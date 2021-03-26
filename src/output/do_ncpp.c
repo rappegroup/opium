@@ -1,5 +1,23 @@
 /*
- * $Id: do_ncpp.c,v 1.4 2004/07/23 14:52:33 ewalter Exp $
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+/*
+ * $Id: do_ncpp.c,v 1.8 2004/10/02 18:34:49 ewalter Exp $
  */
 
 /****************************************************************************
@@ -20,11 +38,13 @@
 #include "parameter.h"        /* defines structure: 'param_t' */
 #include "fortparam.h"        /* fortran code parameters */
 #include "do_ncpp.h"          /* the module's own header */
+#include "nlm.h"
 
-int do_ncpp(param_t *param, char *logfile){
+int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
 
-  int i,j,k,ic;
+  int i,j,k,ic,icount,ncore;
   char filename[180];
+  int ill[4];
   FILE *fp;
   FILE *fp_log;
   double zeff;	                /* effective Z */
@@ -34,8 +54,9 @@ int do_ncpp(param_t *param, char *logfile){
   double ztt;                   /* store z^2/3 */
   double xmin;                  /* ncpp grid */
   double r_1;
-  int lchi;
+  int lchi,c;
   double locc ;                 /* l and occ for wavefunctions */
+  int kk;
   
   static double rscore[NPDM];
   static double nlcore[NPDM];
@@ -85,10 +106,14 @@ int do_ncpp(param_t *param, char *logfile){
 
   /* 1st line of ncpp format: the XC type and a comment */  
 
-  if ((!strcmp(param->xcparam, "lda") || (!strcmp(param->xcparam, "lda"))))
+  if (param->ixc == 0) {
     sprintf(xctype,"%s"," \'pz\'");
-  else  
+  }else if (param->ixc == 2) {
     sprintf(xctype,"%s","\'pbe\'");
+  }else{
+    sprintf(xctype,"%s","\'pw\'");
+  }
+
   fprintf(fp,"%s %s --Opium generated potential--\n",xctype,param->name);  
   
   /* 2nd line of ncpp format: symbol, zeff,lmax,0 (for analytic),*/
@@ -108,7 +133,10 @@ int do_ncpp(param_t *param, char *logfile){
   else
     lcore = 'F';
 
-  fprintf(fp,"\'%s\',%f,%d,0,0,.%c.,%d,.F. \n",param->symbol,zeff,lmax,lcore,param->local);  
+  ncore=param->norb - param->nval;
+
+  fprintf(fp,"\'%s\',%f,%d,0,0,.%c.,%d,.F. \n",param->symbol,zeff,lmax,lcore,
+	  nlm_label(param->nlm[param->localind+ncore]).l);
 
   /* 3rd line of ncpp format: Z used in mesh, xmin , dx ,np , */
   /* num wavefunctions */
@@ -125,7 +153,7 @@ int do_ncpp(param_t *param, char *logfile){
   ztt = pow(param->z,2./3.);
   xmin = log(ztt * param->a);
 
-  fprintf(fp,"%f %f %f %d %d\n",param->z,xmin,param->b,param->ngrid,param->nval);  
+  fprintf(fp,"%f %f %f %d %d\n",param->z,xmin,param->b,param->ngrid,param->nll);
 
   /* section 2: V_nl */
 
@@ -133,17 +161,26 @@ int do_ncpp(param_t *param, char *logfile){
    for (k=0; k<param->ngrid ; k++) {
      r[k] = r_1 * exp(param->b * k);
    }
-   for (j=0; j<lmax+1; j++) {
-     fprintf(fp," Pseudo l=%d\n",j);
-     for (k=0; k<param->ngrid ; k++) {
-       fprintf(fp, "%1.15e  ", rvcore[j][k]/r[k]);
-       if (!((k+1)%4)) fprintf(fp, "\n");
-     }
-     if (k%4) fprintf(fp, "\n");
-   }
 
-  /* section 3: partial core */
-  if (param->rpcc > 1e-12) {
+  for (i=0;i<4;i++)
+    ill[i]=0;
+   icount=0;
+   for (kk=0; kk<param->nll;kk++)
+     for (k=0; k<param->nval; k++) {
+       if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	 ill[nlm_label(param->nlm[k+ncore]).l]++;
+	 fprintf(fp," Pseudo l=%d\n",kk);
+	 for (i=0; i<param->ngrid ; i++) {
+	   fprintf(fp, "%1.15e  ", rvcore[k][i]/r[i]);
+	   if (!((i+1)%4)) fprintf(fp, "\n");
+	 }
+	 if (i%4) fprintf(fp, "\n");
+	 icount++;
+       }
+     }
+
+   /* section 3: partial core */
+   if (param->rpcc > 1e-12) {
     for (k=0; k<param->ngrid; k++) {
       fprintf(fp, "%1.15e  ", rscore[k]/(r[k]*r[k]*4*M_PI));
       if (!((k+1)%4)) fprintf(fp, "\n");
@@ -151,21 +188,43 @@ int do_ncpp(param_t *param, char *logfile){
      if (k%4) fprintf(fp, "\n");
   }
 
-  /* section 4: Wavefunctions */
-  for (j=0; j<param->nval; j++) {
-    i=param->norb - param->nval + j;
-    lchi = (param->nlm[i]%100)/10;
-    locc = param->wnl[i]; 
-    fprintf(fp," Wavefunction %d\n",j+1);
-    fprintf(fp," %d  %f\n",lchi,locc);
-    for (k=0; k<param->ngrid; k++) {
-      fprintf(fp, "%1.15e  ", rnl[j][k]);
-      if (!((k+1)%4)) fprintf(fp, "\n");
-    }
-    if (k%4) fprintf(fp, "\n");
-  }
+   /* section 4: wavefunctiobns */
+  for (i=0;i<4;i++)
+    ill[i]=0;
 
+  icount=0;
+  for (kk=0; kk<param->nll;kk++)
+    for (k=0; k<param->nval; k++) {
+      if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	lchi = nlm_label(param->nlm[k+ncore]).l;
+	locc = param->wnl[k+ncore]; 
+	ill[nlm_label(param->nlm[k+ncore]).l]++;
+	fprintf(fp," Wavefunction %d\n",kk+1);
+	fprintf(fp," %d  %f \n",lchi,locc);
+	for (i=0; i<param->ngrid ; i++) {
+	  fprintf(fp, "%1.15e  ", rnl[k][i]/r[i]);
+	  if (!((i+1)%4)) fprintf(fp, "\n");
+	}
+	if (i%4) fprintf(fp, "\n");
+	icount++;
+      }
+    }
+  
+  
+  fprintf(fp, "\n");
+  fprintf(fp, "############################################################\n");
+  fprintf(fp, "#    Opium Parameter File                                  #\n");
+  fprintf(fp, "############################################################\n");
+  fprintf(fp, "\n");
+  rewind(fp_param);
+  while((c=fgetc(fp_param)) != EOF) fputc(c, fp);
+  fprintf(fp, "############################################################\n");
   fclose(fp);
+
+  
+  fp_log = fopen(logfile, "a");
+  fprintf(fp_log, "   ================================================\n");
+  
   fclose(fp_log);
   return 0;
 }

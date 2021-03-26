@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine atm(znuc,ixc)
 
       implicit double precision(a-h,o-z)
@@ -54,7 +72,7 @@ c     set up ionic potential
       enddo
 
 c     set up initial electronic terms
-      call velect(0,0,ixc,cdd,cdu,cdc,
+      call velect(0,0,zel,ixc,cdd,cdu,cdc,
      +     viod,viou,vid,viu,vod,vou,etot,ev,ek,ep)
 
       do ii=1,nr
@@ -82,7 +100,7 @@ c     compute orbitals
      +        etot,ev,ek,ep)
 
 c     set up output electronic potential from charge density
-         call velect(iter,iconv,ixc,
+         call velect(iter,iconv,zel,ixc,
      +        cdd,cdu,cdc,
      +        viod,viou,vid,viu,vod,vou,
      +        etot,ev,ek,ep)

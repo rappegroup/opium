@@ -1,9 +1,9 @@
       SUBROUTINE XERBLA( SRNAME, INFO )
 *
-*  -- LAPACK auxiliary routine (preliminary version) --
+*  -- LAPACK auxiliary routine (version 3.0) --
 *     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
 *     Courant Institute, Argonne National Lab, and Rice University
-*     February 29, 1992
+*     September 30, 1994
 *
 *     .. Scalar Arguments ..
       CHARACTER*6        SRNAME
@@ -30,6 +30,9 @@
 *          The position of the invalid parameter in the parameter list
 *          of the calling routine.
 *
+* =====================================================================
+*
+*     .. Executable Statements ..
 *
       WRITE( *, FMT = 9999 )SRNAME, INFO
 *

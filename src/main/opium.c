@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
 /* 
- * $Id: opium.c,v 1.8 2004/07/23 22:01:05 ewalter Exp $
+ * $Id: opium.c,v 1.14 2004/10/12 20:22:11 ewalter Exp $
  */
 
 /****************************************************************************
@@ -10,7 +28,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#define VERSION "1.0.1"
+#define VERSION "1.0.3"
 
 /* standard libraries */
 #include <stdio.h>
@@ -29,13 +47,14 @@
 #include "do_nl.h"
 #include "do_tc.h"
 #include "do_pwf.h"
+#include "do_recpot.h"
 #include "do_upf.h"
 #include "do_fhi.h"
 #include "do_plot.h"
 #include "do_ncpp.h"
 #include "do_logplt.h"
 
-#define streq(a,b) (*a==*b && !strcmp(a+1,b+1))
+#define streq(a,b) (!strcasecmp(a,b))
 
 static void read_in_param(param_t *param, char *name, char *logfile, char *parafile);
 static int read_stringline(FILE *fp, char *a);
@@ -294,12 +313,20 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     fp = fopen(paramfile, "r"); 
     do_pwf(param, fp, logfile); 
     fclose(fp);
+  } else if (streq(command, "recpot")){
+    fp = fopen(paramfile, "r"); 
+    do_recpot(param, fp, logfile); 
+    fclose(fp);
   } else if (streq(command, "upf")) {
     do_upf(param, logfile);
   } else if (streq(command, "fhi")) {
-    do_fhi(param, logfile);
+    fp = fopen(paramfile, "r"); 
+    do_fhi(param, fp, logfile);
+    fclose(fp);
   } else if (streq(command, "ncpp")) {
-    do_ncpp(param, logfile);
+    fp = fopen(paramfile, "r"); 
+    do_ncpp(param, fp,logfile);
+    fclose(fp);
   } else if (streq(command, "rpt")) {
     fp = fopen(logfile, "a");
     fprintf(fp,"<<<do_rpt>>>\n");
@@ -363,7 +390,7 @@ static void do_help(){
   printf("\t To run Opium non-interactively enter: \n\n");
   printf("\t\t opium <parameterfile> <logfile> <commands>\n\n\n");
   printf("\t In a non-interactive session... \n");
-  printf("\t enter \"opium -c\" or \"opium help\" for command line help\n");
+  printf("\t enter \"opium -c\" or \"opium comm\" for command line help\n");
   printf("\t enter \"opium -p\" or \"opium plot\" for plotting help\n");
   printf("\t enter \"opium -k\" or \"opium keys\" for keyblock help\n");
 
@@ -384,6 +411,7 @@ static void do_chelp(){
   printf("\n\tpseudo file output style \n");
   /*  printf("\tupf      - generate *.upf  output\n"); */
   printf("\tpwf                 - generate *.pwf  output\n");
+  printf("\trecpot              - generate *.recpot  output\n");
   printf("\tfhi                 - generate *.fhi  output\n");
   printf("\tncpp                - generate *.ncpp output\n");
   printf("\n\tmiscellaneous options \n");
@@ -401,7 +429,7 @@ static void do_phelp(){
   printf("\n\tusage examples: \n");
   printf("\n\t\t >> opium c log ae ps nl plot wp \n");
   printf("\n\t\t >> opium o log ae plot wa \n");
-  printf("\n\t\t >> opium o log ae ps nl plot vion rpt \n");
+  printf("\n\t\t >> opium o log ae ps nl plot vi rpt \n");
   printf("\n\n\tCurrent plot types: \n");
   printf("\n\n\t wa   - all-electron wavefunctions \n");
   printf("\t wp   - pseudo & all-electron wavefunctions \n");
@@ -426,7 +454,9 @@ static void do_khelp(){
   printf("\t  nlm(int), occupation(float), eig. guess(float or - ) for orb 1 \n");
   printf("\t  .                                 .                            . \n");
   printf("\t  .                                 .                            . \n");
-  printf("\t  nlm(int), occupation(float), eig. guess(float or - ) for orb n \n\n\n");
+  printf("\t  nlm(int), occupation(float), eig. guess(float or - ) for orb n \n\n ");
+  printf("\t  NOTE: To indicate a virtual/unbound/Hamann type orbital, make occupation < 0.0 \n ");
+  printf("\t  and specify an eigenvalue in the guess column. \n\n\n");
   printf("\t[Pseudo]\n");
   printf("\t  number of orbitals in pseudopotetntial(int) \n");                         
   printf("\t  cut-off radius for pseudo orbital 1 (float) \n");
@@ -440,7 +470,9 @@ static void do_khelp(){
   printf("\t[XC]                                                                 \n");
   printf("\t  pzlda or pwlda or gga  --xc funct. (default is pzlda, lda=pzlda) \n\n\n");
   printf("\t[Pcc]                                               \n");
-  printf("\t  LFC partial core radius(float) (default = no pcc)  \n\n\n");
+  printf("\t partial core radius(float) (default = no pcc)  \n");
+  printf("\t partial core method (character) lfc or fuchs  \n");
+  printf("\t lfc=Louie, Froyen & Cohen / fuchs=Fuchs & Scheffler  (default=lfc)\n\n\n");
   printf("\t[Relativity] \n");
   printf("\t  nrl or srl -- non-rel or scalar-rel solve (default = nrl) \n\n\n");
   printf("\t[Grid]                                                 \n");

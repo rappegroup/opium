@@ -1,0 +1,114 @@
+
+Opium changelog
+
+
+1.0.1 --> 1.0.2
+
+	1) Further improvement of handling of s,p,d ordering problem
+	   Tried the following tests for .pwf, .ncpp, and .fhi output styles:
+	    Ag - 4d,5s,5p valence ordering s-local
+	    Ag - 5s,5p,4d                  s-local
+	    Ag - 4d,5s,5p                  local not specified (check default = s NOT 1st state)
+
+	    Ti - 3s,3p,3d,4s,4p            s-local
+	    Ti - 3s,4s,3p,4p,3d            s-local
+	    Ti - 3s,3p,4s,4p,3d            '0' local (l=0)
+
+	    Li - 1s,2s,2p                  local not specified
+	    Li - 1s,2p,2s                  local not specified
+	    
+	    For each group, bh, abinit, and pwscf give the same results to ~8 digits.
+
+	2)  Code should be totally case insensitive (all strcmp's replaced with strcasecmp).
+
+	3)  Param file appened to fhi, ncpp files (thanks Wissam!)
+
+	4)  Plot help 'vi' example corrected.
+
+        5)  Added fclose() in do_nl.c (thanks Keith!)
+
+        6)  Configure script modifed to allow LDFLAGS to be appended from command line
+
+        7)  Fixed spelling of Schrodinger in descreen.f
+ 
+        8)  AE and PS eigenvalues were actually reversed in descreen.f (they are
+            identical so no big deal).
+
+        9)  Fixed bug in nllogd for KB log-derivative (missed common block)
+ 
+        10) Adjusted do_logplt so 'ae ps nl' need not be repeated to make plot (thanks Rongqin!)
+
+        11) Added line for refernece energy in logder plot (thanks Rongqin!)
+
+        12) Modified treatment of unbound states to work with semicore (thanks Sara!)
+
+        13) Modified output for .ncpp and .fhi to indicate PW XC correctly
+
+        14) Changed MacOSX configure defs so -r8 included by default
+
+        15) Major modfication of ghost state reporting, now states whether ghost testing
+            was inconclusive (no bound states for local potential)
+
+        16) Ghost testing added for unbound states as local or non-local
+
+        17) Interp.f output cleaned up
+
+        18) Logder plotting states that no [loginfo] key block is set (not just a core dump!)
+
+        19) Fixed legends for plots that were not correct
+
+8/19/04 - EJW
+
+
+
+1.0.2 --> 1.0.3
+
+1) Ghost testing fixed, removed the '?' output if a local state was
+not bound.  Now this eigenvalue is treated as if its eigenvalue = 0.0
+
+2) Changed the way an unbound state is selected.  Now, if the filling
+is set to <-1.0e-12, the state is treated as unbound (and treated as
+if it is empty).  The eigenvalue is fixed by the guess or set to 0.0
+if no guess specified.
+
+3) Added the .recpot output format routines (contributed by Keith
+Refson).  This format is native to the solid state code CASTEP.
+
+4) Added GNU license information, license header prepended to every .f
+.c and .h file and added a "COPYING" file which contains the full-text
+of the license.
+
+5) Fixed bug related to DNL in the PWF format (introduced in the
+previous version).
+
+6) Added the Fuchs + Scheffler partial core correction method which is
+implemented in fhi98pp.
+
+7) Fixed bug related to labeling the eigenvalues in the logdplot
+
+8) Changed keyblock help to reflect #2 and #6 above.
+
+9) Configure script changed such that ifort and ifc libcxa gets
+statically linked (requested by Keith Refson).
+
+10) Added true NULL characters to nwrite calls in writepwf for better
+compatibility.
+
+10/12/04 - EJW
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	

@@ -1,10 +1,4 @@
-c ****************************************************************************
-c Copyright (C) 2002 Andrew M Rappe group, University of Pennsylvania
-c This file is distributed under the terms of the GNU General Public
-c License as described in the file 'License' in the current directory.
-c ****************************************************************************
-
       parameter (nl0 = 51, npdm = 5733, ngau0 = 540, ngrid = npdm,
-     $	nflq = 501, npspt0 = 4002,  nang0 = 3, n0=16)
+     $	maxflq = 2001, npspt0 = 4002,  nang0 = 3, n0=16)
         
       

@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
 /* 
- * $Id: do_ae.c,v 1.6 2004/07/06 15:29:50 ewalter Exp $
+ * $Id: do_ae.c,v 1.9 2004/10/02 18:34:48 ewalter Exp $
  */
 
 #include <stdio.h>
@@ -70,12 +88,32 @@ int do_ae(param_t *param, char *logfile){
     /* starting guess for the AE potential */
     startae(param);
 
+    for (i=0; i<param->norb; i++) {
+      if (ibound_.ibd[i]==0) {
+	fp_log = fopen(logfile, "a");
+	fprintf(fp_log," !NOTE! State: |%3d> marked as unbound, using reference eigenvalue of %6.3f \n",
+		atomic_.nlm[i],ensave_.ensave[i]);
+	fclose(fp_log);
+      }
+    }
+
     /* find the SCF solution */
     scpot_(&param->z,&param->ixc,&ipsp);
 
-    for (i=0; i<param->norb; i++){
-      param->ibound[i]=ibound_.ibd[i];
-    }
+    for (i=0; i<param->norb; i++) {
+      if (param->ibound[i] != ibound_.ibd[i]) {
+	if (i > ncore) {
+	  fp_log = fopen(logfile, "a");
+	  fprintf(fp_log," !NOTE! State: |%3d> was found to be unbound, will use reference eigenvalue of %6.3f \n",
+		  atomic_.nlm[i],ensave_.ensave[i]);
+	  fclose(fp_log);
+	  param->ibound[i]=ibound_.ibd[i];
+	} else {
+	  fprintf(fp_log,"!ERROR! core state not bound?? \n");
+	  exit(1);
+	}
+      }
+    } 
 
   } else {
 
@@ -170,15 +208,14 @@ void nrelorbae(param_t *param, int config) {
       atomic_.nlm[i] = param->nlm[i];
       atomic_.wnl[i] = param->wnl[i];
       atomic_.en[i] = param->en[i];    
-      ensave_.ensave[i]=param->ensave[i];
     }else{
       atomic_.nlm[i] = param->nlm_conf[config][i-nrcore];
       atomic_.wnl[i] = param->wnl_conf[config][i-nrcore];
       atomic_.en[i] = param->en_conf[config][i-nrcore];
-      ensave_.ensave[i]=param->ensave_conf[config][i-nrcore];
     }
-    ibound_.ibd[i]=param->ibound[i];
     atomic_.xion -= atomic_.wnl[i];
+    ibound_.ibd[i]=param->ibound[i];
+    ensave_.ensave[i]=param->ensave[i];
   }
 }
 
@@ -433,6 +470,8 @@ void writeAE(param_t *param) {
     fwrite(&nmax_.nmax[ncore+i], sizeof(int),1, fp);
     fwrite(&nmax_.maxim, sizeof(int),1, fp);
     fwrite(&atomic_.xion, sizeof(double),1, fp);
+    fwrite(&ibound_.ibd[ncore+i], sizeof(int),1, fp);
+    fwrite(&ensave_.ensave[ncore+i], sizeof(double),1, fp);
   }
   fclose(fp);
   

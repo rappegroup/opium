@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine scpot(zeff,ixc,ipsp)
      
 c     *************************************************************************
@@ -190,7 +208,7 @@ c     ***********************************************************************
                   Flstar(i) = (rvps(i,m) - rvloc(i))
      $                 *phipsref(i,m)/r(i)
                enddo
-               
+
                call schsl (m,n,l,en(m),nmax(m),rvloc,p,nig)
 
                call applyaug(rvloc,rvcore(1,iloc))
@@ -370,10 +388,9 @@ c     ***********************************************************************
                      vmin = min((rvps(i,m) + a1/r(i))/r(i),vmin)
                   enddo
                   en(m) = vmin * 0.5
-                  write (7,505) niter,nlm(m),en(m)               
- 505              format('0****positive trial eigenvalue predicted in
-     $                 scpot, niter=',i4,3x,'nlm=',i4,5x,
-     $                 'new corrected e =',e13.7)
+                  write (7,505) nlm(m),en(m)               
+ 505              format(1x,'!WARNING! positive eigenvalue predicted',
+     $                 ' in scpot  nlm=',i4,5x,'new e =',e13.7)
                   if (en(m).ne.en(m)) then
                      goto 1001
                   endif
@@ -391,6 +408,7 @@ c     *********************************************************************
       if (ilogder.eq.1) then
         if (ipsp.eq.0) then
           ic=0
+
           do m=ncores+1,norb
             ic=ic+1
             l = nlm(m)/10 - 10 * (nlm(m)/100)
@@ -512,7 +530,7 @@ c     special treatment for unbound states (norm from 0 to rc is 1)
             enddo
             pow = 2 * ll + 2
             call radin(r,wavea,0,icarray(i),h,pow)            
-            rnorm(i) = pow
+            rnorm(i) = 1.0-pow
          endif
       enddo
       

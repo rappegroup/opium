@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine nllogd(istate,nqn,lang,ei,imax)
       
       implicit double precision (a-h,o-z)
@@ -22,14 +40,14 @@ c     -------------------------------------------------------------------------
 c     -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks                
 c     -------------------------------------------------------------------------
-      common /nlpot1/ Flstar(npdm),phiguess(npdm,n0)
+      common /nlpot1/ Flstar(npdm),phipsref(npdm,n0),phiguess(npdm,n0)
 c     -------------------------------------------------------------------------
 
 c     *************************************************************************
 c     local variables
 c     *************************************************************************
 
-      dimension rvloc(npdm),g(npdm),phipsref(npdm,n0)
+      dimension rvloc(npdm),g(npdm)
       dimension ader(npdm),phomder(npdm),pinhomdr(npdm),Flphider(npdm)
       dimension Flwder(npdm),Flxder(npdm),pder(npdm)
       dimension dl(npl0,4,3,2)

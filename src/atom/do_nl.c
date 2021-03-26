@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
 /* 
- * $Id: do_nl.c,v 1.6 2004/06/16 20:46:17 mbarnes Exp $
+ * $Id: do_nl.c,v 1.10 2004/10/02 18:34:48 ewalter Exp $
  */
 
 /* standard libraries */
@@ -55,7 +73,12 @@ int do_nl(param_t *param, char *logfile){
 
   zeff=atomic_.xion;
   for (i=0; i<param->nll; i++) {
-    ibound_.ibd[i]=param->ibound[param->norb-param->nval + i];
+    if (ibound_.ibd[i]==0) {
+      fp_log = fopen(logfile, "a");
+      fprintf(fp_log," !NOTE! State: |%3d> marked as unbound, using reference eigenvalue of %6.3f \n",
+	      atomic_.nlm[i],ensave_.ensave[i]);
+      fclose(fp_log);
+    }
     zeff +=atomic_.wnl[i];
   }
 
@@ -104,7 +127,7 @@ void nrelorbnl(param_t *param, int config) {
       atomic_.nlm[ii] = param->nlm_conf[config][i];
       atomic_.wnl[ii] = param->wnl_conf[config][i];
     }      
-    ibound_.ibd[i]=ibound_.ibd[i+nrcore];
+    /*    ibound_.ibd[ii] = param->ibound[i+nrcore];*/
     atomic_.xion -= atomic_.wnl[ii];
     k = 0;
     l = nlm_label(atomic_.nlm[ii]).l;
@@ -128,7 +151,8 @@ char * write_reportnl(param_t *param, char *rp, int config, double temp_eigen[],
     for (i=0; i<param->nval; i++)
       rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\t%6s\n",
 		  atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
-		  results_.rnorm[i], (results_.lghost[i]==0)?"no":"yes");
+		  results_.rnorm[i],(results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
+    
   }else{
     rp+=sprintf(rp, 
 		"\n NL:Orbital    Filling       Eigenvalues[Ry]          Norm       Ghost\n"
@@ -136,7 +160,7 @@ char * write_reportnl(param_t *param, char *rp, int config, double temp_eigen[],
     for (i=0; i<param->nval; i++)
       rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\t%6s\n",
 		  atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
-		  results_.rnorm[i],(results_.lghost[i]==0)?"no":"yes");
+		  results_.rnorm[i],(results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
     
   }
   rp+=sprintf(rp, "\n      E_tot = %19.10f Ry\n",
@@ -199,6 +223,8 @@ void readPS(param_t *param) {
     fread(&nmax_.nmax[i], sizeof(int),1, fp);
     fread(&nmax_.maxim, sizeof(int),1, fp);
     fread(&atomic_.xion, sizeof(double),1, fp);
+    fread(&ibound_.ibd[i], sizeof(int),1, fp);
+    fread(&ensave_.ensave[i], sizeof(double),1, fp);
   }
   fclose(fp);
 
@@ -252,6 +278,7 @@ void writeNL(param_t *param) {
     }
     fprintf(fp,"@ \n");
   }
+  fclose(fp);
 
   sprintf(filename, "%s.plt_ips", param->name);
   fp = fopen(filename, "a");

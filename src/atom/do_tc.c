@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
 /* 
- * $Id: do_tc.c,v 1.5 2004/06/16 20:46:17 mbarnes Exp $
+ * $Id: do_tc.c,v 1.11 2004/10/10 22:10:06 ewalter Exp $
  */
 
 /* standard libraries */
@@ -23,7 +41,7 @@ void nrelorbae(param_t *param, int);
 char * write_reportae(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[]);
 char * write_reportnl(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[]);
 void readPS(param_t *param);
-
+void interp_(int *, int *, int *);
 /* fortran prototypes Should this be somewher else?????? */
 void scpot_(double  *, int * ,int *);
 void atm_(double *, int *);
@@ -31,24 +49,27 @@ void atm_(double *, int *);
 
 int do_tc(param_t *param, char *logfile, int job){
 
-  int i, k, kk; 
+  int i, j,k, kk; 
   FILE *fp_log;
   FILE *fp;
   static char filename[160];
   char *rp=report;
-  int ncore; 
+  int ncore,ifrl; 
   double zeff;
   double e,dele;
   int config,con1,con2;
-  int ipsp;
+  int ipsp,ncoreAE;
   double temp_eigen[10];
   double temp_norm[10];
   int npot[10];
   int ntpot;
+  int ill[10];
 
   sprintf(filename, "%s.plt_logd", param->name);
   fp=fopen(filename,"w");
   fclose(fp);
+
+  ncore = param->norb-param->nval;
 
   for (i=0; i<10; i++){
     npot[i]=0;
@@ -57,8 +78,8 @@ int do_tc(param_t *param, char *logfile, int job){
   ntpot=0;
 
   for (i=0; i<param->nval; i++){
-    npot[nlm_label(atomic_.nlm[i]).l]++;
-    if (npot[nlm_label(atomic_.nlm[i]).l] == 1) {
+    npot[nlm_label(param->nlm[i+ncore]).l]++;
+    if (npot[nlm_label(param->nlm[i+ncore]).l] == 1) {
       ntpot++;
     }
   }
@@ -80,65 +101,111 @@ int do_tc(param_t *param, char *logfile, int job){
     con1=job-1;
     con2=job;
   }
-
+  
   for (config=con1;config<con2;config++) {
-
-  fp_log = fopen(logfile, "a");
-  fprintf(fp_log,"\n\n ===============Configuration %d AE Calc=============== \n",config+1);
-  fclose(fp_log);
-
-    ncore = param->norb-param->nval;
-    npm_.ncores = param->norb-param->nval; 
+    
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log,"\n\n ===============Configuration %d AE Calc=============== \n",config+1);
+    fclose(fp_log);
+    
+    npm_.ncores = ncore;
     atomic_.norb = param->norb;
     ipsp = 0;   
     nlpot2_.inl = 0;  
+
+    ilogder_.ilogder = 0;
+    if (job != -67) ilogder_.ilogder = 1;
+    
+    logarith_.rphas = param->rphas;
+    logarith_.elogmin = param->emin;
+    logarith_.elogmax = param->emax;
 
     if (!strcmp(param->reltype, "nrl")){
 
       nrelorbae(param,config);      
       startae(param);
 
-      ilogder_.ilogder = 0;
-      if (param->ilogder != -67) ilogder_.ilogder = 1;
-      
-      logarith_.rphas = param->rphas;
-      logarith_.elogmin = param->emin;
-      logarith_.elogmax = param->emax;
+      for (i=0; i<param->norb; i++) {
+	if (ibound_.ibd[i]==0) {
+	  fp_log = fopen(logfile, "a");
+	  fprintf(fp_log," !NOTE! State: |%3d> marked as unbound, using reference eigenvalue of %6.3f \n",
+		  atomic_.nlm[i],ensave_.ensave[i]);
+	  fclose(fp_log);
+	}
+      }
 
       scpot_(&param->z,&param->ixc,&ipsp);
-
-      /* now dump the Log derivs from the AE calc */
-      if (param->ilogder != -67){
-	sprintf(filename, "%s.logd.%d", param->name,config);
-	fp = fopen(filename, "wb");
-	for (i=0; i<param->nll; i++)
-	  fwrite(logarith_.dlwf[i], sizeof(double), NPL0, fp);
-	fclose(fp);
-
-	sprintf(filename, "%s.plt_logd", param->name);
-	fp = fopen(filename, "a");
-	
-	dele = (param->emax - param->emin)/(NPL0-1);
-	
-	for (i=0; i<param->nll;i++) {
-	  for (k=0; k < NPL0; k++) {
-	    e=param->emin + dele * k; 
-	    fprintf(fp,"%lg %lg \n",e,logarith_.dlwf[i][k]);
-	  }
-	  fprintf(fp,"@ \n");
-	}
-	fclose(fp);
-      }
+      ncoreAE=ncore;
+      
     }else{
-
+      
+      if (job != -67) {
+	fprintf(stderr," No Log derivs for scalar relativistic atoms yet :( \n");
+	exit(1);
+      }
       relorb(param,config);
       atm_(&param->z,&param->ixc);
-      
+      /*      ifrl = (!strcmp(param->reltype,"frl"))?1:0;
+	      param->aereltransf = 0;
+	      nrelorbae(param,config);
+	      interp_(&ifrl, &param->aereltransf,&param->ixc);*/
+
+      ncoreAE=0;
     }
 
-  fp_log = fopen(logfile, "a");
-  fprintf(fp_log,"\n\n ===============Configuration %d NL: Calc ===============\n",config+1);
-  fclose(fp_log);
+    /* now dump the Log derivs from the AE calc */
+    if (job != -67){
+      for (i=0;i<4;i++)
+	ill[i]=0;
+
+      sprintf(filename, "%s.logd.%d", param->name,config+1);
+      fp = fopen(filename, "wb");
+      for (kk=0; kk<param->nll;kk++)
+	for (k=0; k<param->nval; k++)
+	  if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	    ill[nlm_label(param->nlm[k+ncore]).l]++;
+	    fwrite(logarith_.dlwf[k], sizeof(double), NPL0, fp);
+	  }
+      fclose(fp);
+    
+      sprintf(filename, "%s.plt_logd", param->name);
+      fp = fopen(filename, "a");
+
+      for (i=0;i<4;i++)
+	ill[i]=0;
+      
+      dele = (param->emax - param->emin)/(NPL0-1);
+      for (kk=0; kk<param->nll;kk++)
+	for (k=0; k<param->nval; k++)
+	  if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	    ill[nlm_label(param->nlm[k+ncore]).l]++;
+	    
+	    for (j=0; j < NPL0; j++) {
+	      e=param->emin + dele * j; 
+	      fprintf(fp,"%lg %lg \n",e,logarith_.dlwf[k][j]);
+	    }
+	    fprintf(fp,"@ \n");
+	  }
+      fclose(fp);
+
+      for (i=0;i<4;i++)
+	ill[i]=0;
+      
+      sprintf(filename, "%s.logdeAE", param->name);
+      fp = fopen(filename, "wb");
+      for (kk=0; kk<param->nll;kk++)
+	for (k=0; k<param->nval; k++)
+	  if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	    ill[nlm_label(param->nlm[k+ncore]).l]++;
+	    /* Here we use ncoreAE */
+	    fwrite(&atomic_.en[k+ncoreAE], sizeof(double), 1, fp);
+	  }
+      fclose(fp);
+    }
+
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log,"\n\n ===============Configuration %d NL: Calc ===============\n",config+1);
+    fclose(fp_log);
 
 
     rp=write_reportae(param,rp,config,temp_eigen,temp_norm);
@@ -155,11 +222,18 @@ int do_tc(param_t *param, char *logfile, int job){
     nrelorbnl(param,config);
 
     zeff=atomic_.xion;
-    for (i=0; i<param->nval; i++)
+    for (i=0; i<param->nval; i++){
+      if (ibound_.ibd[i]==0) {
+	fp_log = fopen(logfile, "a");
+	fprintf(fp_log," !NOTE! State: |%3d> marked as unbound, using reference eigenvalue of %6.3f \n",
+		atomic_.nlm[i],ensave_.ensave[i]);
+	fclose(fp_log);
+      }
       zeff +=atomic_.wnl[i];
+    }
 
     ilogder_.ilogder = 0;
-    if (param->ilogder != -67) ilogder_.ilogder = 1;
+    if (job != -67) ilogder_.ilogder = 1;
     logarith_.rphas = param->rphas;
     logarith_.elogmin = param->emin;
     logarith_.elogmax = param->emax;
@@ -170,28 +244,54 @@ int do_tc(param_t *param, char *logfile, int job){
     ennl[config+1] = results_.etot;
 
   /* now dump the Log derivs from the NL calc */
-    if (param->ilogder != -67){
-      sprintf(filename, "%s.logd.%d", param->name,config);
-      fp = fopen(filename, "ab");
-      for (i=0; i<param->nll; i++)
-	fwrite(logarith_.dlwf[i], sizeof(double), NPL0, fp);
-      fclose(fp);
 
+    if (job != -67){
+    for (i=0;i<4;i++)
+      ill[i]=0;
+
+      sprintf(filename, "%s.logd.%d", param->name,config+1);
+      fp = fopen(filename, "ab");
+      for (kk=0; kk<param->nll;kk++)
+	for (k=0; k<param->nval; k++)
+	  if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	    ill[nlm_label(param->nlm[k+ncore]).l]++;
+	    fwrite(logarith_.dlwf[k], sizeof(double), NPL0, fp);
+	  }
+      fclose(fp);
+      
       sprintf(filename, "%s.plt_logd", param->name);
       fp = fopen(filename, "a");
       
       dele = (param->emax - param->emin)/(NPL0-1);
-      
-      for (i=0; i<param->nll;i++) {
-	for (k=0; k < NPL0; k++) {
-	  e=param->emin + dele * k; 
-	  fprintf(fp,"%lg %lg \n",e,logarith_.dlwf[i][k]);
-	}
-	fprintf(fp,"@ \n");
-      }
+
+      for (i=0;i<4;i++)
+	ill[i]=0;
+
+      for (kk=0; kk<param->nll;kk++)
+	for (k=0; k<param->nval; k++)
+	  if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	    ill[nlm_label(param->nlm[k+ncore]).l]++;
+	    for (j=0; j < NPL0; j++) {
+	      e=param->emin + dele * j; 
+	      fprintf(fp,"%lg %lg \n",e,logarith_.dlwf[k][j]);
+	    }
+	    fprintf(fp,"@ \n");
+	  }
+      fclose(fp);
+
+      for (i=0;i<4;i++)
+	ill[i]=0;
+
+      sprintf(filename, "%s.logdeNL", param->name);
+      fp = fopen(filename, "wb");
+      for (kk=0; kk<param->nll;kk++)
+	for (k=0; k<param->nval; k++)
+	  if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	    ill[nlm_label(param->nlm[k+ncore]).l]++;
+	    fwrite(&atomic_.en[k], sizeof(double), 1, fp);
+	  }
       fclose(fp);
     }
-
   }
 
   rp+=sprintf(rp,

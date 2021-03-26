@@ -1,0 +1,10 @@
+#!/bin/csh -f
+
+if ("$1"x == x) then
+   echo "Usage:  clatom <atom name> "
+   echo	"    -- removes all <atomname>.* files exculding <atomname>.param"
+   exit
+endif
+mv $1.param save
+rm $1.*
+mv save $1.param

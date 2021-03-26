@@ -1,5 +1,23 @@
 /*
- * $Id: do_ps.c,v 1.6 2004/06/16 20:46:17 mbarnes Exp $
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+/*
+ * $Id: do_ps.c,v 1.10 2004/10/02 18:34:49 ewalter Exp $
  */
 
 #include <stdio.h>
@@ -39,11 +57,6 @@ int do_ps(param_t *param, char *logfile){
 
   /* set the log file */
   sprintf(filenames_.file_log, "%s", logfile);
-
-  for (i=0; i<param->nval; i++) {
-    ibound_.ibd[i]=param->ibound[param->norb-param->nval + i];
-    ensave_.ensave[i]=param->ensave[param->norb-param->nval + i];
-  }
 
   atomic_.norb=param->nll;
   np_.nvales=param->nll;
@@ -135,9 +148,11 @@ void readAE(param_t *param) {
       fread(&nmax_.nmax[ic], sizeof(int),1, fp);
       fread(&nmax_.maxim, sizeof(int),1, fp);
       fread(&atomic_.xion, sizeof(double),1, fp);
+      fread(&ibound_.ibd[ic], sizeof(int),1, fp);
+      fread(&ensave_.ensave[ic], sizeof(double),1, fp);
       ic++;
     }else{
-      fseek(fp,3*(sizeof(double)+sizeof(int)),1);
+      fseek(fp,4*(sizeof(double)+sizeof(int)),1);
     }
   }
   fclose(fp);
@@ -166,7 +181,7 @@ char * write_reportps(param_t *param , char *rp) {
 	rp+=sprintf(rp, "\t%3d        %16.10f  %16.10f  %16.10f\t%6s\n",
 		    atomic_.nlm[i], convrpt_.sumc[i]*1000., convrpt_.wsumt[i]*1000., 
 		    convrpt_.wsumt[i]*13.6058*1000.,
-		    (convrpt_.lghost[i]==0)?"no":"yes");
+		    (convrpt_.lghost[i]>0)?"yes":((convrpt_.lghost[i]<0)?"?":"no"));
 	tot_conv_error += convrpt_.wsumt[i]*1000.;
       } else {
 	/*	rp+=sprintf(rp, "\t%3d  (unbound)   --------          --------          --------       -- \n",

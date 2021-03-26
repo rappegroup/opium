@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine newmin(numfn,rx,rkinfin)
       implicit double precision(a-h,o-z)
 
@@ -436,8 +454,8 @@ c      write(7,9030) rsum
  9020 format(1x,'Final KE error:',f16.10)
  9030 format(1x,'Sum of coeffs :',f16.10)
  9040 format(1x,i5,5f12.6)
- 9045 format(1x,' step #     theta      slope       ',
-     $     'curv       KEresid     coeffsum')
+ 9045 format(1x,' step #    theta       slope       ',
+     $     'curv       KEresid    coeffsum')
 c     ----------------------------------------
 c     Lets see if we know how to z -> y -> x
 

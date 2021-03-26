@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
 /* 
- * $Id: parameter.c,v 1.8 2004/06/16 21:25:54 mbarnes Exp $
+ * $Id: parameter.c,v 1.14 2004/10/02 19:43:17 ewalter Exp $
  */
 
 /****************************************************************************
@@ -23,7 +41,7 @@
 /* module's own header */
 #include "parameter.h"
 
-#define streq(a,b) (*a==*b && !strcmp(a+1,b+1))
+#define streq(a,b) (!strcasecmp(a,b))
 
 double symtoz(char *sym , char *longname);
 int read_param(param_t *param, FILE *fp, FILE *fp_log){
@@ -38,6 +56,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   char la[]={"spdf"};
   int ncore; 
   char loc='s';
+  int pccmeth='l';
   int loctemp=0;
   int npot[10];
 
@@ -87,9 +106,11 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   /* [Pcc] */
   flexi_request_key("Pcc",0,"%lg", &param->rpcc);
+  flexi_request_key("Pcc",0,"%d",&pccmeth);
+
   /* default */
   param->rpcc=0.0;
-
+  
   /* [LogInfo] */
   flexi_request_key("Loginfo",0,"%d %lg %lg %lg", &param->ilogder,
 		    &param->rphas, &param->emin, &param->emax);
@@ -134,6 +155,18 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   /* element name and symbol from Z */
 
+  rpcc_.rpcc = param->rpcc;
+  ipccmeth_.ipccmeth=-1;
+  /*  printf("  pccmeth= %c \n",pccmeth);*/
+  if ((pccmeth=='l') || (pccmeth=='L')) {
+    ipccmeth_.ipccmeth=0; 
+  }else if ((pccmeth=='f') || (pccmeth=='F')) {
+    ipccmeth_.ipccmeth=1;
+  }else {
+    printf("Can not determine partial core correction method ; must be either lfc or fuchs \n");
+    exit(1);
+  }
+
   param->z = symtoz(param->symbol,param->longname);
   rxccut_.rxccut=param->rxccut;
 
@@ -162,6 +195,8 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   /* [Atom] */
   flexi_request_key("Atom",1,"%s %d", param->symbol, &param->norb);
+  param->ibound = (int *)malloc(param->norb*sizeof(int));
+  param->ensave = (double *)malloc(param->norb*sizeof(double));
   param->nlm = (int *)malloc(param->norb*sizeof(int));
   param->wnl = (double *)malloc(param->norb*sizeof(double));
   param->en = (double *)malloc(param->norb*sizeof(double));
@@ -177,13 +212,11 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   param->nlm_conf = (int **)malloc(param->nconfigs*sizeof(int *));
   param->wnl_conf = (double **)malloc(param->nconfigs*sizeof(double *));
   param->en_conf = (double **)malloc(param->nconfigs*sizeof(double *)); 
-  param->ensave_conf = (double **)malloc(param->nconfigs*sizeof(double *)); 
   ensc = (char ***)malloc(param->nconfigs*sizeof(char **));
   for (i=0; i<param->nconfigs; i++){
     param->nlm_conf[i] = (int *)malloc(param->nval*sizeof(int));
     param->wnl_conf[i] = (double *)malloc(param->nval*sizeof(double));
     param->en_conf[i] = (double *)malloc(param->nval*sizeof(double));
-    param->ensave_conf[i] = (double *)malloc(param->nval*sizeof(double)); 
     ensc[i] = (char **)malloc(param->nval*sizeof(char *));
     for (j=0; j<param->nval; j++){
       ensc[i][j] = (char *)malloc(20*sizeof(char));
@@ -243,6 +276,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     param->optmeth='n';
   }
 
+
   /* 3rd flexi_gather_keys() */
   if (flexi_gather_keys(fp)) return 1;
 
@@ -289,10 +323,10 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   npm_.ncores = param->norb - param->nval;
   ncore = param->norb - param->nval;
   nll_.nll = param->nll;
-  rpcc_.rpcc = param->rpcc;
 
   /* Section to make KB local idiot proof */
 
+  param->local=-67;
   switch (loc) {
     
   case '0' : 
@@ -315,16 +349,26 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     fprintf(stderr," Can't determine local potential, check [KBdesign] key-block \n"); 
     exit(1); 
   }
-
   for (i=ncore;i<param->norb;i++) {
-    if (loctemp == nlm_label(param->nlm[i]).l) param->local=loctemp;
+    if (loctemp == nlm_label(param->nlm[i]).l) {
+
+      /*EJW  param->local is the l value of the local pot
+	param->localind is the valence index (index-ncore) of the local pot */
+
+      param->local=loctemp;
+      param->localind=i-ncore;
+      break;
+    } 
+  }
+
+  if (param->local == -67) {
+    fprintf(stderr," Can't determine local potential, check [KBdesign] key-block \n"); 
+    exit(1); 
   }
 
   /* This is where initial guesses are chosen */
   /* ensave is used as the default eigenvalue if an unbound state is found */
 
-  param->ibound = (int *)malloc(param->norb*sizeof(int));
-  param->ensave = (double *)malloc(param->norb*sizeof(double));
   /* process reference config eigenvalue guesses and free arrays */
   for (i=0; i<param->norb; i++){
     param->ibound[i]=1;
@@ -338,12 +382,25 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
       n = param->nlm[i]/100;
       param->en[i] = -1. * (param->z * param->z) / (double)(n*n*n*n);
       param->ensave[i]=0.0;
-      
     }else {
       /* user provides an eigenvalue guess */
       param->en[i] = atof(ens[i]);
       param->ensave[i]=param->en[i];
-      if (param->en[i] > 0.0) param->ibound[i]=0;
+    }
+
+    if (param->wnl[i] < -1e-12) {
+      if (i>ncore) {
+	if (streq(param->reltype,"nrl")) {
+	  param->ibound[i]=0;
+	  param->wnl[i]=0.0;
+	} else {
+	  fprintf(fp_log, " !ERROR! Unbound states not implemented for scalar/fully relativistic \n");
+	  exit(1);
+	}
+      } else {
+	fprintf(fp_log, " !ERROR! A core state can not be unbound! \n");
+	exit(1);
+	}
     }
     
     free(ens[i]);
@@ -354,16 +411,16 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   for (i=0; i<param->nconfigs; i++){
     for (j=0; j<param->nval; j++){
       k = 0;
+
       while ( k<strlen(ensc[i][j]) && ensc[i][j][k]=='-' ) ++k;
       if (k==strlen(ensc[i][j])){
         /* user wants opium to guess a good eigenvalue */
         n = param->nlm_conf[i][j]/100;
         param->en_conf[i][j] = -1. * (param->z * param->z) / (double)(n*n*n*n);
-	param->ensave_conf[i][j]=0.0;
+
       }else{
         /* user provides an eigenvalue guess */
         param->en_conf[i][j] = atof(ensc[i][j]);
-	param->ensave_conf[i][j]=param->en_conf[i][j];
       }
       free(ensc[i][j]);
     }
@@ -469,7 +526,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   /* set up DNL stuff */
 
-  local_.iloc = param->local + 1;
+  local_.iloc = param->localind+1;
   box_.numbox = param->nboxes;
 
   for (i=0; i<4; i++){
@@ -513,7 +570,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   ncore=param->norb - param->nval;
 
   fprintf(fp_log, " The %c potential is used for the KB construction \n",
-	  la[nlm_label(param->nlm[param->local+ncore]).l]);
+	  la[nlm_label(param->nlm[param->localind+ncore]).l]);
 
   if (param->psmeth=='o') {
     fprintf(fp_log, " Optimized (RRKJ) pseudopotential method will be used \n");
@@ -546,7 +603,12 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   }
 
   if (param->rpcc > 1e-6) {
-    fprintf(fp_log, " LFC partial core radius: %lg \n",param->rpcc);
+    fprintf(fp_log, " Partial core radius: %lg \n",param->rpcc);
+    if (ipccmeth_.ipccmeth == 0) {
+      fprintf(fp_log, " Using the Louie-Froyen-Cohen type pcc \n");
+    }else{
+      fprintf(fp_log, " Using the Fuchs-Scheffler type pcc \n");
+    }
   }
 
   fprintf(fp_log, "\n");

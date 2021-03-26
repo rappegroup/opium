@@ -13,9 +13,9 @@ RANLIB = @RANLIB@
 LDFLAGS = @LDFLAGS@
 AR = @AR@
 
-fobjects = klby.o radina.o writepwf.o
+fobjects = klby.o radina.o writepwf.o writerecpot.o
 
-cobjects = cwritepwf.o do_fhi.o do_ncpp.o do_pwf.o do_upf.o nwrite.o
+cobjects = cwritepwf.o do_fhi.o do_ncpp.o do_pwf.o do_upf.o nwrite.o do_recpot.o
 
 all_objects = $(fobjects) $(cobjects)
 

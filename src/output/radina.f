@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       SUBROUTINE RADINA (R,F,M,NP,H,P,INV,IEN)                          
 C RADIAL INTEGRAL ON LOGARITHMIC GRID- CORRECTED TRAPEZOIDAL RULE       
 C THIS METHOD IS PARTICULARLY CONVENIENT AND EFFECTIVE FOR DEF INT--    
@@ -55,7 +73,7 @@ C THE NEXT LINES ARE SPECIFIC TO IST=4.
          IF (NUMPM1.LT.IST) THEN                                        
             WRITE (7,*) 'TERMINAL ERROR IN RADINA.DISCONTINUITIES       
      $ TOO CLOSE TOGETHER.  CANNOT INTEGRATE WITH HIGH ACCURACY.'       
-            WRITE (7,*) 'INV,L,LEND,IREND= ',INV,L,LEND,IREND           
+            WRITE (7,*) 'INV,L,LEND,IREND= ',INV,L,LEND,IREND,IEN           
             STOP                                                        
             END IF                                                      
          NQ = NUMPM1/IST - 1                                            

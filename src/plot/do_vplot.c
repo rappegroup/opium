@@ -1,5 +1,23 @@
 /*
- * $Id: do_vplot.c,v 1.6 2004/06/16 21:25:54 mbarnes Exp $
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+/*
+ * $Id: do_vplot.c,v 1.9 2004/10/02 18:34:49 ewalter Exp $
  */
 
 /* screened pseudo potential plotting with xmgrace */
@@ -18,7 +36,7 @@
 #include "do_ps.h"
 #include "nlm.h"
 
-#define streq(a,b) (*a==*b && !strcmp(a+1,b+1))
+#define streq(a,b) (!strcasecmp(a,b))
 
 int do_vplot(param_t *param, char *logfile, char *pltyp){
 
@@ -113,15 +131,15 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
       fprintf(parm," s%d legend \"%d%c\" \n",i,
 	  nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
     }
-
-    fprintf(parm," s%d hidden false \n",i+1);
-    fprintf(parm," s%d type xy \n",i+1);
-    fprintf(parm," s%d symbol 0 \n",i+1);
-    fprintf(parm," s%d line type 1 \n",i+1);
-    fprintf(parm," s%d line linestyle %d \n",i+1,3);
-    fprintf(parm," s%d line linewidth 3.0 \n",i+1);
-    fprintf(parm," s%d line color %d \n",i+1,14);
-    fprintf(parm," s%d legend \"V_loc\"\n" ,i+1);
+    i=param->nll;
+    fprintf(parm," s%d hidden false \n",i);
+    fprintf(parm," s%d type xy \n",i);
+    fprintf(parm," s%d symbol 0 \n",i);
+    fprintf(parm," s%d line type 1 \n",i);
+    fprintf(parm," s%d line linestyle %d \n",i,3);
+    fprintf(parm," s%d line linewidth 3.0 \n",i);
+    fprintf(parm," s%d line color %d \n",i,14);
+    fprintf(parm," s%d legend \"V_loc\"\n" ,i);
 
     fclose(parm);
 
@@ -134,7 +152,7 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     parm = fopen("ips.par","w");
 
     if (!parm) {
-      printf("Could not open grace param file 'sps.par': %s\n",
+      printf("Could not open grace param file 'ips.par': %s\n",
 	  strerror(errno));
       return 1;
     }
@@ -200,24 +218,24 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
 	  nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
     }
     /* add the AE ionic potential */
+    i=param->nll;
+    fprintf(parm," s%d hidden false \n",i);
+    fprintf(parm," s%d type xy \n",i);
+    fprintf(parm," s%d symbol 0 \n",i);
+    fprintf(parm," s%d line type 1 \n",i);
+    fprintf(parm," s%d line linestyle %d \n",i,3);
+    fprintf(parm," s%d line linewidth 2.0 \n",i);
+    fprintf(parm," s%d line color %d \n",i,15);
+    fprintf(parm," s%d legend \"2Z_eff/r\"\n" ,i);
 
     fprintf(parm," s%d hidden false \n",i+1);
     fprintf(parm," s%d type xy \n",i+1);
     fprintf(parm," s%d symbol 0 \n",i+1);
     fprintf(parm," s%d line type 1 \n",i+1);
     fprintf(parm," s%d line linestyle %d \n",i+1,3);
-    fprintf(parm," s%d line linewidth 2.0 \n",i+1);
-    fprintf(parm," s%d line color %d \n",i+1,15);
-    fprintf(parm," s%d legend \"2Z_eff/r\"\n" ,i+1);
-
-    fprintf(parm," s%d hidden false \n",i+2);
-    fprintf(parm," s%d type xy \n",i+2);
-    fprintf(parm," s%d symbol 0 \n",i+2);
-    fprintf(parm," s%d line type 1 \n",i+2);
-    fprintf(parm," s%d line linestyle %d \n",i+2,3);
-    fprintf(parm," s%d line linewidth 3.0 \n",i+2);
-    fprintf(parm," s%d line color %d \n",i+2,14);
-    fprintf(parm," s%d legend \"V_loc\"\n" ,i+2);
+    fprintf(parm," s%d line linewidth 3.0 \n",i+1);
+    fprintf(parm," s%d line color %d \n",i+1,14);
+    fprintf(parm," s%d legend \"V_loc\"\n" ,i+1);
 
     fclose(parm);
 

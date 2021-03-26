@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 1998-2004 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
 /* 
- * $Id: do_qplot.c,v 1.4 2004/06/16 21:25:54 mbarnes Exp $
+ * $Id: do_qplot.c,v 1.7 2004/10/02 18:34:49 ewalter Exp $
  */
 
 
@@ -18,7 +36,7 @@
 #include "nlm.h"
 
 void btrans_(double *, char *);
-
+void readPS(param_t *param);
 
 int do_qplot(param_t *param, char *logfile){
 
@@ -41,9 +59,11 @@ int do_qplot(param_t *param, char *logfile){
 
   comm= (char *) malloc(120*sizeof(char));
 
+  readPS(param);
+
   ncore=param->norb-param->nval;
 
-  ic=0;
+  /*ic=0;
   sprintf(filename, "%s.pot_ps", param->name);
   fp = fopen(filename, "rb");
   for (i=0; i<param->nval; i++) {
@@ -54,8 +74,9 @@ int do_qplot(param_t *param, char *logfile){
       fseek(fp,sizeof(double)*param->ngrid,1);
     }
   }
-  fclose(fp);
+  fclose(fp);*/
 
+  /*
   sprintf(filename, "%s.eig_ae", param->name);
   fp = fopen(filename, "rb");
   for (i=0; i<param->nval; i++){
@@ -66,7 +87,7 @@ int do_qplot(param_t *param, char *logfile){
     fread(&nmax_.maxim, sizeof(int),1, fp);
     fread(&atomic_.xion, sizeof(double),1, fp);
   }
-  fclose(fp);
+  fclose(fp); */
 
   sprintf(filename, "%s.loc", param->name);
   fp = fopen(filename, "rb");
@@ -85,6 +106,7 @@ int do_qplot(param_t *param, char *logfile){
     zeff +=param->wnl[i+ncore];
   }
   nll_.nll=param->nll;
+
   btrans_(&zeff,param->name);
 
   if ((parm = fopen("vq.par","w")) != NULL) {
@@ -146,14 +168,24 @@ int do_qplot(param_t *param, char *logfile){
 	      nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
     }
     
+    fprintf(parm," s%d hidden false \n",i);
+    fprintf(parm," s%d type xy \n",i);
+    fprintf(parm," s%d symbol 0 \n",i);
+    fprintf(parm," s%d line type 1 \n",i);
+    fprintf(parm," s%d line linestyle %d \n",i,3);
+    fprintf(parm," s%d line linewidth 3.0 \n",i);
+    fprintf(parm," s%d line color %d \n",i,14);
+    fprintf(parm," s%d legend \"V_loc\"\n" ,i);
+    
+
     fprintf(parm," s%d hidden false \n",i+1);
     fprintf(parm," s%d type xy \n",i+1);
     fprintf(parm," s%d symbol 0 \n",i+1);
     fprintf(parm," s%d line type 1 \n",i+1);
     fprintf(parm," s%d line linestyle %d \n",i+1,3);
-    fprintf(parm," s%d line linewidth 3.0 \n",i+1);
-    fprintf(parm," s%d line color %d \n",i+1,14);
-    fprintf(parm," s%d legend \"V_loc\"\n" ,i+1);
+    fprintf(parm," s%d line linewidth 2.5 \n",i+1);
+    fprintf(parm," s%d line color %d \n",i+1,13);
+    fprintf(parm," s%d legend \"Rho_pcc\"\n" ,i+1);
     
     
     fclose(parm);

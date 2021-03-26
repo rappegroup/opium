@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine schsl(iorb,nqn,lang,ei,imax,rv,p,igh)
       implicit double precision (a-h,o-z)
       
@@ -28,7 +46,7 @@ c -------------------------------------------------------------------------
       iterm = 0
       iout = 7
       iclose = 0
-      itmax = 100
+      itmax = 800
       npm1 = np - 1
       x1 = lang * (lang + 1)
       x2 = (lang + 0.5)**2
@@ -61,7 +79,7 @@ c -------------------------------------------------------------------------
          itermcount=itermcount+1
          write (7,9003) nqn,lang
          if (itermcount.eq.5.and.igh.eq.0) then 
-            write(7,*) 'setting',nqn,lang,' to be unbound!'            
+            write(7,*) '    !NOTE! : setting',nqn,lang,' to be unbound!'            
             ei=ensave(iorb)
             ibd(iorb)=0
          endif
@@ -91,7 +109,7 @@ c -------------------------------------------------------------------------
          call outward(ei,lang,rv,p,phom,pinhom,
      $        flstar,phipsref(1,iorb),imat,xt,wt)
          
-         if (bound) call cntnodes(nqn,lang,ei,p,imat,node,iskip)
+         if (bound) call cntnodes(nqn,lang,ei,p,imat,node,iskip,iclose)
          if (iterm.eq.1) goto 912
          if (iskip.eq.1) goto 1
 
@@ -111,9 +129,10 @@ c -------------------------------------------------------------------------
          if (val.gt.etol) goto 1303
 
          write (iout,9000) nqn,lang
+         iterm=1
          ipos(iorb)=ipos(iorb)+1
          if (igh.eq.0.and.ipos(iorb).gt.4) then 
-            write(7,*) 'setting',nqn,lang,' to be unbound!'
+            write(7,*) '    !NOTE! : setting',nqn,lang,' to be unbound!'
             ei=ensave(iorb)
             ibd(iorb)=0
          endif
@@ -121,13 +140,14 @@ c -------------------------------------------------------------------------
 
  1304    ei = ep
          if (val.le.0.05) iclose = 1
-c         write (iout,9100) iorb,nqn,lang,iter,ibd(iorb)
+c         write (iout,9100) iter,iorb,nqn,lang,ei,de,imat
 
  1       continue         
       enddo
+      if (iter.eq.itmax) iterm=1
  911  continue
 
-c       write (iout,9100) iorb,nqn,lang,iter,ibd(iorb)
+c      write (iout,9101) iter,iorb,nqn,lang,ei,de,imat
 
       do i = 1,imax
         p(i) = p(i)*sqrt(r(i))*1/sqrt(ap)
@@ -139,18 +159,22 @@ c       write (iout,9100) iorb,nqn,lang,iter,ibd(iorb)
 
       return
  912  continue
+      iterm=1
+c      write (iout,9102) iter,iorb,nqn,lang,ei,de,imat
 
-c      write (iout,9100) iter,iorb,nqn,lang,ibd(iorb)
-
- 9000 format('!WARNING!: schsl found a positive eigenvalue.',
+ 9000 format('    !WARNING! : schsl found a positive eigenvalue.',
      $     ' n,l=:', 2i4)
- 9003 format('!WARNING!: schsl found a positive eigenvalue.',
-     $     ' n,l=:', 2i4, '---ca')
+ 9003 format('    !WARNING! : schsl found a positive eigenvalue.',
+     $     ' n,l=:', 2i4)
 
- 9100 format('iter:',i5,1x,'iorb:',i5,1x,'n:',i5,1x,'l:',
-     $     i3,1x,'ibd:',i5)
+ 9100 format('Aiter:',i5,1x,'iorb:',i5,1x,'n:',i5,1x,'l:',
+     $     i3,1x,'ee:',2f10.6,3x,'im  ',i5)
+ 9101 format('Biter:',i5,1x,'iorb:',i5,1x,'n:',i5,1x,'l:',
+     $     i3,1x,'ee:',2f10.6,3x,'im  ',i5)
+ 9102 format('Citer:',i5,1x,'iorb:',i5,1x,'n:',i5,1x,'l:',
+     $     i3,1x,'ee:',2f10.6,3x,'im  ',i5)
 
- 9200 format('!WARNING! : classical turning point at r=0',
+ 9200 format(' !WARNING! : classical turning point at r=0',
      $     i5,' times in a row. Solve FAILED!')
 
       return
@@ -227,8 +251,8 @@ c      write (iout,9100) iter,iorb,nqn,lang,ibd(iorb)
       if (ei.gt.v(npm1)) ei = 2.0 * v(npm1)
       if (ei.gt.emore) ei = emore * 1.1
 
- 9000 format ('!WARNING!: schsl stopped due since ',
-     $     'v+l(l+1)/r^2 became positive  --ca')
+ 9000 format ("    !WARNING! : schsl stopped due since ",
+     $     "v+l(l+1)/r^2 became positive")
 
       return
       end
@@ -251,8 +275,6 @@ c      write (iout,9100) iter,iorb,nqn,lang,ibd(iorb)
          v(i) = ((rv(i) - ei * r(i)) * r(i) + x2) * h2 
      $        +  h2 * wnlf(i) * r(i) * r(i)
       enddo
-
-
       
       do imat = np,1,-1
          if (v(imat).le.0.0) goto 213
@@ -290,7 +312,7 @@ c     if (ei.ge.-etol.or.ncross.gt.node) then
          endif
       endif
 
- 9010 format('!WARNING! : schsl found this state to be unbound:',
+ 9010 format(' !WARNING! : schsl found this state to be unbound:',
      $     ' n,l=',2i4,' --nm')
 
       return
@@ -365,10 +387,11 @@ c     if (ei.ge.-etol.or.ncross.gt.node) then
       return
       end
       
-      subroutine cntnodes(nqn,lang,ei,p,imat,node,iskip)
+      subroutine cntnodes(nqn,lang,ei,p,imat,node,iskip,iclose)
       implicit double precision (a-h,o-z)
       
 #include "PARAMHFS"
+      common /grid/ h,r1,z,r(npdm),np
       common /consts/ etol,vtol,maxit,isoft
       common /itoo/ ietoolo,ietoohi
       common /elim/ emore,eless,elim
@@ -378,6 +401,7 @@ c     if (ei.ge.-etol.or.ncross.gt.node) then
 
       iskip=0
       ncross = 1
+
       do i = 2, imat
          if (p(i)*p(i-1).le.0.0) ncross = ncross + 1
       enddo
@@ -406,11 +430,10 @@ c     if (ei.ge.-etol.or.ncross.gt.node) then
       endif
 
 
-
- 9000 format('!WARNING!: schsl found too few nodes',
-     $     '   n,l=',2i4,2x,'e= ', e7.2)
- 9010 format('!WARNING!: schsl found too many nodes',
-     $     '   n,l=',2i4,2x,'e= ', e7.2)
+ 9000 format('    !WARNING! : schsl found too few nodes',
+     $     '   n,l=',2i4,2x,'e= ', e10.4)
+ 9010 format('    !WARNING! : schsl found too many nodes',
+     $     '   n,l=',2i4,2x,'e= ', e10.4)
 
       return
       end
@@ -512,8 +535,8 @@ c     if (ei.ge.-etol.or.ncross.gt.node) then
       res1= h2*(wt)*(g(imat-2)+10*g(imat-1)+g(imat))
       de = (-p(imat-1) * (res+res1))/(h*ap)
 
- 9000 format('!WARNING! : schsl found (v-e)*r^2 to be too low',
-     $     ' for n,l=',2i4,' --is')
+ 9000 format('    !WARNING! : schsl found (v-e)*r^2 to be too low',
+     $     ' for n,l=',2i4)
       
       return
       end

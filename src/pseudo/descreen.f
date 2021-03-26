@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine descreen(ixc)
       
       implicit double precision(a-h,o-z)
@@ -122,7 +140,7 @@ c     solve schroedinger equation for each state in turn in following loop,
 c     *************************************************************************
 
       write(7,*) 
-      write(7,*) '----Solving the Schodinger equation',
+      write(7,*) '----Solving the Schrodinger equation',
      $           ' for all states----'
       ig=0
       do m=1,nvales
@@ -139,7 +157,7 @@ c     *************************************************************************
         call schsl(m,nn,l,ee,im,rvps(1,m),p,ig)
         
         if (iterm.eq.0) then
-          write(7,9111) n,xc(l),ee,en(m)
+          write(7,9111) n,xc(l),en(m),ee
  9111     format(1x,'State: ',i1,a1,2x,'AE eigenvalue = ', f10.6,2x,
      $         'PS eigenvalue = ', f10.6)
         endif            

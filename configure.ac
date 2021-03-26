@@ -51,6 +51,7 @@ AC_SUBST(FPPFLAGS,[$FPPFLAGS])
 AC_SUBST(F2C_H,[$F2C_H])
 AC_SUBST(NOOPT,[$NOOPT])
 
+
 FOO_MONKEY="$PATH:/lib:/usr/lib"
 AC_PATH_PROG([FPP], [cpp], [no], [$FOO_MONKEY])
 
@@ -219,7 +220,7 @@ dnl PC running linux and Portland Group's C and Portand compilers
 ])
       fi
 
-      LDFLAGS="-L$i -lg2c"
+      LDFLAGS="$LDFLAGS -L$i -lg2c -static-libcxa"
 
       if test $F77 = ifort; then
         LDFLAGS="$LDFLAGS -nofor_main"
@@ -295,8 +296,9 @@ if test $F77 = fort77; then
   CFLAGS="$xSAVE_CFLAGS"
   LDFLAGS="$xLDFLAGS_SAVE"
 
-  test x"$FFLAGS" = x-g && FFLAGS="-O2 -r8"
-
+  test x"$FFLAGS" = x-g && FFLAGS="-O3 -r8"
+  test x"$FFLAGS" = "x-g -O2" && FFLAGS="-O3 -r8"
+dnl Boy! This is a hack EJW
 fi
 
 dnl Checks for header files.

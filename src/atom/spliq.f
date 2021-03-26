@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine spliq(x,y,yp,ypp,n,xlo,xup,nup,ans,ierr)
       implicit double precision(a-h,o-z)
       dimension x(n),y(n),yp(n),ypp(n),xup(nup),ans(nup)
@@ -85,6 +103,7 @@ c
 c   check for improper input
 c
 c
+      nout=6
       ierr = 2
       if(n .ge. 4  .and.  nup .ge. 1) go to 1
       write(nout,110)

@@ -1,4 +1,22 @@
-      subroutine velect(iter,iconv,ixc,
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
+      subroutine velect(iter,iconv,zel,ixc,
      +     cdd,cdu,cdc,
      +     viod,viou,vid,viu,vod,vou,
      +     etot,ev,ek,ep)
@@ -35,7 +53,7 @@ c     set up initial charge density.
 c     cdd and cdu  =  2 pi r**2 rho(r)
          aa = 0.5
          do i=1,nr
-            cdd(i) = zel*aa**3*exp(-aa*r(i))*r(i)**2/4
+            cdd(i) = zel*aa**3*exp(-aa*r(i))*r(i)**2/4.0
             cdu(i) = cdd(i)
          enddo
       endif
@@ -89,9 +107,9 @@ c     compute hartree contribution to total energy
          ll = 4
          do 140 i=2,nr
             ehart = ehart + ll * (cdd(i)+cdu(i)) * vod(i) * rab(i)
-            if (ifcore .ge. 2) then
-               ehart = ehart + ll * cdc(i) * vod(i) * rab(i)
-            end if
+c            if (ifcore .ge. 2) then
+c               ehart = ehart + ll * cdc(i) * vod(i) * rab(i)
+c            end if
             ll = 6 - ll
   140    continue
          ehart = ehart / 6
@@ -175,6 +193,10 @@ c
             end if
          else
            
+c            if(i.lt.2) goto 170
+            
+cEJW  -- i=2 causes a problem!
+
             if(i.lt.2) goto 170
 
             exlsd=0.0

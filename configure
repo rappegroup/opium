@@ -2509,6 +2509,7 @@ F2C_H=$F2C_H
 NOOPT=$NOOPT
 
 
+
 FOO_MONKEY="$PATH:/lib:/usr/lib"
 # Extract the first word of "cpp", so it can be a program name with args.
 set dummy cpp; ac_word=$2
@@ -3095,7 +3096,7 @@ echo "$as_me: error:
    { (exit 1); exit 1; }; }
       fi
 
-      LDFLAGS="-L$i -lg2c"
+      LDFLAGS="$LDFLAGS -L$i -lg2c -static-libcxa"
 
       if test $F77 = ifort; then
         LDFLAGS="$LDFLAGS -nofor_main"
@@ -3649,8 +3650,8 @@ echo "$as_me: error:
   CFLAGS="$xSAVE_CFLAGS"
   LDFLAGS="$xLDFLAGS_SAVE"
 
-  test x"$FFLAGS" = x-g && FFLAGS="-O2 -r8"
-
+  test x"$FFLAGS" = x-g && FFLAGS="-O3 -r8"
+  test x"$FFLAGS" = "x-g -O2" && FFLAGS="-O3 -r8"
 fi
 
 xLDFLAGS_SAVE="$LDFLAGS"

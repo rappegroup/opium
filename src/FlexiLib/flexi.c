@@ -1,5 +1,5 @@
 /*
- * $Id: flexi.c,v 1.3 2004/06/16 21:25:54 mbarnes Exp $
+ * $Id: flexi.c,v 1.4 2004/08/04 16:25:57 ewalter Exp $
  */
 
 /****************************************************************************
@@ -268,7 +268,7 @@ static keycell *find_key(char *key){
   if (cell==NULL) return NULL;
   
   do{
-    if (strcmp(cell->key,key)==0) break;
+    if (strcasecmp(cell->key,key)==0) break;
     cell = cell->next;
   }while (cell != NULL);
   

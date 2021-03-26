@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine writepwf(ifp, symbol)
       
 c -- Perform KB transformation and output the info in the 
@@ -12,10 +30,10 @@ c -- PWF pseudopotential file format
       common /en/ ien(10),inv                                           
       common /dql/ dql
       common /maxx/ maxx(5)
-      common /flqeta/ eta(5),flq(nflq,5)
+      common /flqeta/ eta(5),flq(maxflq,5),nflq
       common /nlcore/ rvloc(npdm)
       common /pwf/ zeff, rpcc, spacing, first,
-     &             nval, igrid, inl, ist1, ncut, ilocal
+     &             nval, igrid, inl, ist1, ncut, ilocal,ilocalind
       common /nmax/ nmax(n0),maxim
 
       common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm)
@@ -25,7 +43,7 @@ c -- PWF pseudopotential file format
 
       dimension vl(npspt0),bb(npdm)
       dimension xr(npdm),dvp(3),bb3(npdm)
-      dimension dflq(nflq,15),ill(4)
+      dimension dflq(maxflq,15),ill(4)
       dimension psp(npspt0),dpsp(npspt0)
       dimension rrvloc(npdm)
 
@@ -64,15 +82,20 @@ c -- hardcoded settings gjt moved out of runNL to where they are used (here):
       mq = 4000
       dql = 0.020000
       dqnl = 0.075000
+      nflq=501
 
 c -- original writepwf comes here ---
+
+c     EJW: ilocal is the 'l' value of the local pot
+c          ilocalind is the valence index of the local pot
+c          use ilocalind + 1 for fortran
 
       if (rpcc.gt.1e-12) then
          xrpcc = 'y'
       else
          xrpcc = 'n'
       endif
-          
+
       if (nval.eq.1) then
          iproj = 0
          xproj = "    "
@@ -82,7 +105,7 @@ c -- original writepwf comes here ---
             xproj = "sp  "
          else
             iproj = 1
-            if (ilocal.eq.1) then
+            if (ilocal.eq.0) then
                xproj="p   "
             else
                xproj="s   "
@@ -94,9 +117,9 @@ c -- original writepwf comes here ---
             xproj = "spd "
          else
             iproj = 2
-            if (ilocal.eq.1) then
+            if (ilocal.eq.0) then
                xproj="pd  "
-            elseif (ilocal.eq.2) then
+            elseif (ilocal.eq.1) then
                xproj="sd  "
             else
                xproj="sp  "
@@ -108,11 +131,11 @@ c -- original writepwf comes here ---
             xproj = "spdf"
          else
             iproj = 3
-            if (ilocal.eq.1) then
+            if (ilocal.eq.0) then
                xproj="pdf "
-            elseif (ilocal.eq.2) then
+            elseif (ilocal.eq.1) then
                xproj="sdf "
-            elseif (ilocal.eq.3) then
+            elseif (ilocal.eq.2) then
                xproj="spf "
             else
                xproj="spd "
@@ -120,15 +143,17 @@ c -- original writepwf comes here ---
          endif
       endif
 
-      do j=1,nvales
-         nnj=nlm(j)/100
-         llj=(nlm(j) - nnj * 100)/10
-         if (llj.eq.0) xao(j)='s'
-         if (llj.eq.1) xao(j)='p'
-         if (llj.eq.2) xao(j)='d'
-         if (llj.eq.3) xao(j)='f'
+c     EJW: this will have to good enough for now
+c     guess.f in bh (which I wrote) handles the
+c     identity of the AO's in a stupid way.
+      do j=1,npots
+         if (j.eq.1) xao(j)='s'
+         if (j.eq.2) xao(j)='p'
+         if (j.eq.3) xao(j)='d'
+         if (j.eq.4) xao(j)='f'
       enddo
-      xao(8)=''
+
+      xao(8)='\0'
       
 c -- number of |nlm> AO (including m-multiplicity!)
       numAOs = iproj**2
@@ -136,9 +161,8 @@ c -- number of |nlm> AO (including m-multiplicity!)
 c -- hardcoded settings for now...
       aorad = 5.0
 
-
 c -- now call the new C routine that writes the header info      
-      call cwritepwf(ifp, symbol, zeff, NPSPT0, NFLQ, iproj, nvales,
+      call cwritepwf(ifp, symbol, zeff, NPSPT0, NFLQ, iproj, npots,
      $       xproj, xrpcc, np, spacing, first, numAOs, aorad, xao)
 
 c -- end of original writepwf comes here ---
@@ -168,34 +192,16 @@ c     NOTE: redefinition of rvcore no factors of r
 
       enddo
 
-c     Decide what the local potential is
-      if (inl.ne.0) then
-         iloc = 0
-         goto 170
+      if (inl.eq.1) then
+         write(7,185)
+         ilocal=-67
+c     this allows the local+box to be local!
+      else
+         if (ilocal.eq.0) write(7,190) 
+         if (ilocal.eq.1) write(7,200)                                      
+         if (ilocal.eq.2) write(7,210)                                      
       endif
-      if (ist1.eq.2) then                                                
-         iloc=ilocal                                                    
-         goto 170                                                       
-      endif                                                          
-      if (ist1.eq.3) then                                               
-         if (ilocal.ne.0) then                                            
-            iloc = ilocal                                               
-            goto 170                                                    
-         end if                                                      
-         iloc = 1                                                     
-         goto 211                                                       
-      end if                                                         
-c     Wrong method (ist1 <> 1 or 2)
-      write(7,180)                                                      
-      stop                                                              
-  170 continue 
-      if (iloc.eq.0) write(7,185)
-      if (iloc.eq.1) write(7,190) 
-      if (iloc.eq.2) write(7,200)                                      
-      if (iloc.eq.3) write(7,210)                                      
- 211  continue 
 
-ccccc
 c     Now put local potential into rvlr
 
       do k=1,np                                                
@@ -204,19 +210,8 @@ c     Now put local potential into rvlr
          if (inl.ne.0) then
             rvloc(k) = rrvloc(k)
          else
-            rvloc(k)=rvcore(k,iloc)  
+            rvloc(k)=rvcore(k,ilocalind+1)  
          endif
-
-cEJW I don't think we need this and it is not compatible
-c    with newer code
-c
-c         do i=1,nvales                                              
-c            dvp(i)=rvcore(k,i)-rvloc(k) 
-c            if (abs(dvp(i)).le.1e-12) then
-c               dvp(i) = 0.0
-c            endif
-c         enddo
-cEJW
 
       enddo
 
@@ -230,10 +225,11 @@ c     Get q grid
       pow=1.0e0                                                         
       if (zeff.eq.0.0e0) pow = 2.0e0                                      
 c     compute q=0 term
+
       call radina(xr,bb,0,np,h,pow,inv,ien) 
 
       sumg0 = pow * pi4                                                   
-      
+
       do j=1,mq                                                    
          ql=dql*dble(j)                                             
          pow=1.0e0                                                      
@@ -266,12 +262,14 @@ c     linearly interpolate dpsp at endpoints  1,npspts-1 see note at top
       dpsp(npspts)=dql/bohrad                                           
 
 c -- use the C I/O call to output the local potential coefficients
+c
+      call nclear(ifp)
       do i=1,npspts
-        call nwrite(ifp, "", 4, "%18.8f", psp(i))
+        call nwrite(ifp, "\0", 4, "%18.8f", psp(i))
       enddo
       call nclear(ifp)
       do i=1,npspts
-        call nwrite(ifp, "", 4, "%18.8f", dpsp(i))
+        call nwrite(ifp, "\0", 4, "%18.8f", dpsp(i))
       enddo
       call nclear(ifp)
         
@@ -303,48 +301,27 @@ c -- New lines that omit the 0's but still produce the BH format
          ill(i)=0
       enddo
 
-      do j=1,nvales
-         nnj=nlm(j)/100
-         llj=(nlm(j) - nnj * 100)/10
-         if (ill(llj+1).eq.0) then
-            ill(llj+1)=ill(llj+1)+1
-            if (j.ne.iloc) then
-               do i=1,nflq
-                  call nwrite(ifp, " ", 3, "%20.10f", flq(i,j))
-               enddo
-            endif
+      do k=1,npots
+         if (k.ne.ilocal+1) then
+            do i=1,nflq
+               call nwrite(ifp, " ", 3, "%20.10f", flq(i,k))
+            enddo
          endif
       enddo
       call nclear(ifp)
-
-      do i=1,4
-         ill(i)=0
-      enddo
-      do j=1,nvales
-         nnj=nlm(j)/100
-         llj=(nlm(j) - nnj * 100)/10
-         if (ill(llj+1).eq.0) then
-            ill(llj+1)=ill(llj+1)+1
-            if (j.ne.iloc) then
-               do i=1,nflq
-                  call nwrite(ifp, " ", 3, "%20.10f", dflq(i,j))
-               enddo
-            endif
+      
+      do k=1,npots
+         if (k.ne.ilocal+1) then
+            do i=1,nflq
+               call nwrite(ifp, " ", 3, "%20.10f", dflq(i,k))
+            enddo
          endif
       enddo
       call nclear(ifp)
-
-      do i=1,4
-         ill(i)=0
-      enddo
-      do j=1,nvales
-         nnj=nlm(j)/100
-         llj=(nlm(j) - nnj * 100)/10
-         if (ill(llj+1).eq.0) then
-            ill(llj+1)=ill(llj+1)+1
-            if (j.ne.iloc) then
-               call nwrite(ifp, " ", 3, "%20.10f", eta(j))
-            endif
+      
+      do k=1,npots
+         if (k.ne.ilocal+1) then
+            call nwrite(ifp, " ", 3, "%20.10f", eta(k))
          endif
       enddo
       call nclear(ifp)
@@ -359,24 +336,35 @@ c -- New lines that omit the 0's but still produce the BH format
  200  format(1x,'local potential is p')                                 
  210  format(1x,'local potential is d')                                 
 
-      
 c -- append the atomic pseudo wave functions to the *.pwf file
-      
+
       do i=1,np
-        call nwrite(ifp, "", 6, "%20.15f", r(i))
-        do j=1,nvales
-          call nwrite(ifp, "", 6, "%20.15f", rnl(i,j)/r(i))
-        enddo
-        call nclear(ifp)
+         call nwrite(ifp,"\0", 6, "%20.15f", r(i))
+         do ik=1,4
+            ill(ik)=0
+         enddo
+         
+         do k=1,npots
+            do j=1,nvales
+               nnj=nlm(j)/100
+               ljp=(nlm(j) - nnj * 100)/10 + 1
+               
+               if ((ill(ljp).eq.0).and.(ljp.eq.k)) then
+                  ill(ljp)=ill(ljp)+1
+                  call nwrite(ifp, "\0", 6, "%20.15f", rnl(i,j)/r(i))
+               endif
+            enddo
+         enddo
+         call nclear(ifp)
       enddo
       call nclear(ifp)
       
-c -- append the partial core charge to the *.pwf file if required
+c     -- append the partial core charge to the *.pwf file if required
 
       if (rpcc.gt.1e-12) then
-        do i=1,np
-          call nwrite(ifp, "", 2, "%26.16E",r(i))
-          call nwrite(ifp, "", 2, "%26.16E",rscore(i))
+         do i=1,np
+          call nwrite(ifp, "\0", 2, "%26.16E",r(i))
+          call nwrite(ifp, "\0", 2, "%26.16E",rscore(i))
         enddo
       endif
 

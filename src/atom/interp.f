@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine interp(ifrl, itransf,ixc)
       
 c     *************************************************************************
@@ -28,7 +46,9 @@ c     *************************************************************************
       common /relwf/ wfu(npdm,nvale0),wfd(npdm,nvale0)
       common /frlwf/ nlmp(nvale0),wnlp(nvale0),ev(nvale0*2),
      $     rnor(nvale0*2)
-     
+
+      common /logarith/ rphas,elogmax,elogmin,dlwf(npl0,n0)     
+      common /ilogder/ ilogder
 c     *************************************************************************
 c     local variables
 c     *************************************************************************
@@ -46,7 +66,9 @@ c     *************************************************************************
       dimension xah(npdm),xdh(npdm),xch(npdm),xlh(npdm)
       dimension phom1(npdm),rsvale1(npdm),temp1(npdm),temp2(npdm)
       dimension ratio(nvale0),tempx(npdm),rclp(nvale0*2)
-      
+      dimension pder(npdm),ader(npdm)
+      dimension dl(npl0,4,3,2)
+      character*1 xc(4)
 c     *************************************************************************
 c     gjt: this parameter corresponds to the setting in f_src_rel/param.h
       parameter (nrmax=10000, norbp=40)
@@ -59,15 +81,20 @@ c     gjt: this is for communication between atm() and interp()
       character*80 file_log
 c     *************************************************************************
       
-c     *************************************************************************
-c     redirect stdout to the log file
-c     *************************************************************************
+      xc(1)='s'
+      xc(2)='p'
+      xc(3)='d'
+      xc(4)='f'
 
       open(unit=7,file=file_log,form='formatted',access='append')
 
 c     *************************************************************************
 c     initialize some local arrays
 c     *************************************************************************
+
+      write(7,*) "-----------------------------------------------"
+      write(7,*) "Starting j-averaging procedure                 "
+      write(7,*) "-----------------------------------------------"
 
       do i = 1,npdm
         rvxct(i) = 0.0
@@ -94,7 +121,6 @@ c     *************************************************************************
 c     Here we generate the new information.
 c     Need:  maxim,en,nmax,rnl
       do i = 1,nvales
-c         q1(i) = 0.0
          nlm(i) = nlmp(i+ncores)
          wnl(i) = wnlp(i+ncores)
       enddo
@@ -116,15 +142,16 @@ c     *************************************************************************
       numu = 0
       numd = 0
   9   continue      
+
 c     gjt: either read AE info from file of expect through common block  
-      if (itransf.gt.0) then
-        read (22,*) nr, numorb
-        do 10 j = 1,nr
-          read (22,*) rin(j),wfin(j,icount+1),vin(j),cdc(j)
- 10    continue
-       read (22,*) ev(icount+1),lo(icount+1),so(icount+1),no(icount+1)
- 121   format (4E32.24)
-      else
+c      if (itransf.gt.0) then
+c        read (22,*) nr, numorb
+c        do 10 j = 1,nr
+c          read (22,*) rin(j),wfin(j,icount+1),vin(j),cdc(j)
+c 10    continue
+c       read (22,*) ev(icount+1),lo(icount+1),so(icount+1),no(icount+1)
+c 121   format (4E32.24)
+c      else
         do j = 1,nr
           rin(j) = rr(j)
           wfin(j,icount+1) = aar(j,icount+1)
@@ -134,14 +161,12 @@ c     gjt: either read AE info from file of expect through common block
         lo(icount+1) = llo(icount+1)
         so(icount+1) = sso(icount+1)
         no(icount+1) = nno(icount+1)
-      endif
+c      endif
             
       icount = icount + 1
-c      write (7,*) 'icount / numorb = ', icount, numorb
       if (so(icount).lt.0.1.or.lo(icount).eq.0) then
         numd = numd + 1
         nd(numd) = icount
-c        write (7,*) 'found j=l-1/2'
         nlmp(icount) = nlm(numd)
         rclp(icount) = rcall(numd)
         ll = nlm(numd) - 100 * (nlm(numd)/100)
@@ -151,7 +176,6 @@ c        write (7,*) 'found j=l-1/2'
       if (so(icount).gt.0.1.or.lo(icount).eq.0) then
         numu = numu + 1
         nu(numu) = icount
-c        write (7,*) 'found j=l+1/2'
         nlmp(icount) = nlm(numu)
         rclp(icount) = rcall(numu)
         ll = nlm(numu) - 100 * (nlm(numu)/100)
@@ -160,70 +184,8 @@ c        write (7,*) 'found j=l+1/2'
       endif
       if (icount.lt.numorb) goto 9
       
-      
-c     New section to include unfilled f orbital in core.  AMR 7/25/91
-c      ifld = 0
-c      do 901 i = 1,numd
-c         if (lo(nd(i)).eq.3) ifld = i
-c 901  continue
-c      iflu = 0
-c      do 902 i = 1,numu
-c         if (lo(nu(i)).eq.3) iflu = i
-c 902  continue
-c      ii = nlmp(ncores)/100
-c      ii = nlmp(ncores) - 100 * ii
-c      ii = ii/10
-c      if (ifld.ne.0) then 
-c         if (ii.ne.3) then
-c            write (7,*) 'make f orbital last core orbital in .hfsae'
-c            stop
-c         endif
-c         numd = numd - 1
-c         if (ifld.ne.numd+1) then
-c            write (7,*) 'put valence wfs in order of increasing'
-c            write (7,*) 'angular momentum.'
-c            stop
-c         endif
-c         wg = wnlp(ncores) * 3.0/7.0
-c         do 903 i = 1,nr
-c            cdc(i) = cdc(i) + wg * wfin(i,nd(numd+1))**2
-c 903     continue
-c         numorb = numorb - 1
-c      endif
-c      if (iflu.ne.0) then 
-c         if (ii.ne.3) then
-c            write (7,*) 'make f orbital last core orbital in .hfsae'
-c            stop
-c         endif
-c         numu = numu - 1
-c         if (iflu.ne.numu+1) then
-c            write (7,*) 'put valence wfs in order of increasing'
-c            write (7,*) 'angular momentum.'
-c            stop
-c         endif
-c         wg = wnlp(ncores) * 4.0/7.0
-c         do 904 i = 1,nr
-c            cdc(i) = cdc(i) + wg * wfin(i,nu(numu+1))**2
-c 904     continue
-c         numorb = numorb - 1
-c      endif
-c     More than 5 valence wavefunctions are available only if f
-c     wavefunctions are included.  f pseudization does not yet exist,
-c     so we do not process these f wavefunctions, thereby relegating
-c     them to the core.  This will be improved in the future.  AMR 7/25/91
-c     End of f processing section.
-
-
-
-c      write (7,*) 'nu ',(nu(i),i=1,numu)
-c      write (7,*) 'nd ',(nd(i),i=1,numd)
-c      write (7,*)
-c      write (7,*) 'nlmp ',(nlmp(i),i=1,numorb)
-c      write (7,*) 'wnlp ',(wnlp(i),i=1,numorb)
-      
       irel = 1
       if (numd.ne.numu) irel = 0
-c      write (7,*) 'irel = ',irel
       
 c     *************************************************************************
 c     Now we create the new grid, and interpolate the wfs and pots onto it
@@ -239,7 +201,6 @@ c     *************************************************************************
         jmax = nr
         jflag = 0
         do j = nr,1,-1
-c          write (7,*) 'wfin ',j,rin(j),wfin(j,i),i
           f(j) = wfin(j,i)
           if (f(j).ne.0.0.and.jflag.eq.0) then
             jflag = 1
@@ -262,7 +223,6 @@ c          write (7,*) 'wfin ',j,rin(j),wfin(j,i),i
             endif
             oldval = fval
           enddo
-c          write (7,*) 'wf2 ',j,r(j),wf2(j,i),i
           if (iflag.eq.0) then
             write (7,*) 'wf interpolation failed ',j,i
             write (7,*) 'nlm',nlm(i)
@@ -274,7 +234,6 @@ c          write (7,*) 'wf2 ',j,r(j),wf2(j,i),i
 
       do j = 1,nr
         f(j) = cdc(j)
-c        write(900,*) rin(j),f(j)
       enddo
 
       do 26 j = 1,np
@@ -287,7 +246,6 @@ c        write(900,*) rin(j),f(j)
 
         do m = 1,20
           fval = val(f,rin,nr,r(j),m)
-c          write (7,*) j,m,r(j),fval
           diff = oldval - fval
           if (abs(diff).lt.1.0e-7) then
             rscore(j) = fval
@@ -338,7 +296,6 @@ c          write (7,*) j,m,r(j),fval
         enddo
         pow = float(lo(i)*2+2)
         call radin(r,f,0,np,h,pow)
-c        write (7,*) 'valence charge = ',i,pow
 
         psqrt = sqrt(pow)
         do j = 1,np
@@ -351,14 +308,9 @@ c        write (7,*) 'valence charge = ',i,pow
         pow = 2.0
         call radin(r,rsvale,0,np,h,pow)
 
-c        write (7,*) 'total valence charge now = ',pow
       enddo
       write (7,9020) pow 
-
- 9000 format(' Z atomic :',f10.6)
- 9010 format(' Z valence :',f10.6)
- 9020 format(' Total valence charge :',f20.10)
-
+      write (7,*)
 c     *************************************************************************
 c     New section written by I. Grinberg for mapping relativistic
 c     solutions to non-relativistic equations.
@@ -375,8 +327,13 @@ c       iwrite = 11 for spin up, iwrite = 12 for spin down.
           if(iwrite.eq.11) then
             mm = nd(kk)
             eigend(kk)=ev(mm)
-            write (7,*) 'DOWN nlm = ',nlm(kk),' Eigenvalue = ',
-     $             eigend(kk)
+            n = nlm(kk)/100
+            l = nlm(kk)/10 - 10 * (nlm(kk)/100)
+            
+            write(7,9030) n,xc(l+1),eigend(kk)
+
+c            write (7,*) 'DOWN nlm = ',nlm(kk),' Eigenvalue = ',
+c     $             eigend(kk)
             do j=1,np
               wfd(j,kk)=wf2(j,mm)
             enddo
@@ -384,15 +341,22 @@ c       iwrite = 11 for spin up, iwrite = 12 for spin down.
           if(iwrite.eq.12) then 
             mm = nu(kk)
             eigenu(kk)=ev(mm)
-            write (7,*) 'UP   nlm = ',nlm(kk),' Eigenvalue = ',
-     $             eigenu(kk)
+
+            n = nlm(kk)/100
+            l = nlm(kk)/10 - 10 * (nlm(kk)/100)
+
+            write(7,9040) n,xc(l+1),eigenu(kk)
+c            write (7,*) 'UP   nlm = ',nlm(kk),' Eigenvalue = ',
+c     $             eigenu(kk)
             do j=1,np
               wfu(j,kk)=wf2(j,mm)
+c              rtemp(j)=0.0
             enddo
           endif
         enddo
       enddo
- 
+      write (7,*)
+
 c     *************************************************************************
 c     2 relativistic -> 1 non-relativistic starts here
 c     *************************************************************************
@@ -411,6 +375,7 @@ c       calculate charge density  and integrate it to get total valence charge
         do j=1,maxim
           phom1(j)=wfu(j,i)**2*xu+wfd(j,i)**2*xd
         enddo            
+
 c       phom1 here has 2 powers of  r
         pow=2*ll+2
         call radin(r,phom1,0,maxim,h,pow)
@@ -418,6 +383,7 @@ c       phom1 here has 2 powers of  r
         do ii = 1,np
           if (rcall(i).gt.r(ii)) indall(i) = ii
         enddo
+
 c       calculate the within breakpoint charge, outside breakpoint charge     
         ibp(i) = indall(i) - 5
 c       "breakpoint" for norm in tail region WAS indall-19 now indall-5.
@@ -427,19 +393,20 @@ cEJW    now compute the norm from rc->oo
         pow=2*ll+2
         call radin(r,phom1,0,indall(i),h,pow)
         rnor(i) = 1- pow
-        write (7,*) 'norm rc to infinity = ',i,rnor(i)
-cEJW
+        n = nlm(i)/100
+        l = nlm(i)/10 - 10 * (nlm(i)/100)
+        write (7,9050) n,xc(l+1),rnor(i)
 
         pow=2*ll+2
         call radin(r,phom1,0,ibp(i),h,pow)
         powall = 1- pow
-        write (7,*) 'norm rbp to infinity = ',i,powall
+c        write (7,*) 'norm rbp to infinity = ',i,powall
 
 c       conmax insert
-        if (ioutput.eq.1) then
-          open(unit=56,file='AENORM',form='formatted')
-          write(56,*) powall
-        endif
+c        if (ioutput.eq.1) then
+c          open(unit=56,file='AENORM',form='formatted')
+c          write(56,*) powall
+c        endif
 
         rcint=pow
         partint=abs(totalint-rcint)
@@ -449,7 +416,9 @@ c       get first guess for the nr wavefunc from the valence charge density
         fe_old(i)=partint
         do j=1,maxim
           phom(j,i)=sqrt(wfu(j,i)**2*xu+wfd(j,i)**2*xd)
+c          rtemp(j)=rtemp(j)+(wfu(j,i)**2*xu+wfd(j,i)**2*xd)*wnl(i)
         enddo
+
 c       phom1 here has 1 power of  r              
 c       overwrite guess wavefunc at breakpoint with arbitrary formula,
 c       which still preserves the correct within breakpoint charge
@@ -485,7 +454,9 @@ c       which still preserves the correct within breakpoint charge
           phom(j,i)=rl*(chiro+c*oneminus)
         enddo
       enddo
-      
+
+ 911  continue
+
       c=1.0
       do ii=1, np
         rsvale(ii)=0
@@ -497,19 +468,61 @@ c       which still preserves the correct within breakpoint charge
           phom1(ii)=0
         enddo
 c       calculate the first guess for valence charge density
+        
         do ii=1,np
           rsvale(ii)=rsvale(ii)+phom(ii,i)**2*wnl(i)
           phom1(ii)=phom1(ii)+phom(ii,i)**2
-c          write(7,*) ii, rsvale(ii), phom1(ii)
         enddo
-c        write (7,*) i, ii, phom(ii,i)
       enddo
-      
+      write (7,*)
+
 c     *************************************************************************
 c     iterative solution for the nr wavefunc with correct eigenvalues and 
 c     within and outside breakpoint fillings 
 c     *************************************************************************
-      
+
+c     EJW section to do Rel log der
+c      if (ilogder.eq.1) then
+c         ic=0
+c         do i=1,np
+c            rsatom(i)=rtemp(i)+rscore(i)
+c            rvxct(i) = 0.0
+c            rexct(i) = 0.0
+c            rvh(i) = 0.0
+c         enddo
+c         call excorr (np,ixc,r,rsatom,rvxct,rexct)
+c         call hrtree (np,h,r,rsatom,rvh)
+c         do i=1,np
+c            rvscr(i)=rvh(i)+rvxct(i)
+c            rv(i)=-2*z+rvscr(i)
+c         enddo
+
+c         do m=1,nvales
+c            ic=ic+1
+c            l = nlm(m)/10 - 10 * (nlm(m)/100)
+c            xt = float(4 * l + 2)
+c            xu = float(2 * l + 2)/xt
+c            xd = float(2 * l)/xt            
+c            en(m)=eigenu(m)*xu+eigend(m)*xd
+c            
+c            dele = (elogmax-elogmin)/float(npl0-1)
+c            nr = 4
+c            isoft = 0
+c            do ii = 1, np
+c               pder(ii) = 0.0
+c               ader(ii) = 0.0
+c            enddo
+c            
+c            do ii = 1, npl0
+c               e = elogmin + dele * float(ii-1)
+c               call logder(e,z,l,isoft,rv,ader,r,np,h,
+c     $              rphas,dl,npl0,nr,pder,wfld,0,1.0,1.0,1.0)
+c               dlwf(ii,ic) = wfld
+c            enddo
+c         enddo
+c         return
+c      endif
+
       do ijk=1,100
 c       calculate total atomic charge density and potentials
         do i=1,np
@@ -524,7 +537,7 @@ c       calculate total atomic charge density and potentials
           rvscr(i)=rvh(i)+rvxct(i)
           rv(i)=-2*z+rvscr(i)
         enddo
-        
+
         do j =1,nvales
 c         calculate eigenvalues, prepare for inward solve
           ll = nlm(j) - 100 * (nlm(j)/100)
@@ -581,6 +594,7 @@ c       get new charge density
           do ii=ibp(i)+1,np
             phom(ii,i)=phom(ii,i)*sqrt(r(ii))
           enddo
+
 c         phom now has 1 power of r (1/2 +1/2 = 1), ibp point is 
 c         untouched by the inward solve so it still has correct 1 power of r
           do ii=ibp(i),np
@@ -663,7 +677,6 @@ c       calculate new rsvale, phom has 1 power of r
           do ii=1,np
             rsvale(ii)=rsvale(ii)+phom(ii,i)**2*wnl(i)
           enddo
-c         write (7,*) ijk, i, phom(1,i), wnl(i)
         enddo
       enddo
  
@@ -671,7 +684,9 @@ c     *************************************************************************
 c     done with iterative solution and 
 c     *************************************************************************
  
- 998  write(7,*) "CONVERGED!",ijk,rttot
+ 998  write(7,9060) ijk,rttot
+      write(7,*)
+
 c     if converged use new wavefunctions to calculate all quantities that
 c     will be outputed (rvcoul, rnl, etc.) 
       do j=1,nvales
@@ -721,25 +736,38 @@ c     gjt: tol2 is defined in PARAMOPT
         enddo
       enddo
       tch=2.0
-      
+
 c     write out all the necessary information in 1 nr potential format
       im = maxim
       do i = 1,nvales
 c       conmax insert
-        if (ioutput.eq.1) then
-          open(unit=55,file='AEEIG',form='formatted')
-          write(55,*) en(i)
-        endif
+c        if (ioutput.eq.1) then
+c          open(unit=55,file='AEEIG',form='formatted')
+c          write(55,*) en(i)
+c        endif
+         n = nlm(i)/100
+         l = nlm(i)/10 - 10 * (nlm(i)/100)
 
-        write(7,*) 'nlm = ',nlm(i),' Averaged Eigenvalue = ',en(i)
+        write(7,9070) n,xc(l+1),en(i)
       enddo
-      
+
+ 9000 format(5x,"Z atom                            :",f10.6)
+ 9010 format(5x,"Z valence                         :",f10.6)
+ 9020 format(5x,"Total valence charge              :",f10.6)
+
+ 9030 format(1x,i1,a1,2x,"- eigenvalue                      :",f10.6)
+ 9040 format(1x,i1,a1,2x,"+ eigenvalue                      :",f10.6)
+
+ 9050 format(1x,i1,a1,2x,"Norm rc->oo                       :",f10.6)
+
+ 9060 format(5x,"Converged in ", i3,1x,"iterations, residual:",e10.3)
+
+ 9070 format(1x,i1,a1,2x,"Avg. eigenvalue                   :",f10.6)
 c     *************************************************************************
 c     write the appropriate AE information to the appropriate binary file
 c     *************************************************************************
- 
+
       if (ifrl.eq.0) then
-      
       else
          
 c     frl output ; do norms and
@@ -754,7 +782,7 @@ c     ensure that the wave function converges to 0 from the positive side
                   wf2(j,i) = -wf2(j,i)
                enddo
             endif
-cEJW
+c     EJW
             do j=1,np
                if (rclp(i).gt.r(j)) irc=j
                phom1(j)=wf2(j,i)**2
@@ -762,16 +790,9 @@ cEJW
             pow=float(lo(i)*2+2)
             call radin(r,phom1,0,irc,h,pow)
             rnor(i) = 1-pow
-c            write(7,*) 'DEBUG: i,ll',i,irc,pow
-cEJW
-
+c     EJW
          enddo
-         
       endif
       
-c     *************************************************************************
-c     finish up
-c     *************************************************************************
-
       close(unit=7)
       end

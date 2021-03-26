@@ -1,3 +1,21 @@
+c
+c Copyright (c) 1998-2004 The OPIUM Group
+c
+c This program is free software; you can redistribute it and/or modify
+c it under the terms of the GNU General Public License as published by
+c the Free Software Foundation; either version 2 of the License, or
+c (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to the Free Software
+c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+c
       subroutine pbe(cdu,cdd,rr,nr,b,expp,vxp,rab,
      $     ecp,vcp,i,ixc,fxpbe,exlsd,vxlsd,rholap)
 CIG   called in velect in cdd,cdu order, here reverse since for 
@@ -67,8 +85,13 @@ CCC  put in real value for hh
              agrup=abs(cdu(i+1)-cdu(i-1))/2 
              agrup=agrup/(2*rab(i)+eps)
              agrup_plus=abs(cdu(i+2)-cdu(i))/2
+
              agrup_plus=agrup_plus/(2*rab(i+1)+eps)
-             agrup_minus=abs(cdu(i)-cdu(i-2))/2
+             if (i.ge.3) then
+                agrup_minus=abs(cdu(i)-cdu(i-2))/2
+             else
+                agrup_minus=0.0
+             endif
              agrup_minus=agrup_minus/(2*rab(i-1)+eps)
              
              
