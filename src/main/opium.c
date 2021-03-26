@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#define VERSION "3.6"
+#define VERSION "3.7"
 #ifndef CHOST
 #define CHOST "unknown"
 #endif
@@ -57,6 +57,8 @@
 #include "do_pwf.h"
 #include "do_recpot.h"
 #include "do_qeupf.h"
+#include "do_teter.h"
+#include "do_qso.h"
 #include "do_spinor.h"
 #include "do_fhi.h"
 #include "do_plot.h"
@@ -388,75 +390,86 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     if (verbosity) do_tc_report(stdout);*/
   } else if (streq(command, "pwf")){
     if (streq(param->reltype,"frl")) {
-      printf("pwf -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
-      exit(-1);
+      printf("!!ERROR!!: the pwf format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_pwf(param, fp, logfile); 
+      fclose(fp);
     }
-    fp = fopen(paramfile, "r"); 
-    do_pwf(param, fp, logfile); 
-    fclose(fp);
   } else if (streq(command, "recpot")){
     if (streq(param->reltype,"frl")) {
-      printf("recpot -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
-      exit(-1);
+      printf("!!ERROR!!: the recpot format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_recpot(param, fp, logfile); 
+      fclose(fp);
     }
-    fp = fopen(paramfile, "r"); 
-    do_recpot(param, fp, logfile); 
-    fclose(fp);
   } else if (streq(command, "upf")) {
     fp = fopen(paramfile, "r"); 
     do_qeupf(param, fp, logfile);
     fclose(fp);
+  } else if (streq(command, "tet") || streq(command, "teter")) {
+    fp = fopen(paramfile, "r"); 
+    do_teter(param, fp, logfile);
+    fclose(fp);
+  } else if (streq(command, "qso")) {
+    if (streq(param->reltype,"frl")) {
+      printf("!!ERROR!!: the qso format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_qso(param, fp, logfile);
+      fclose(fp);
+    }
   } else if (streq(command, "spinor")) {
     do_spinor(param, logfile);
   } else if (streq(command, "fhi")) {
     if (streq(param->reltype,"frl")) {
-      printf("fhi -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
-      exit(-1);
+      printf("!!ERROR!!: the fhi format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_fhi(param, fp, logfile);
+      fclose(fp);
     }
-    fp = fopen(paramfile, "r"); 
-    do_fhi(param, fp, logfile);
-    fclose(fp);
   } else if (streq(command, "champ")) {
     if (streq(param->reltype,"frl")) {
-      printf("champ -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
-      exit(-1);
+      printf("!!ERROR!!: the champ format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_champ(param, fp, logfile);
+      fclose(fp);
     }
-    fp = fopen(paramfile, "r"); 
-    do_champ(param, fp, logfile);
-    fclose(fp);
   } else if (streq(command, "siesta")||streq(command, "psf")) {
     if (streq(param->reltype,"frl")) {
-      printf("siesta/psf -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
-      exit(-1);
+      printf("!!ERROR!!: the siesta/psf format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_siesta(param, fp, logfile);
+      fclose(fp);
     }
-    fp = fopen(paramfile, "r"); 
-    do_siesta(param, fp, logfile);
-    fclose(fp);
   } else if (streq(command, "ncpp")) {
     if (streq(param->reltype,"frl")) {
-      printf("ncpp -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
-      exit(-1);
+      printf("!!ERROR!!: the ncpp format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_ncpp(param, fp,logfile);
+      fclose(fp);
     }
-
-    fp = fopen(paramfile, "r"); 
-    do_ncpp(param, fp,logfile);
-    fclose(fp);
   } else if (streq(command, "casino")) {
     if (streq(param->reltype,"frl")) {
-      printf("casino -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
-      exit(-1);
+      printf("!!ERROR!!: the casino format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_casino(param, fp,logfile);
+      fclose(fp);
     }
-    fp = fopen(paramfile, "r"); 
-    do_casino(param, fp,logfile);
-    fclose(fp);
   } else if (streq(command, "cpmd")) {
     if (streq(param->reltype,"frl")) {
-      printf("cpmd -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
-      exit(-1);
+      printf("!!ERROR!!: the cpmd format does not support fully relativistic / spin-orbit psps currently\n");
+    }else{
+      fp = fopen(paramfile, "r"); 
+      do_cpmd(param, fp,logfile);
+      fclose(fp);
     }
-    fp = fopen(paramfile, "r"); 
-    do_cpmd(param, fp,logfile);
-    fclose(fp);
   } else if (streq(command, "rpt")) {
     fp = fopen(logfile, "a");
     fprintf(fp,"<<<do_rpt>>>\n");
@@ -564,7 +577,9 @@ static void do_chelp(){
   printf("\tncpp                - generate *.ncpp (PWSCF) output\n");
   printf("\tpsf                 - generate *.psf(SIESTA) output \n");
   printf("\tcasino              - generate *.casino (CASINO) output \n");
-  printf("\tchamp               - generate *.champ(CHAMP) output \n");
+  printf("\tchamp               - generate *.champ (CHAMP) output \n");
+  printf("\ttet                 - generate *.teter (ABINIT spin-orbit/frl only) output \n");
+  printf("\tqso                 - generate *.qso.xml (QBOX) output \n");
   printf("\n\tmiscellaneous options \n");
   printf("\trpt                 - generate report file\n");
   printf("\tplot [plot_type]    - make a plot of type [plot_type]\n" 
@@ -623,7 +638,9 @@ static void do_khelp(){
   printf("\t       the optimization procedure.  The default is (n)ew  \n\n\n");  
   printf("\t[XC]                                                                 \n");
   printf("\t  pzlda,pwlda,pbegga,pw91gga,wcgga, or hf                            \n"); 
-  printf("\t  GGA smoothing radius (float) [optional] \n\t\t for Z<=36 and gga, default: not used, \n\t\t for Z>36 and gga, default=0.001 au  \n\n\n");
+  printf("\t  GGA smoothing radius (float) [optional] \n\t\t for Z<=36 and gga, default: not used, \n\t\t for Z>36 and gga, default=0.001 au  \n");
+  printf("\t  a postive value for the radius slowly changes into LDA from the point of the radius back to 0. \n");
+  printf("\t  a negative value for the radius fits the XC potential near the radius to a simple quadratic formula which should approach the origin smoothly \n\n\n");
   printf("\t[Pcc]                                               \n");
   printf("\t partial core radius(float) (default = no pcc)  \n");
   printf("\t partial core method (character) lfc or fs  \n");
@@ -681,6 +698,12 @@ static void do_khelp(){
   printf("\t hf smoothing eigenvalue tolerance (float) \n");
 
   printf("\t  See http://opium.sourceforge.net for more help \n\n\n");
+
+  printf("\t[QSOMesh]                                            \n");
+  printf("\t  # grid points(int), grid spacing(float) \n\n");
+  printf("\t defines a linear grid for use in the qso output (qbox) \n");
+  printf("\t  default = 1000 0.02 \n\n");
+
   printf("\t=================================================================\n\n\n");
 
 

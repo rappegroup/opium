@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #include "common_blocks.h"    /* fortran common blocks */
 #include "energy.h"           /* this is for saving the energies */
 
-static char report[8000];
+static char report[16000];
 void startae(param_t *param, int);
 void relorbae(param_t *param, int, char *); 
 void nrelorbnl(param_t *param, int, char *); 

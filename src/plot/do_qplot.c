@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ int do_qplot(param_t *param, char *logfile){
   int lsty=0;
   int ncore;
   int ic;
+  int config=-1;
 
   char filename[80];
   char filename1[80];
@@ -57,6 +58,14 @@ int do_qplot(param_t *param, char *logfile){
 
   #define comm_size 240
   comm= (char *) malloc(comm_size*sizeof(char));
+
+  if (!strcmp(param->reltype, "frl")) { 
+    relsproj(param,logfile);
+    relorbnl(param,config,logfile);
+  }else{
+    nrelsproj(param,logfile);
+    nrelorbnl(param,config,logfile);
+  }
 
   readPS(param);
 

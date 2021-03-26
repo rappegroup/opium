@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@ typedef struct param_t{
     *name,        /* name */
     *symbol,      /* symbol */
     *longname;
+  double 
+  mass;
 
   /* [Relativity] */
   char
@@ -55,6 +57,12 @@ typedef struct param_t{
     ngrid2;        /* number of grid points */
   double  
     a2,b2;          /* grid parameters: r[i] = a*exp(b*i) */
+
+  /* [LinearGrid] */
+  int 
+    ngridl;
+  double
+    lspc;
     
   /* [Atom] */
   int  

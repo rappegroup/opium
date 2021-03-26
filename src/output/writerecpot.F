@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2010 The OPIUM Group
+c Copyright (c) 1998-2012 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -219,7 +219,7 @@ c      close(unit=7)
 c      open(unit=7,file=file_log,form='formatted',access='append')      
 
 
-      call nwrite(ifp, " ", 1, "%18.8f", gcut/bohrad)
+      call nwrite(ifp, "", 1, "%18.8f", gcut/bohrad)
       psp(1)=sumg0*ryd*(bohrad**3)                                     
       do n=2,npspts
          psp(n)=(vl(n-1)-2.0d0*pi4*zeff/(dql*(n-1))**2)*ryd*(bohrad**3)
@@ -227,7 +227,7 @@ c      open(unit=7,file=file_log,form='formatted',access='append')
 
 c -- use the C I/O call to output the local potential coefficients
       do i=1,npspts
-        call nwrite(ifp, " ", 3, "%20.10f", psp(i))
+        call nwrite(ifp, "", 3, "%20.10f ", psp(i))
       enddo
       call nclear(ifp)
         
@@ -248,15 +248,15 @@ c -- New lines that omit the 0's but still produce the BH format
 
       do k=1,nll
          if (k.ne.ilocal+1) then
-           call iwrite(ifp, " ", 1, "%d",k-1)
-           call nwrite(ifp, " ", 1, "%20.10f",eta(k))
+           call iwrite(ifp, "", 1, "%d",k-1)
+           call nwrite(ifp, "", 1, "%20.10f ",eta(k))
            do i=1,nflq
-               call nwrite(ifp, " ", 3, "%20.10f", flq(i,k))
+               call nwrite(ifp, "", 3, "%20.10f ", flq(i,k))
            enddo
          endif
       enddo
 
-      call iwrite(ifp, " ", 1, "%d", 1000)
+      call iwrite(ifp, "", 1, "%d", 1000)
 
 c
 c NLCC
@@ -283,7 +283,7 @@ c     Convert to recip space
           
         enddo
         do i=1,npspts
-          call nwrite(ifp, " ", 3, "%20.10f", qcore(i))
+          call nwrite(ifp, "", 3, "%20.10f ", qcore(i))
         enddo
       end if
       call nclear(ifp)

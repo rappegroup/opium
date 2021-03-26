@@ -11,9 +11,12 @@ C  INPUT U:  (GRAD D)*GRAD(ABS(GRAD D))/(D**2 * (2*KF)**3)
 C  INPUT V: (LAPLACIAN D)/(D*(2*KF)**2)
 C  OUTPUT:  EXCHANGE ENERGY PER ELECTRON (EX) AND POTENTIAL (VX)
       IMPLICIT REAL*8 (A-H,O-Z)
+
+      double precision s,s2,s3,s4,p0,p1,p2,p3,p4,a1,a2,a3,a4
       parameter(a1=0.19645D0,a2=0.27430D0,a3=0.15084D0,a4=100.d0)
       parameter(ax=-0.7385588D0,a=7.7956D0,b1=0.004d0)
       parameter(thrd=0.333333333333D0,thrd4=1.33333333333D0)
+
 c for Becke exchange, set a3=b1=0
       FAC = AX*D**THRD
       S2 = S*S
@@ -116,6 +119,7 @@ C  OUTPUT DVCUP,DVCDN:  NONLOCAL PARTS OF CORRELATION POTENTIALS
       parameter(c1=0.002568D0,c2=0.023266D0,c3=7.389D-6,c4=8.723D0)
       parameter(c5=0.472D0,c6=7.389D-2,a4=100.D0)
       parameter(thrdm=-0.333333333333D0,thrd2=0.666666666667D0)
+      double precision pon
       BET = XNU*CC0
       DELT = 2.D0*ALF/BET
       G3 = G**3
@@ -520,6 +524,7 @@ c          |zeta|=1.
       parameter(gamma=0.03109069086965489503494086371273d0)
       parameter(bet=0.06672455060314922d0,delt=bet/gamma)
       parameter(eta=1.d-12)
+      double precision PON
 c----------------------------------------------------------------------
 c----------------------------------------------------------------------
 c find LSD energy contributions, using [c](10) and Table I[c].

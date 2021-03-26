@@ -1434,7 +1434,7 @@ ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-  for ac_prog in pgf77 pgf90 fort ifort ifc efc fort77 pathf90 gfortran
+  for ac_prog in ifort ifc efc gfortran pgf77 pgf90 fort fort77 pathf90
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -1476,7 +1476,7 @@ fi
 fi
 if test -z "$F77"; then
   ac_ct_F77=$F77
-  for ac_prog in pgf77 pgf90 fort ifort ifc efc fort77 pathf90 gfortran
+  for ac_prog in ifort ifc efc gfortran pgf77 pgf90 fort fort77 pathf90
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3262,8 +3262,8 @@ fi
 
 FCT=`echo "$F77" |sed -e s,^.*/,,`
 CCT=`echo "$F77" |sed -e s,^.*/,,`
-echo $FCT $CCT
-echo $F77 $CC
+
+
 
 case $ac_cv_host in
 
@@ -3388,21 +3388,60 @@ fi
     echo ""
     echo "*******************************************************************"
     echo "*******************************************************************"
-    echo "Using gfortran for OPIUM is experimental... please be extra careful"
+    echo "Using gfortran for OPIUM is experimental... please be careful      "
     echo "*******************************************************************"
     echo "*******************************************************************"
     echo ""
     echo ""
 
     LD=$F77
-    LDFLAGS="-fdefault-real-8 -fno-automatic $LDFLAGS"
-    FFLAGS="$FFLAGS -fdefault-real-8 -fno-automatic"
+    LDFLAGS="-fdefault-real-8 -fdefault-double-8 -fno-automatic $LDFLAGS"
+    FFLAGS="$FFLAGS -fdefault-real-8 -fdefault-double-8 -fno-automatic"
     NOOPT="-O0"
     fi
     if test $FCT = gcc ; then
       test x"$CFLAGS" = x-g && CFLAGS="-O2"
     fi
     ;;
+
+  *-apple-*)
+    NOOPT="-O0"
+
+    if test $FCT = ifc || test $FCT = ifort; then
+      LD=$FCT
+      LDFLAGS="$LDFLAGS -Vaxlib"
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 "
+      LDFLAGS="$LDFLAGS -L$i -static-libcxa"
+
+      if test $FCT = ifort; then
+        LDFLAGS="$LDFLAGS -nofor_main"
+      fi
+
+    fi
+
+    if test x"$CCT" = xicc; then
+      test x"$CFLAGS" = x-g && CFLAGS="-O2"
+    fi
+
+    if test $FCT = gfortran ; then
+    echo ""
+    echo ""
+    echo "*******************************************************************"
+    echo "*******************************************************************"
+    echo "Using gfortran for OPIUM is experimental... please be careful      "
+    echo "*******************************************************************"
+    echo "*******************************************************************"
+    echo ""
+    echo ""
+    LD=$F77
+    LDFLAGS="-lm -fdefault-real-8 -fdefault-double-8 -fno-automatic $LDFLAGS"
+    FFLAGS="-fdefault-real-8 -fdefault-double-8 -fno-automatic $FFLAGS"
+    fi
+    if test $FCT = gcc ; then
+      test x"$CFLAGS" = x-g && CFLAGS="-O2"
+    fi
+    ;;
+
 
   *x86_64*linux-*)
     NOOPT="-O0 -r8"

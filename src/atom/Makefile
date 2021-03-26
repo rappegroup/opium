@@ -20,13 +20,7 @@ all_objects = $(fobjects) $(cobjects)
 this_dir = atom
 
 .F.o:
-	if [ $(OSTYPE) = darwin ] ; then \
-         $(FPP) $(FPPFLAGS) -I../include $< > $<.f ;\
-	 $(FC) $(FFLAGS) $(OPTIONS) -c -I../include $<.f -o $@ ; \
-	 rm -f $<.f ; \
-        else \
-         $(FC) $(FFLAGS) $(OPTIONS)  -I../include $*.F -c ; \
-        fi
+	$(FC) $(FFLAGS) $(OPTIONS)  -I../include $*.F -c 
 
 all: $(all_objects)
 	-rm -f objects

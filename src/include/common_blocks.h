@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,7 +144,6 @@ extern struct{
   double a,b,r[NPDM],rab[NPDM];
 }rgrid_;
 
-/* 5  */
 extern struct{
   int nr;
 }nrgrid_;

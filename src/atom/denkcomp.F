@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2010 The OPIUM Group
+c Copyright (c) 1998-2012 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -53,17 +53,17 @@ c
       rks=0.0
       
       qmax=20
-      qp=500
-      dqq=qmax/qp
+      iqp=500
+      dqq=qmax/iqp
       
       rsc=0.0
       call radin(r,rscore,0,np,h,rsc)
 
-      do j=1,qp+1
+      do j=1,iqp+1
          rke(j)=0.0
       enddo
       
-      do j=1,qp+1                                                    
+      do j=1,iqp+1                                                    
          qq=dqq*dble(j-1)                                             
          
          do k=1,maxim                                                
@@ -82,7 +82,7 @@ c
       rkkmlast=0.0
 
          rkkmlast=0.0
-         do j=1,qp                                                    
+         do j=1,iqp                                                    
             qq=dqq*dble(j-1)                            
             rkk=rks-rke(j)
             rkkmlast=rkkm

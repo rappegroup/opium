@@ -6,20 +6,15 @@ include ../../makevars
 
 fobjects = klby.o radina.o writepwf.o writerecpot.o
 
-cobjects = cwritepwf.o do_fhi.o do_ncpp.o do_pwf.o do_qeupf.o do_spinor.o nwrite.o do_recpot.o do_siesta.o do_cpmd.o do_casino.o do_champ.o
+cobjects = cwritepwf.o do_fhi.o do_ncpp.o do_pwf.o do_qeupf.o do_spinor.o nwrite.o do_recpot.o do_siesta.o do_cpmd.o do_casino.o do_champ.o do_teter.o do_qso.o
 
 all_objects = $(fobjects) $(cobjects)
 
 this_dir = output
 
 .F.o:
-	if [ $(OSTYPE) = darwin ] ; then \
-         $(FPP) $(FPPFLAGS) -I../include $< > $<.f ;\
-	 $(FC) $(FFLAGS) $(OPTIONS) -c -I../include $<.f -o $@ ; \
-	 rm -f $<.f ; \
-        else \
-         $(FC) $(FFLAGS) $(OPTIONS)  -I../include $*.F -c ; \
-        fi
+	$(FC) $(FFLAGS) $(OPTIONS)  -I../include $*.F -c 
+
 
 all:  $(all_objects)
 	-rm -f objects

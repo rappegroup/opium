@@ -401,21 +401,8 @@ Patch to enable partial core corrections for the .recpot (castep) format
 
 6) worked more on gfortran compatibility
 
-3.5 -> 3.6
 
-1) Added fully-relativisitc psps -- needed significant modifications
-which resulted in many routines needed changing
 
-2) Restored most if not all of the support for separate command line
-action (>>opium al log ae ; >>opium al log ps ; etc..) which had been
-lost in previous releases.
-
-3) Implemented QuantumESPRESSO's upf version 1 psp output.  Version
-2 is in progress.
-
-4) Added DNL modifications from Ben Truscott
-
-5) Added Flexib corrections submitted by Keith Refson 
 
 
 

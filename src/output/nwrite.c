@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +29,12 @@
 #include <stdio.h>
 #include <string.h>
 
-
 static int counter;
 
 void nwrite_(FILE *fp, char *linetag, int *n, char *format, double *x){
   
   if (counter==0) fprintf(fp, "%s", linetag);
-  
+
   fprintf(fp, format, *x);
   
   if (counter<*n-1)

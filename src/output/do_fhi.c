@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,8 +109,8 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   /* allocate some memory for the radial arrays */
   unipp.r_m = (double *)malloc(unipp.m_mesh*sizeof(double));
   unipp.v_loc = (double *)malloc(unipp.m_mesh*sizeof(double));
-  unipp.u_ps = (double ***)malloc(unipp.l_max*sizeof(double **));
-  unipp.v_ps = (double ***)malloc(unipp.l_max*sizeof(double **));
+  unipp.u_ps = (double ***)malloc((unipp.l_max+1)*sizeof(double **));
+  unipp.v_ps = (double ***)malloc((unipp.l_max+1)*sizeof(double **));
   for (l=0; l<unipp.l_max+1; l++){
     if (unipp.rel && l){
       unipp.u_ps[l] = (double **)malloc(2*sizeof(double));
@@ -242,6 +242,8 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   fp_log = fopen(logfile, "a");  
   fprintf(fp_log,"   ================================================\n");
   fclose(fp_log);
+
+  /*  uniPP_free(&unipp);*/
   
   return 0;
 }

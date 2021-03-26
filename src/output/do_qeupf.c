@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
   lc[2]='D';
   lc[3]='F';
 
-  if ((!strcmp(param->reltype, "nrl")) || (!strcmp(param->reltype, "srl")) && (param->ixc >= 0)) {
+  if ((!strcmp(param->reltype, "nrl")) || (!strcmp(param->reltype, "srl"))) {
     nrelorbnl(param,config,logfile);
     nrelsproj(param,logfile);
 
@@ -87,7 +87,7 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
     relorbnl(param,config,logfile);
     /*relsproj(param,logfile);*/
   }
-
+ 
   ncore=aorb_.norb-aorb_.nval;
 
   for (i=0;i<param->ngrid;i++)
@@ -179,7 +179,7 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
   } else if (param->ixc == 2) {
     fprintf(fp,"SLA  PW   PBE  PBE     PBE  Exchange-Correlation functional\n");
   } else {
-    printf("WARNING!!  Your choice of XC functional is not currently supported for this type of output, will print LDA Perdew-Zunger\n");
+    printf("!!WARNING!!: Your choice of XC functional is not currently supported for this type of output (UPF), will print LDA Perdew-Zunger\n");
     fprintf(fp,"SLA  PZ   NOGX NOGC    PZ   Exchange-Correlation functional\n");
   }
   fprintf(fp," %lg          Z valence\n",zeff);

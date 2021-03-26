@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 void cwritepwf_(FILE *fp, char *symbol, double *zeff, int *npspt0, int *nflq,
                 int *iproj, int *idi, char *xproj, char *xrpcc, int *igrid,
-                double *spacing, double *first, int *numa, double *aorad, char *xao){
+                double *spacing, double *first, int *numa, double *aorad){
 
   /* annoying thing in bh that the symbol cant start with a space, so 
      interchange the characters */
@@ -39,7 +39,7 @@ void cwritepwf_(FILE *fp, char *symbol, double *zeff, int *npspt0, int *nflq,
     symbol[0] = symbol[1];
     symbol[1] = ' ';
   }
-
+  
   fprintf(fp, "# Opium generated file\n");
   fprintf(fp, "%-2s                      : Element Symbol\n", symbol);
   fprintf(fp, "%4.1f                    : Zeff\n", *zeff);
@@ -48,18 +48,13 @@ void cwritepwf_(FILE *fp, char *symbol, double *zeff, int *npspt0, int *nflq,
   fprintf(fp, "%4d %1d                  : # non-local grid points, #proj\n",
           *nflq, *iproj);
   fprintf(fp, "y                       : dV/dr?\n");
-  fprintf(fp, "%4s                    : projs\n", xproj);
+  fprintf(fp, "%4s                       : projs\n", xproj);
   fprintf(fp, "y                       : AOs in file?\n");
-/*  fprintf(fp, "n                       : AOs in file?\n"); */
   fprintf(fp, "%1s                       : PCC in file?\n", xrpcc);
   fprintf(fp, "%4d%7.4f%7.4f %1d    : # AO grid points,h,r1,#AOs in file\n",
           *igrid, *spacing, *first, *idi);
   fprintf(fp, "%4.1f                  : AO radius\n",
           *aorad);
-/*  fprintf(fp, "none                    : AO ordering\n"); */
-
-/*  fprintf(fp, "%-7s                : AO ordering\n", xao);*/
-  
 }
                 
                 

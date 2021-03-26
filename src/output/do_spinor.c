@@ -3,7 +3,7 @@ format was originally .upf, but I am changing this to .spinor so
 the QE UPF output can be introduced.  This format also uses the UniPPlib 
 directory. I am not sure if this output even works anymore?? */
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -76,7 +76,7 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
   
   if (param->rpcc > 0.){
     fprintf(stderr, "CPMD format not working for pcc yet, sorry!\n");
-    exit(1);
+    return 0;
   }
 
   if (param->rpcc > 0.){
@@ -106,8 +106,8 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
   /* allocate some memory for the radial arrays */
   unipp.r_m = (double *)malloc(unipp.m_mesh*sizeof(double));
   unipp.v_loc = (double *)malloc(unipp.m_mesh*sizeof(double));
-  unipp.u_ps = (double ***)malloc(unipp.l_max*sizeof(double **));
-  unipp.v_ps = (double ***)malloc(unipp.l_max*sizeof(double **));
+  unipp.u_ps = (double ***)malloc((unipp.l_max+1)*sizeof(double **));
+  unipp.v_ps = (double ***)malloc((unipp.l_max+1)*sizeof(double **));
   for (l=0; l<unipp.l_max+1; l++){
     if (unipp.rel && l){
       unipp.u_ps[l] = (double **)malloc(2*sizeof(double));
@@ -244,6 +244,8 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
   fp_log = fopen(logfile, "a");  
   fprintf(fp_log,"   ================================================\n");
   fclose(fp_log);
+
+  uniPP_free(&unipp);
   
   return 0;
 }

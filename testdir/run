@@ -2,15 +2,5 @@
 cp params/*.param .
 foreach i (`cat LIST|egrep -v \#`)
         echo $i
-	../opium $i $i.log ae ps nl ke tc pwf fhi ncpp rpt champ casino psf recpot cpmd
-#	rm  *.logd 
-#        rm  *.eng
-#	rm  *.par
-#	rm  *.eig*
-#	rm  *.pot*
-#	rm  *.psi*
-#	rm  *.plt*
-#	rm  *.loc
-#	rm  *.rho_core
-#	rm  *.logd*
+	../opium $i $i.log ae ps nl ke tc pwf recpot fhi cpmd ncpp champ psf recpot tet upf qso rpt
 end

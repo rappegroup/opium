@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 #include "nlm.h"
 #include "common_blocks.h"
 
-void interp2_(double *,double *);
+void interp2_(int *, double *,double *, double *);
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 void nrelsproj(param_t *param, char *);
 int do_siesta(param_t *param, FILE *fp_param, char *logfile){
@@ -94,13 +94,13 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
 
   if (param->nboxes > 0) {
     fp_log = fopen(logfile, "a");
-    fprintf(fp_log," The Siesta format does not support the use of augmentation operators\n");
+    fprintf(fp_log,"!!ERROR!!: The Siesta format does not support the use of augmentation operators \n");
     fclose(fp_log);
     return 1;
   }
 
   fp_log = fopen(logfile, "a");
-  fprintf(fp_log," Note: the Siesta code redefines the local part of the psp, proceed with caution ...\n");
+  fprintf(fp_log,"!!NOTE!!: the Siesta code redefines the local part of the psp, proceed with caution ...\n");
   /*printf(" Note: the Siesta code redefines the local part of the psp, proceed with caution ...\n");*/
   fclose(fp_log);
 
@@ -121,7 +121,7 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
     fp_file = fopen(filename, "rb");
     fread(dumm, sizeof(double), param->ngrid, fp_file);    
 
-    interp2_(dumm,dumm2);
+    interp2_(&nrgrid_.nr,dumm,dumm2,rgrid_.r);
 
     for (j=0; j<ngg; j++){
       rvv[i][j]=dumm2[j];
@@ -146,7 +146,7 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
       sprintf(filename, "%s.rho_pcore", param->name);
       fp_file = fopen(filename, "rb");
       fread(rscore, sizeof(double), param->ngrid, fp_file);
-      interp2_(rscore,rscore2);
+      interp2_(&nrgrid_.nr,rscore,rscore2,rgrid_.r);
       fclose(fp_file);
   }
 
@@ -168,7 +168,7 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
     }
   }
 
-  interp2_(rho,rho2);
+  interp2_(&nrgrid_.nr,rho,rho2,rgrid_.r);
 
   /* section 1 : header */
 
@@ -185,7 +185,11 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   case 2 : sprintf(xstr,"%s","pb"); break;
 
   default :
-    fprintf(stderr,"Can not determine XC string for Siesta format, using ca \n");
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log,"!!WARNING!!: Can not determine XC string for Siesta format, using ca \n");
+    fclose(fp_log);
+    printf("!!WARNING!!: Can not determine XC string for Siesta format, using ca \n");
+
     sprintf(xstr,"%s","ca");
   }
 

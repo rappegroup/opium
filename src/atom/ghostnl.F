@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2010 The OPIUM Group
+c Copyright (c) 1998-2012 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -137,9 +137,6 @@ c        if (k.eq.iloc) goto 911
         if (isemi(k).eq.1) n=n+1
         ee = en(k)
         call schsl(k,n,l,ee,maxim,rvloc,p,ig,ibd(k))
-        do ii=1,np
-           write(900+n+l*10,*) r(ii),rvloc(ii),p(ii)
-        enddo
 
         el0(k) = ee
         iterm0=iterm
@@ -151,9 +148,6 @@ c        if (k.eq.iloc) goto 911
         n = l + 2
         if (isemi(k).eq.1) n=n+1
         call schsl(k,n,l,ee,maxim,rvloc,p,ig,ibd(k))
-        do ii=1,np
-           write(900+n+l*10,*) r(ii),rvloc(ii),p(ii)
-        enddo
 
         el1(k) = ee
         iterm1=iterm

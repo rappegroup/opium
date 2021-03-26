@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2010 The OPIUM Group
+c Copyright (c) 1998-2012 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -51,8 +51,8 @@ c -- PWF pseudopotential file format
 
       character*2 xrpcc
       character*5 xproj
-      character*1 xao(8)
 
+      character*8 xform
       character*(*) symbol
 
       common /filenames/ file_log
@@ -97,6 +97,8 @@ c          use ilocalind + 1 for fortran
       else
          xrpcc = 'n'
       endif
+
+      xproj="     "
 
       if (nll.eq.1) then
          iproj = 0
@@ -144,18 +146,6 @@ c          use ilocalind + 1 for fortran
             endif
          endif
       endif
-
-c     EJW: this will have to good enough for now
-c     guess.f in bh (which I wrote) handles the
-c     identity of the AO's in a stupid way.
-      do j=1,nll
-         if (j.eq.1) xao(j)='s'
-         if (j.eq.2) xao(j)='p'
-         if (j.eq.3) xao(j)='d'
-         if (j.eq.4) xao(j)='f'
-      enddo
-
-      xao(8)='\0'
       
 c -- number of |nlm> AO (including m-multiplicity!)
       numAOs = iproj**2
@@ -165,7 +155,7 @@ c -- hardcoded settings for now...
 
 c -- now call the new C routine that writes the header info      
       call cwritepwf(ifp, symbol, zeff, NPSPT0, NFLQ, iproj, nval,
-     $       xproj, xrpcc, np, spacing, first, numAOs, aorad, xao)
+     $       xproj, xrpcc, np, spacing, first, numAOs, aorad)
 
 c -- end of original writepwf comes here ---
 
@@ -263,6 +253,7 @@ c     linearly interpolate dpsp at endpoints  1,npspts-1 see note at top
       psp(npspts)=gcut/bohrad                                           
       dpsp(npspts)=dql/bohrad                                           
 
+
 c -- use the C I/O call to output the local potential coefficients
 c
       call nclear(ifp)
@@ -275,7 +266,6 @@ c
       enddo
       call nclear(ifp)
         
-
 c     for kleinman-bylander non-local psp                               
 c     change units
       do m=1,nll                                                      
@@ -303,20 +293,21 @@ c -- New lines that omit the 0's but still produce the BH format
          ill(i)=0
       enddo
 
+      xform="%20.10f"
+      call nclear(ifp)
       do k=1,nll
          if (k.ne.ilocal+1) then
             do i=1,nflq
-               call nwrite(ifp, " ", 3, "%20.10f", flq(i,k))
+               call nwrite(ifp, "", 3, "%20.10f ", flq(i,k))
             enddo
          endif
       enddo
-      call nclear(ifp)
 
-      
+      call nclear(ifp)
       do k=1,nll
          if (k.ne.ilocal+1) then
             do i=1,nflq
-               call nwrite(ifp, " ", 3, "%20.10f", dflq(i,k))
+               call nwrite(ifp, "", 3, "%20.10f ", dflq(i,k))
             enddo
          endif
       enddo
@@ -324,7 +315,7 @@ c -- New lines that omit the 0's but still produce the BH format
       
       do k=1,nll
          if (k.ne.ilocal+1) then
-            call nwrite(ifp, " ", 3, "%20.10f", eta(k))
+            call nwrite(ifp, "", 3, "%20.10f ", eta(k))
          endif
       enddo
       call nclear(ifp)
@@ -339,10 +330,11 @@ c -- New lines that omit the 0's but still produce the BH format
  200  format(1x,'local potential is p')                                 
  210  format(1x,'local potential is d')                                 
 
+
       if (rpcc.gt.1e-12) then
          do i=1,np
-          call nwrite(ifp, " ", 2, "%26.16E",r(i))
-          call nwrite(ifp, " ", 2, "%26.16E",rscore(i))
+          call nwrite(ifp, "", 2, "%26.16e",r(i))
+          call nwrite(ifp, "", 2, "%26.16e",rscore(i))
         enddo
       endif
 

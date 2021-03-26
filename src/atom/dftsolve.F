@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2010 The OPIUM Group
+c Copyright (c) 1998-2012 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ c     *************************************************************************
       implicit double precision (a-h,o-z)
 
 #include "fortdim.h"
- 
+
 c     -------------------------------------------------------------------------
 c     External (shared between C and Fortran) common blocks
 c     -------------------------------------------------------------------------
@@ -78,12 +78,13 @@ c     *************************************************************************
       dimension dl(n0), rsatom2(npdm)
       dimension rsold(npdm),wnlfract(npdm)
       dimension wavea(npdm),icarray(n0)
+c     rvpostloc(npdm),rvpreloc(npdm)
 c     *************************************************************************
 c     Section 1:  set up tolerance params and zero out arrays.
 c     *************************************************************************
       character*80 file_log
       character*1 xc(0:3)
-
+      
       xc(0)='s'
       xc(1)='p'
       xc(2)='d'
@@ -111,6 +112,8 @@ c     routines ; disable for now.
             if (ibd(i).ne.0) en(ii)=-z*z/(no(ii)*no(ii))
          enddo
       endif
+
+
 
 c      if (ipsp.eq.1) then
 c
@@ -273,8 +276,7 @@ c     if non-rel
                   
                   if (inl.ne.0) then
 c     if non-local
-                     call applyaug(rvloc,rvps(1,iloc))
-                     
+                     call applyaug(rvloc,rvps(1,iloc))                        
                      do i=1,np
                         Flstar(i) = (rvps(i,m) - rvloc(i))
      $                       *phipsref(i,m)/r(i)
@@ -896,6 +898,7 @@ c     ***********************************************************************
  9011 format(1x,'partial core charge : ', f20.10)
 
       if (inl.ne.0) then
+         
          call applyaug(rvloc,rvps(1,iloc))
          call ghostnl (rvloc)
          call applyaug(rvloc,rvcore(1,iloc))

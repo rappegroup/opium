@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #include "nlm.h"
 #include "common_blocks.h"
 
-void interp2_(double *,double *);
+void interp2_(int *, double *,double *, double *);
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 void nrelsproj(param_t *param, char *);
 int do_casino(param_t *param, FILE *fp_param, char *logfile){
@@ -86,7 +86,7 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
     fp = fopen(filename, "rb");
     fread(dumm, sizeof(double), param->ngrid, fp);    
     fseek(fp,sizeof(double) ,param->ngrid);
-    interp2_(dumm,dumm2);
+    interp2_(&nrgrid_.nr,dumm,dumm2,rgrid_.r);
     for (j=0; j<ngg; j++){
       rvv[i][j]=dumm2[j];
     }

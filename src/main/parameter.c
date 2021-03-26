@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 The OPIUM Group
+ * Copyright (c) 1998-2012 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 
 #define streq(a,b) (!strcasecmp(a,b))
 
-double symtoz(char *sym , char *longname);
+double symtoz(char *sym , char *longname, double *mass);
 int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   int i, j, k,kk;
@@ -146,9 +146,10 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     printf("Can not determine partial core correction method ; must be either lfc or fuchs \n");
     exit(1);
   }
-  
-  param->z = symtoz(param->symbol,param->longname);
-  
+ 
+  param->mass=-1.0;
+  param->z = symtoz(param->symbol,param->longname,&param->mass);
+
   param->ixc = -100;
   if (streq(param->xcparam, "pbesol")) param->ixc = 5;
   if (streq(param->xcparam, "wcgga")) param->ixc = 4;
@@ -324,7 +325,14 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   param->a = .0001;
   param->b = .013;
   param->ngrid = 1201;
+
+  /* [LinearGrid] */
+  flexi_request_key("QSOMesh",0,"%d %lg", &param->ngridl, 
+		    &param->lspc);
   
+  param->ngridl=1000;
+  param->lspc=0.02;
+
   /* [RelGrid] */
   flexi_request_key("Relgrid",0,"%d %lg %lg", &param->ngrid2, 
 		    &param->a2, &param->b2);
@@ -961,445 +969,554 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   
 }  
 
-double symtoz(char *sym, char *longname) {
+double symtoz(char *sym, char *longname, double *mass) {
   
   double val=0.0;
 
   if (streq(sym,"H")){
     strcpy(longname,"Hydrogen   ");
     val =  1;
+    *mass = 1.008;
 
   }else if (streq(sym,"He")){
     strcpy(longname,"Helium     ");
     val =  2;
-    
+    *mass = 4.002602;
+
   }else if (streq(sym,"Li")){
     strcpy(longname,"Lithium    ");
     val =  3;
-    
+    *mass = 6.94;
+
   }else if (streq(sym,"Be")){
     strcpy(longname,"Beryllium  ");
     val =  4;
-    
+    *mass = 9.012182;
+
   }else if (streq(sym,"B")){
     strcpy(longname,"Boron      ");
     val =  5;
-    
+    *mass =     10.81;
+
   }else if (streq(sym,"C")){
     strcpy(longname,"Carbon     ");
     val =  6;
-    
+    *mass =     12.011;
+
   }else if (streq(sym,"N")){
     strcpy(longname,"Nitrogen   ");
     val =  7;
-    
+    *mass =     14.007;
+
   }else if (streq(sym,"O")){
     strcpy(longname,"Oxygen     ");
     val =  8;
-    
+    *mass =     15.999;
+
   }else if (streq(sym,"F")){
     strcpy(longname,"Fluorine   ");
     val =  9;
-    
+    *mass =     18.9984032;
+
   }else if (streq(sym,"Ne")){
     strcpy(longname,"Neon       ");
     val = 10;
-    
+    *mass =     20.1797;
+
   }else if (streq(sym,"Na")){
     strcpy(longname,"Sodium     ");
     val = 11;
-    
+    *mass =     22.98976928;
+
   }else if (streq(sym,"Mg")){
     strcpy(longname,"Magnesium  ");
     val = 12;
-    
+    *mass =     24.3050;
+
   }else if (streq(sym,"Al")){
     strcpy(longname,"Aluminum   ");
     val = 13;
-    
+    *mass =     26.9815386;
+
   }else if (streq(sym,"Si")){
     strcpy(longname,"Silicon    ");
     val = 14;
-    
+    *mass =     28.085;
+
   }else if (streq(sym,"P")){
     strcpy(longname,"Phosphorus ");
     val = 15;
-    
+    *mass =     30.973762;
+
   }else if (streq(sym,"S")){
     strcpy(longname,"Sulfur     ");
     val = 16;
-    
+    *mass =     32.06;
+
   }else if (streq(sym,"Cl")){
     strcpy(longname,"Chlorine   ");
     val = 17;
-    
+    *mass =     35.45;
+
   }else if (streq(sym,"Ar")){
     strcpy(longname,"Argon      ");
     val = 18;
-    
+    *mass =     39.948;
+
   }else if (streq(sym,"K")){
     strcpy(longname,"Potassium  ");
     val = 19;
-    
+    *mass =     39.0983;
+
   }else if (streq(sym,"Ca")){
     strcpy(longname,"Calcium    ");
     val = 20;
-    
+    *mass =     40.078;
+
   }else if (streq(sym,"Sc")){
     strcpy(longname,"Scandium   ");
     val = 21;
-    
+    *mass =     44.955912;
+
   }else if (streq(sym,"Ti")){
     strcpy(longname,"Titanium   ");
     val = 22;
-    
+    *mass =     47.867;
+
   }else if (streq(sym,"V")){
     strcpy(longname,"Vanadium   ");
     val = 23;
-    
+    *mass =     50.9415;
+
   }else if (streq(sym,"Cr")){
     strcpy(longname,"Chromium   ");
     val = 24;
-    
+    *mass =     51.9961;
+
   }else if (streq(sym,"Mn")){
     strcpy(longname,"Manganese  ");
     val = 25;
-    
+    *mass =     54.938045;
+
   }else if (streq(sym,"Fe")){
     strcpy(longname,"Iron       ");
     val = 26;
-    
+    *mass =     55.845;
+
   }else if (streq(sym,"Co")){
     strcpy(longname,"Cobalt     ");
     val = 27;
-    
+    *mass =     58.933195;
+
   }else if (streq(sym,"Ni")){
     strcpy(longname,"Nickel     ");
     val = 28;
-    
+    *mass =     58.6934;
+
   }else if (streq(sym,"Cu")){
     strcpy(longname,"Copper     ");
     val = 29;
-    
+    *mass =     63.546;
+
   }else if (streq(sym,"Zn")){
     strcpy(longname,"Zinc       ");
     val = 30;
-    
+    *mass =     65.38;
+
   }else if (streq(sym,"Ga")){
     strcpy(longname,"Gallium    ");
     val = 31;
-    
+    *mass =     69.723;
+
   }else if (streq(sym,"Ge")){
     strcpy(longname,"Germanium  ");
     val = 32;
-    
+    *mass =     72.63;
+
   }else if (streq(sym,"As")){
     strcpy(longname,"Arsenic    ");
     val = 33;
-    
+    *mass =     74.92160;
+
   }else if (streq(sym,"Se")){
     strcpy(longname,"Selenium   ");
     val = 34;
-    
+    *mass =     78.96;
+
   }else if (streq(sym,"Br")){
     strcpy(longname,"Bromine    ");
     val = 35;
-    
+    *mass =     79.904;
+
   }else if (streq(sym,"Kr")){
     strcpy(longname,"Krypton    ");
     val = 36;
-    
+    *mass =     83.798;
+
   }else if (streq(sym,"Rb")){
     strcpy(longname,"Rubidium   ");
     val = 37;
-    
+    *mass =     85.4678;
+
   }else if (streq(sym,"Sr")){
     strcpy(longname,"Strontium  ");
     val = 38;
-    
+    *mass =     87.62;
+
   }else if (streq(sym,"Y")){
     strcpy(longname,"Yttrium    ");
     val = 39;
-    
+    *mass =     88.90585;
+
   }else if (streq(sym,"Zr")){
     strcpy(longname,"Zirconium  ");
     val = 40;
-    
+    *mass =     91.224;
+
   }else if (streq(sym,"Nb")){
     strcpy(longname,"Niobium    ");
     val = 41;
-    
+    *mass =     92.90638;
+
   }else if (streq(sym,"Mo")){
     strcpy(longname,"Molybdenum ");
     val = 42;
-    
+    *mass =     95.96;
+
   }else if (streq(sym,"Tc")){
     strcpy(longname,"Technetium ");
     val = 43;
-    
+    *mass =98;
+
   }else if (streq(sym,"Ru")){
     strcpy(longname,"Ruthenium  ");
     val = 44;
-    
+    *mass =     101.07;
+
   }else if (streq(sym,"Rh")){
     strcpy(longname,"Rhodium    ");
     val = 45;
-    
+    *mass =     102.90550;
+
   }else if (streq(sym,"Pd")){
     strcpy(longname,"Palladium  ");
     val = 46;
-    
+    *mass =     106.42;
+
   }else if (streq(sym,"Ag")){
     strcpy(longname,"Silver     ");
     val = 47;
-    
+    *mass =     107.8682;
+
   }else if (streq(sym,"Cd")){
     strcpy(longname,"Cadmium    ");
     val = 48;
-    
+    *mass =     112.411;
+
   }else if (streq(sym,"In")){
     strcpy(longname,"Indium     ");
     val = 49;
-    
+    *mass =     114.818;
+
   }else if (streq(sym,"Sn")){
     strcpy(longname,"Tin        ");
     val = 50;
-    
+    *mass =     118.710;
+
   }else if (streq(sym,"Sb")){
     strcpy(longname,"Antimony   ");
     val = 51;
-    
+    *mass =     121.760;
+
   }else if (streq(sym,"Te")){
     strcpy(longname,"Tellurium  ");
     val = 52;
-    
+    *mass =     127.60;
+
   }else if (streq(sym,"I")){
     strcpy(longname,"Iodine     ");
     val = 53;
-    
+    *mass =     126.90447;
+
   }else if (streq(sym,"Xe")){
     strcpy(longname,"Xenon      ");
     val = 54;
-    
+    *mass =     131.293;
+
   }else if (streq(sym,"Cs")){
     strcpy(longname,"Cesium     ");
     val = 55;
-    
+    *mass =     132.9054519;
+
   }else if (streq(sym,"Ba")){
     strcpy(longname,"Barium     ");
     val = 56;
-    
+    *mass =     137.327;
+
   }else if (streq(sym,"La")){
     strcpy(longname,"Lanthanum  ");
     val = 57;
-    
+    *mass =     138.90547;
+
   }else if (streq(sym,"Ce")){
     strcpy(longname,"Cerium     ");
     val = 58;
-    
+    *mass =     140.116;
+
   }else if (streq(sym,"Pr")){
     strcpy(longname,"Praseodymium");
     val = 59;
-    
+    *mass =     140.90765;
+
   }else if (streq(sym,"Nd")){
     strcpy(longname,"Neodymium  ");
     val = 60;
-    
+    *mass =     144.242;
+
   }else if (streq(sym,"Pm")){
     strcpy(longname,"Promethium ");
     val = 61;
-    
+    *mass =    145;
+
   }else if (streq(sym,"Sm")){
     strcpy(longname,"Samarium   ");
     val = 62;
-    
+    *mass =     150.36;
+
   }else if (streq(sym,"Eu")){
     strcpy(longname,"Europium   ");
     val = 63;
-    
+    *mass =     151.964;
+
   }else if (streq(sym,"Gd")){
     strcpy(longname,"Gadolinium ");
     val = 64;
-    
+    *mass =     157.25;
+
   }else if (streq(sym,"Tb")){
     strcpy(longname,"Terbium    ");
     val = 65;
-    
+    *mass =     158.92535;
+
   }else if (streq(sym,"Dy")){
     strcpy(longname,"Dysprosium ");
     val = 66;
-    
+    *mass =     162.500;
+
   }else if (streq(sym,"Ho")){
     strcpy(longname,"Holmium    ");
     val = 67;
-    
+    *mass =     164.93032;
+
   }else if (streq(sym,"Er")){
     strcpy(longname,"Erbium     ");
     val = 68;
-    
+    *mass =     167.259;
+
   }else if (streq(sym,"Tm")){
     strcpy(longname,"Thulium    ");
     val = 69;
-    
+    *mass =     168.93421;
+
   }else if (streq(sym,"Yb")){
     strcpy(longname,"Ytterbium  ");
     val = 70;
-    
+    *mass =     173.054;
+
   }else if (streq(sym,"Lu")){
     strcpy(longname,"Lutetium   ");
     val = 71;
-    
+    *mass =     174.9668;
+
   }else if (streq(sym,"Hf")){
     strcpy(longname,"Hafnium    ");
     val = 72;
-    
+    *mass =     178.49;
+
   }else if (streq(sym,"Ta")){
     strcpy(longname,"Tantalum   ");
     val = 73;
-    
+    *mass =     180.94788;
+
   }else if (streq(sym,"W")){
     strcpy(longname,"Tungsten   ");
     val = 74;
-    
+    *mass =     183.84;
+
   }else if (streq(sym,"Re")){
     strcpy(longname,"Rhenium    ");
     val = 75;
-    
+    *mass =     186.207;
+
   }else if (streq(sym,"Os")){
     strcpy(longname,"Osmium     ");
     val = 76;
-    
+    *mass =     190.23;
+
   }else if (streq(sym,"Ir")){
     strcpy(longname,"Iridium    ");
     val = 77;
-    
+    *mass =     192.217;
+
   }else if (streq(sym,"Pt")){
     strcpy(longname,"Platinum   ");
     val = 78;
-    
+    *mass =     195.084;
+
   }else if (streq(sym,"Au")){
     strcpy(longname,"Gold       ");
     val = 79;
-    
+    *mass =     196.966569;
+
   }else if (streq(sym,"Hg")){
     strcpy(longname,"Mercury    ");
     val = 80;
-    
-  }else if (streq(sym,"Tm")){
+    *mass =     200.59;
+
+  }else if (streq(sym,"Tl")){
     strcpy(longname,"Thallium   ");
     val = 81;
-    
+    *mass =     204.38;
+
   }else if (streq(sym,"Pb")){
     strcpy(longname,"Lead       ");
     val = 82;
-    
+    *mass =     207.2;
+
   }else if (streq(sym,"Bi")){
     strcpy(longname,"Bismuth    ");
     val = 83;
-    
+    *mass =     208.98040;
+
   }else if (streq(sym,"Po")){
     strcpy(longname,"Polonium   ");
     val = 84;
-    
+    *mass =     209;
+
   }else if (streq(sym,"At")){
     strcpy(longname,"Astatine   ");
     val = 85;
-    
+    *mass =     210;
+
   }else if (streq(sym,"Rn")){
     strcpy(longname,"Radon      ");
     val = 86;
-    
+    *mass =     222;
+
   }else if (streq(sym,"Fr")){
     strcpy(longname,"Francium   ");
     val = 87;
-    
+    *mass =     223;
+
   }else if (streq(sym,"Ra")){
     strcpy(longname,"Radium     ");
     val = 88;
-    
+    *mass =     226;
+
   }else if (streq(sym,"Ac")){
     strcpy(longname,"Actinium   ");
     val = 89;
-    
+    *mass =     227;
+
   }else if (streq(sym,"Th")){
     strcpy(longname,"Thorium    ");
     val = 90;
-    
+    *mass =     232.03806;
+
   }else if (streq(sym,"Pa")){
     strcpy(longname,"Protactinium");
     val = 91;
-    
+    *mass =     231.03588;
+
   }else if (streq(sym,"U")){
     strcpy(longname,"Uranium    ");
     val = 92;
-    
+    *mass =     238.02891;
+
   }else if (streq(sym,"Np")){
     strcpy(longname,"Neptunium  ");
     val = 93;
-    
+    *mass =     237;
+
   }else if (streq(sym,"Pu")){
     strcpy(longname,"Plutonium  ");
     val = 94;
-    
+    *mass =     244;
+
   }else if (streq(sym,"Am")){
     strcpy(longname,"Americium  ");
     val = 95;
-    
+    *mass =     243;
+
   }else if (streq(sym,"Cm")){
     strcpy(longname,"Curium     ");
     val = 96;
-    
+    *mass =     247;
+
   }else if (streq(sym,"Bk")){
     strcpy(longname,"Berkelium  ");
     val = 97;
-    
+    *mass =     247;
+
   }else if (streq(sym,"Cf")){
     strcpy(longname,"Californium");
     val = 98;
-    
+    *mass =     251;
+
   }else if (streq(sym,"Es")){
     strcpy(longname,"Einsteinium");
     val = 99;
-    
+    *mass =     252;
+
   }else if (streq(sym,"Fm")){
     strcpy(longname,"Fermium    ");
     val =100;
-    
+    *mass =     257;
+
   }else if (streq(sym,"Md")){
     strcpy(longname,"Mendelevium");
     val =101;
-    
+    *mass =     258;
+
   }else if (streq(sym,"No")){
     strcpy(longname,"Nobelium   ");
     val =102;
-    
+    *mass =     259;
+
   }else if (streq(sym,"Lr")){
     strcpy(longname,"Lawrencium ");
     val =103;
-    
+    *mass =     262;
+
   }else if (streq(sym,"Rf")){
     strcpy(longname,"Rutherfordium");
     val =104;
-    
+    *mass =     265;
+
   }else if (streq(sym,"Db")){
     strcpy(longname,"Dubnium    ");
     val =105;
-    
+    *mass =     268;
+
   }else if (streq(sym,"Sg")){
     strcpy(longname,"Seaborgium ");
     val =106;
-    
+    *mass =     271;
+
   }else if (streq(sym,"Bh")){
     strcpy(longname,"Bohrium    ");
     val =107;
-    
+    *mass =     270;
+
   }else if (streq(sym,"Hs")){
     strcpy(longname,"Hassium    ");
     val =108;
-    
+    *mass =     277;
+
   }else if (streq(sym,"Mt")){
     strcpy(longname,"Meitnerium ");
     val =109;
+    *mass = 276;
   }
   return val;
 }

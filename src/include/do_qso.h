@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 The OPIUM Group
+ * Copyright (c) 1998-2011 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,4 +21,4 @@
 
 #include "parameter.h"
 
-int do_logplt(param_t *param, char *logfile);
+int do_qso(param_t *param, FILE *fp_param, char *logfile);

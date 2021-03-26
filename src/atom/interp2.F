@@ -1,6 +1,6 @@
-      subroutine interp2(f,f2)
+      subroutine interp2(nnn,f,f2,f3)
 c
-c Copyright (c) 1998-2010 The OPIUM Group
+c Copyright (c) 1998-2012 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -28,15 +28,15 @@ c     Interpolate onto the 0 origin grid
       common /rgrid/ a,b,rrg(nrmax),rab(nrmax)
       common /nrgrid/ nr
 
-      dimension f(npdm),f2(npdm),fp(npdm)
+      dimension f(npdm),f2(npdm),fp(npdm),f3(npdm)
 
       yp1 = 2e33
       ypn = 2e33
 
       call spline(r,f,np,yp1,ypn,fp)
       
-      do j=1,nr
-         call splint(r,f,fp,np,rrg(j),yy)
+      do j=1,nnn
+         call splint(r,f,fp,np,f3(j),yy)
          f2(j)=yy
       enddo
 
