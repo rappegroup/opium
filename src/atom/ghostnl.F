@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine ghostnl (iloc,rvloc)
+      subroutine ghostnl(rvloc)
            
 c     *************************************************************************
 c     nloc    in
@@ -50,7 +50,7 @@ c     -------------------------------------------------------------------------
 
       common /grid/ h,r1,z,r(npdm),np
       common /box/ iboxstart(n0),iboxend(n0),boxheight(n0),numbox
-
+      common /local/ nlghost(n0),iloc,idesign
 c     -------------------------------------------------------------------------
  
 c     -------------------------------------------------------------------------
@@ -61,7 +61,7 @@ c     -------------------------------------------------------------------------
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
 c     -------------------------------------------------------------------------
       
-      dimension rvloc(npdm),nlghost(n0)
+      dimension rvloc(npdm)
       
 c     *************************************************************************
 c     local variables
@@ -109,7 +109,7 @@ c      endif
           n2 = nlm(j)/100
           l2 = nlm(j)/10 - 10 * n2
           
-          if (l2.eq.l) then
+          if (l2.eq.l.and.n2.ne.n) then
             isemi(j)=1
           endif
         enddo
@@ -122,7 +122,7 @@ c      endif
         l = nlm(k)/10 - 10 * n
 
 c        if (k.eq.iloc.or.ibd(k).eq.0) goto 911
-        if (k.eq.iloc) goto 911
+c        if (k.eq.iloc) goto 911
 
         write(7,*)        
         write(7,9110) n,xc(l)
@@ -137,6 +137,10 @@ c        if (k.eq.iloc.or.ibd(k).eq.0) goto 911
         if (isemi(k).eq.1) n=n+1
         ee = en(k)
         call schsl(k,n,l,ee,maxim,rvloc,p,ig,ibd(k))
+        do ii=1,np
+           write(900+n+l*10,*) r(ii),rvloc(ii),p(ii)
+        enddo
+
         el0(k) = ee
         iterm0=iterm
         if (iterm0.eq.1) then
@@ -147,6 +151,10 @@ c        if (k.eq.iloc.or.ibd(k).eq.0) goto 911
         n = l + 2
         if (isemi(k).eq.1) n=n+1
         call schsl(k,n,l,ee,maxim,rvloc,p,ig,ibd(k))
+        do ii=1,np
+           write(900+n+l*10,*) r(ii),rvloc(ii),p(ii)
+        enddo
+
         el1(k) = ee
         iterm1=iterm
         if (iterm1.eq.1) then

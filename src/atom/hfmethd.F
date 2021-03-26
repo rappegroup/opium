@@ -28,7 +28,7 @@ c-----------------------------------------------------------------------
 
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ c -------------------------------------------------------------------------
          eu=((z-min(0.5*s(m),2.d0*s(m)))/no(m))**2
       else
          em=1.d-4
-         eu=e(m,m)+10.d0
+         eu=e(m,m)+1.d0
       endif
 
       fu=eu

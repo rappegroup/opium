@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,34 +73,26 @@ void nrelorbae(param_t *param, int config, char *logfile) {
 
     ic=i-aorb_.ncore;
     aval_.rcall[ic] = param->rc[ic];   
-
     aval_.ibd[ic] = 1;
     if (adat_.wnl[i]<0) aval_.ibd[ic] = 0;
     if (aval_.ibd[ic]==0)  adat_.wnl[i]=0.0;
 
-
-    /*    aval_.ibd[ic]=param->ibound[ic];
-	  if (aval_.ibd[ic]==0)  adat_.wnl[i]=0.0;*/
-    
     adat_.xion -= adat_.wnl[i];
   }
 
-  /*  fp_log = fopen(logfile, "a");
-  fprintf(fp_log,"  Core orbitals - \n");
-  for (i=0; i<aorb_.ncore; i++){
+    
+  /*   fp_log = fopen(logfile, "a");
+   fprintf(fp_log,"  Core orbitals - \n");
+   for (i=0; i<aorb_.ncore; i++){
     fprintf(fp_log," |%d%d0>  %6.3f  %6.3f \n",aorb_.no[i],aorb_.lo[i],adat_.wnl[i],adat_.en[i]);
   }
   fprintf(fp_log,"  Valence orbitals - \n");
   for (i=aorb_.ncore; i<aorb_.norb; i++){
     ic=i-aorb_.ncore;
     fprintf(fp_log," |%d%d0>  %6.3f %6.3f %d  \n",aorb_.no[i],aorb_.lo[i],adat_.wnl[i],adat_.en[i],aval_.ibd[ic]);
-    }*/
-  
-  /*  param->nvalrel=aorb_.nval;
-      param->ncorerel=aorb_.ncore;*/
-
-  /*    fclose(fp_log);*/
-
-}
+    }
+    fclose(fp_log);
+  */
+    }
 
 

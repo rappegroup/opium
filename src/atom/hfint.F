@@ -28,7 +28,7 @@ c-----------------------------------------------------------------------
 
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ c -------------------------------------------------------------------------
       common /itoo/ ietoolo,ietoohi
       common /iskip/ iskip
       common /ameth/ meth(n0),imeth
+      common /ighost/ ighost,ighost2
 
 c -------------------------------------------------------------------------
       dimension p(npdm), yk(npdm)
@@ -84,8 +85,10 @@ c -------------------------------------------------------------------------
 
       if (.not.first) goto 17
 
+      if (ighost*ighost2.gt.1) goto 17
       call potl(yr,m)
       call xch(x,m,3)
+      ighost2=ighost2+1
 
       cd=(lo(m)+1.d0/2.d0)**2
       mk=0
@@ -135,8 +138,24 @@ c -------------------------------------------------------------------------
       r1=lo(m)+2.5d0
       x(2)=r(2)**r1*(x(5)/r(5)**r1 - 3.d0*(x(4)/r(4)**r1-x(3)/r(3)**r1))
 
-      if (ipsp.eq.0) em=(zinf/(no(m)+0.5))**2
-      fm=em
+      if (imeth.ne.3) goto 80
+
+      do jj=15,np
+         j=np-jj
+         if (yk(j).lt.0.d0) goto 63
+      enddo
+      write(7,*) "POTENTIAL TOO SMALL!"
+      goto 80
+ 63   em=-yk(j)/r(j)**2
+      goto 81
+ 80   continue
+      
+      if (ipsp.eq.0) then
+         em=(zinf/(no(m)+0.5))**2
+      endif
+ 81   fm=em
+
+
       fl=0.d0
       cden=0.d0
       np2=np-2
@@ -154,7 +173,7 @@ c -------------------------------------------------------------------------
 
       if (ed.lt.em) then
          ed=em
-         if (dabs(fm-e(m,m)).gt.1e-6) goto 19
+         if (dabs(fm-e(m,m)).gt.1e-6.or.kk.eq.3) goto 19
          if (ipsp.eq.0) then
             zzz=z
          else
@@ -174,7 +193,7 @@ c -------------------------------------------------------------------------
       azd=az(m)
 
  17   continue
-
+      
       do j=1,np
          yr(j)=(yk(j)+ed*r(j)*r(j))*ch
          xz(j)=0.d0
@@ -273,6 +292,7 @@ c         write(7,*) 'Hey in var section'
          
 c      write(7,9955) m,pp,del1,delh
  9955 format(1x,'pp',i5,3f20.15)
+      
       return
       end
 

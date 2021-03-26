@@ -28,7 +28,7 @@ c-----------------------------------------------------------------------
 
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -294,7 +294,7 @@ c
       do i = 1,norb-1
          do j = i+1,norb
             if (dabs(e(i,j)) .gt. 1.d-10) then
-c               write(7,*) 'Rotation needed ', i,j,e(i,j)
+               write(7,*) 'Rotation needed ', i,j,e(i,j)
                if (dabs(e(i,j)) .gt. 1.d-10) call rotate(i,j)
             endif
          enddo

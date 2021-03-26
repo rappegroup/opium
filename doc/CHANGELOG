@@ -282,17 +282,140 @@ The Atom, Configs, Pseudo, and Optinfo keyblocks are all reordered the
 same way. 
 
 
+3.0 -> 3.1
 
 
+Bugfix release:
+
+1) .ncpp output no longer lists "-1" electrons when a state
+is unbound.
+
+2) ghost reporting in .rpt fixed (used to always say "no ghosts")
 
 
+3.1 -> 3.2
+
+1) Cleanup of src/atom/average.f 
+
+2) Scalar relativistic averaging now defaults to being done correctly
+for GGA XC potentials.  Previous versions of OPIUM would average the
+rel-wavefunctions from infinity -> rc for each channel.  This is ok
+and still the default for LDA, however, for GGA ALL wavefunctions must
+be averaged down to the same radius.  This is the minimum radius by
+default.
+
+3) Due to the change in the srl averaging mentioned in the previous
+change, a new keyblock "[Average]", has been add to allow users to try
+the old behavior on GGA potentials.
+
+The new keyblock gets only one character argument:
+
+[Average]
+b
+
+or
+
+[Average]
+m
+
+'b' - refers to the LDA behavior  "by rc"
+'m' - refers to the GGA behavior  "min rc"
 
 
+4) A new string variable has been added to the [Relativity] keyblock.
+This string refers to whether the relativistic corrections to the XC
+functional are used or not.  If the value is "rxc" then the
+corrections are used, if it is "nxc" then they are not used.  If the
+calculation is not relativistic, this is ignored.
+
+5) The eigenvalue guesses supplied in the param file are ignored for
+atomic SRL calculations.  This was always done prior to version 3.0,
+the srl solve is not robust enough to take a poor user guess and still
+converge in all cases.
+
+6) A small bug in the smoothing of the GGA XC functional has been corrected.  Now the 
+correct transition to LDA XC is done as you approach the origin from the smoothing
+radius.  
+
+7) A newer GGA XC smoothing method is introduced which simply fits the XC potential to 
+a quadratic near some user defined radius and then continues the analytic form back to the
+origin.  To access this smoothing method, simply make the GGA smoothing radius negative.
+
+8) A semilocal solve and test can be done instead of the non-local solve from the command line.
+See "opium -c" for more info.
+
+9) The bug which caused a command line like:
+
+opium mn log ae nl fhi
+
+to core dump (the 'ps' step is missing ; this is necessary for psps
+using potentials from different reference states) has been fixed.
+
+10) An update of the "champ" output has been done.  The header was changed, and
+instead of interpolating onto the unshifted grid from the shifted grid, the 
+shifted grid output is just written out.
+
+11) Changed .ncpp output to no longer print element name after XC
+functional due to conflict between "HF" - hartree-fock and "Hf" -
+Hafnium.
+
+12) The ability to use augmentation functions has been added to "ncpp" output
+
+13) An error is now thrown if the SIESTA output is tried for a psp with 
+augmentation functions.  Also, a warning is written about the fact that the
+SIESTA code redefines the form of the local potential within the target 
+calculation.
 
 
+3.2 -> 3.3
 
+Bugfix release:
 
+1) In version 3.2, the relativistic XC corrections were NOT applied to
+the test pseudo (NL or SL) configurations.  This bug does not effect
+the reference configuration or the output pseudo files (.fhi, .pwf
+etc.)  This bug was also pretty small, most changes are less than 1
+mRy in the transferability error.
 
+2) Added a new variable to the [HFsmooth] keyblock to allow for
+less strict tolerances on the conservation of the eigenvalues
+when smoothing the HF potentials.
+
+3.3 -> 3.4
+
+Bugfix release:
+
+Patch to enable partial core corrections for the .recpot (castep) format
+
+3.4 -> 3.5
+
+1) Fixed casino output - Significant help from William Parker
+
+2) PBEsol xc functional added by William Parker
+
+3) precision on xmgrace files increased
+
+4) modified logplt to plot semi-core correctly
+
+5) cpmd output fixed for DNL
+
+6) worked more on gfortran compatibility
+
+3.5 -> 3.6
+
+1) Added fully-relativisitc psps -- needed significant modifications
+which resulted in many routines needed changing
+
+2) Restored most if not all of the support for separate command line
+action (>>opium al log ae ; >>opium al log ps ; etc..) which had been
+lost in previous releases.
+
+3) Implemented QuantumESPRESSO's upf version 1 psp output.  Version
+2 is in progress.
+
+4) Added DNL modifications from Ben Truscott
+
+5) Added Flexib corrections submitted by Keith Refson 
 
 
 

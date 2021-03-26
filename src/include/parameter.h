@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
  *
  */
 /*
- * $Id: parameter.h,v 1.7 2004/10/02 18:34:49 ewalter Exp $
  */
 
 #ifndef __INCLUDE_PARAMETER_H
@@ -42,7 +41,8 @@ typedef struct param_t{
 
   /* [Relativity] */
   char
-    *reltype;     /* relativistic type */
+    *reltype,     /* relativistic type */
+    *relxc;     /* relativistic XC corrections  */
 
   /* [Grid] */
   int  
@@ -154,7 +154,7 @@ typedef struct param_t{
 
   /* HF options */
  double
- *rlocalr;
+ *rlocalr,qptol;
  int
  qpopt;
 

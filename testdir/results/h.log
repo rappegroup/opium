@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:        3.0                             
+           OPIUM  Version:        3.3                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
  Copyright 2007 : The OPIUM project                         
 
- Compile host     : strange.physics.wm.edu
- Compile OS       : Linux 2.4.20-20.9smp i686
- Compile date     : Wed Aug 22 12:15:40 EDT 2007
+ Compile host     : pzt.wm.edu
+ Compile OS       : Linux 2.6.9-42.ELsmp x86_64
+ Compile date     : Wed Aug 13 16:34:20 EDT 2008
 
- Execution host   : strange.physics.wm.edu
- time of execution: Wed Aug 22 12:17:11 2007
+ Execution host   : wave.arc.wm.edu
+ time of execution: Wed Aug 13 16:36:55 2008
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <h.param> ... 
@@ -108,11 +108,16 @@
      1    0.032455   -0.001603    0.024700    0.000000    1.305098
  
  # steps:     1
+ Final KE error:    0.0000003046
+ Sum of coeffs :    1.3050984160
+ ---------------------------------------------------------------
+ Coeff:      0.800051  0.406640  0.092397  0.006011
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0000003046
- Norm error        :     0.000E+00
- Continuity error  :     0.000E+00
- Curvature error   :     0.125E-15
- 
+ Norm error        :    -0.111E-15
+ Continuity error  :    -0.555E-16
+ Curvature error   :     0.208E-16
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        1.0476483425        0.8000513732
    2        2.6797162945        0.4066397192
@@ -124,7 +129,7 @@
  qc -> oo contribution   :     0.0000003046   (=Convergence term)
  Occupancy of this state :     1.0000000000
  Convergence term (Ry/e) :     0.0000003046
- Convergence error (mRy) :     0.0003046419
+ Convergence error (mRy) :     0.0003046418
  Convergence error (meV) :     0.0041448961
  
  ------------------------------
@@ -289,6 +294,7 @@
 <<<do_cpmd>>>
    ================================================
 <<<do_siesta -- psf>>>
+ Note: the Siesta code redefines the local part of the psp, proceed with caution ...
    ================================================
 ------------- closing opium session ------------
 <<<do_recpot>>>

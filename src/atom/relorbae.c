@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,6 +64,7 @@ void relorbae(param_t *param, int config, char *logfile) {
       adat_.wnl[aorb_.norb] = 2.0*(nlm_label(param->nlm[i]).l+sc)+1.0;
       adat_.xion -= adat_.wnl[aorb_.norb];
       aval_.ibd[aorb_.norb]=param->ibound[i];
+
       if (fabs(adat_.wnl[aorb_.norb])>0.1) aorb_.norb++;
       sc=-1.0*sc;
     }
@@ -89,7 +90,6 @@ void relorbae(param_t *param, int config, char *logfile) {
 	  adat_.wnl[aorb_.norb] = param->wnl[i]*(2*(aorb_.lo[aorb_.norb]+adat_.so[aorb_.norb])+1)/(4*aorb_.lo[aorb_.norb]+2);
 	  aval_.ibd[ic]=1;
 	}
-	/*printf("HEY: %d %d %d \n", aorb_.norb,ic,aval_.ibd[ic]);*/
 
       }else{
 	aorb_.no[aorb_.norb] = nlm_label(param->nlm_conf[config][i-ncore]).n;
@@ -107,9 +107,10 @@ void relorbae(param_t *param, int config, char *logfile) {
 	}
 
       }
-      optparam_.qcl[aorb_.norb-aorb_.ncore]=param->qc[i-ncore];
-      optparam_.nbl[aorb_.norb-aorb_.ncore]=param->nb[i-ncore];
+      /*      optparam_.qcl[aorb_.norb-aorb_.ncore]=param->qc[i-ncore];
+	      optparam_.nbl[aorb_.norb-aorb_.ncore]=param->nb[i-ncore];*/
       aval_.rcall[aorb_.norb-aorb_.ncore]=param->rc[i-ncore];
+      /*      printf(" aorb_.norb-aorb_.ncore,i-ncore,rc %d %d %lg \n",aorb_.norb-aorb_.ncore,i-ncore,aval_.rcall[aorb_.norb-aorb_.ncore]);*/
       aorb_.nlm[aorb_.norb]=param->nlm[i];
       adat_.xion -= adat_.wnl[aorb_.norb];
       if (aorb_.lo[aorb_.norb]+adat_.so[aorb_.norb]>0.0) {
@@ -128,17 +129,8 @@ void relorbae(param_t *param, int config, char *logfile) {
     for (j=i+1; j<aorb_.norb; j++) 
       if ((aorb_.lo[j]==aorb_.lo[i])&&(aorb_.no[j]!=aorb_.no[i])) param->isemi=1;
   
-  nto=0;
-  for (i=ncore; i<param->norb; i++){
-    ic=i-ncore;
-    ni=(!(nlm_label(param->nlm[i]).l)?1:2);
-    for (j=0; j<ni; j++){
-      aval_.rcall[nto]=param->rc[ic];
-      nto++;
-    }
-  }
 
-  /*  fp_log = fopen(logfile, "a");
+  /*    fp_log = fopen(logfile, "a");
   fprintf(fp_log,"  Core orbitals - nlm s j k occ etrial\n");
   for (i=0; i<aorb_.ncore; i++){
     fprintf(fp_log," |%d%d0> %+1.0f/2 %+1.0f/2 %+1.0f %6.3f %6.3f  \n",aorb_.no[i],aorb_.lo[i],2*adat_.so[i],2*(aorb_.lo[i]+adat_.so[i]),-2*adat_.so[i]*(aorb_.lo[i]+adat_.so[i]+0.5),adat_.wnl[i],adat_.en[i]);

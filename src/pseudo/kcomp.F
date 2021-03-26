@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine kcomp(name,rkstor,ikstor)
+      subroutine kcomp(irel,name,rkstor,ikstor)
       implicit double precision (a-h,o-z)
       
 #include "fortdim.h"
@@ -46,9 +46,9 @@ c
       pi4=4.0*pi                                                      
       rnq=sqrt(2.0/pi)
 
-
       write(7,9393)
       write(7,9394) 
+
 
       do m=1,nval
          ill(m)=0
@@ -59,29 +59,47 @@ c
          if (ill(m).gt.0) goto 911
          ill(m)=ill(m)+1
          
-         write(7,9000) nlm(m)
+         if (irel.eq.1) then
+            if (so(m).gt.0) then
+               write(7,9001) nlm(m)
+            else
+               write(7,9002) nlm(m)
+            endif
+         else
+            write(7,9000) nlm(m)
+         endif
+
          write(7,*) "     Ecut(Ry)  KE/electron(Ry)",
      $        "         KE error/electron (mRy,meV)"
 
          rks=0.0
-
+         mxk=np
          qmax=20
          qp=500
+         iqp=int(qp)
          dqq=qmax/qp
 
-         do j=1,qp+1
+         do j=1,iqp+1
             rke(m,j)=0.0
          enddo
 
-         do j=1,qp+1                                                    
+         do k=np,1,-1
+            if (rnl(k,m).gt.1e-9) then 
+               mxk=k
+               goto 912
+            endif
+         enddo
+ 912     continue
+
+         do j=1,iqp+1                                                    
             qq=dqq*dble(j-1)                                             
 
-            do k=1,maxim                                                
+            do k=1,mxk
                qr=r(k)*qq                                             
                rtemp(k) = rnl(k,m)*r(k) * besfn(qr,l)
             enddo
             pow=dble(l+1)**2
-            call radin(r,rtemp,0,maxim,h,pow)
+            call radin(r,rtemp,0,mxk,h,pow)
             pl(j)=pow *rnq 
 
             rks=rks+pl(j)*pl(j)*qq*qq*qq*qq*dqq
@@ -94,7 +112,7 @@ c
             rkstor(m,kk)=0.0
          enddo
          rkkmlast=0.0
-         do j=1,qp                                                    
+         do j=1,iqp                                                    
             qq=dqq*dble(j-1)                            
             rkk=rks-rke(m,j)
             rkkmlast=rkkm
@@ -131,6 +149,8 @@ c
  9393 format(1x,70('-'))
  9394 format(1x,20x,"Kinetic energy convergence")
  9000 format(1x,5x,30('='),'|',i3,'>',30('='),10x)
+ 9001 format(1x,5x,30('='),'|',i3,'+>',30('='),10x)
+ 9002 format(1x,5x,30('='),'|',i3,'->',30('='),10x)
  9020 format(i10,f18.9,10x,f15.6,f15.6)
       return
       end

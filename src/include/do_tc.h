@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/*
- * $Id: do_tc.h,v 1.4 2004/10/02 18:34:49 ewalter Exp $
- */
 
 #include "parameter.h"
 
-int do_tc(param_t *param, char *logfile, int job, int doifc);
+int do_tc(param_t *param, char *logfile, int job, int doifc, int donl);
 
 void do_tc_report(FILE *fp);

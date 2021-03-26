@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(opium, 1.1, mbarnes@compsci.wm.edu,ejwalt@wm.edu)
+AC_INIT(opium, ac1.2, ejwalt@wm.edu)
 
 AC_CONFIG_SRCDIR([src/uniPPlib/xmcomplex.h])
 
@@ -26,7 +26,7 @@ if test "${f2c_prefix+set}" = set; then
 fi
 
 dnl Checks for programs.
-AC_PROG_F77(pgf77 fort ifort ifc efc fort77)
+AC_PROG_F77(pgf77 pgf90 fort ifort ifc efc fort77 pathf90 gfortran)
 AC_F77_LIBRARY_LDFLAGS
 
 if test x"$F77" = x; then
@@ -35,7 +35,7 @@ if test x"$F77" = x; then
 ])
 fi
 
-AC_PROG_CC(ccc pgcc icc ecc gcc cc)
+AC_PROG_CC(ccc pgcc icc ecc pathcc gcc cc)
 
 if test x"$CC" = x; then
   AC_MSG_ERROR([
@@ -116,11 +116,16 @@ fi
 
 AC_CHECK_LIB([m], [cos],[LDFLAGS="$LDFLAGS -lm"])
 
+FCT=`echo "$F77" |sed -e s,^.*/,,`
+CCT=`echo "$F77" |sed -e s,^.*/,,`
+echo $FCT $CCT
+echo $F77 $CC
+
 case $ac_cv_host in
 
 dnl Sun's f77 and C compiler
   *sun*)
-    if test "$F77" = "fort77"; then
+    if test "$FCT" = "fort77"; then
       :
     else
       if test x"$CFLAGS" = "x-g"; then
@@ -136,7 +141,7 @@ dnl Sun's f77 and C compiler
 
 dnl SGI's native C and fortran compilers
   *sgi*)
-    if test "$F77" = "fort77"; then
+    if test "$FCT" = "fort77"; then
       :
     else
       LD=$F77
@@ -152,12 +157,12 @@ dnl SGI's native C and fortran compilers
 
 dnl alpha linux with Compaq (HP)'s ccc and fort compilers
   *alpha*linux*)
-    if test "$CC" = "ccc"; then
+    if test "$CCT" = "ccc"; then
       if test x"$CFLAGS" = "x-g"; then
 	CFLAGS="-tune host"
       fi
     fi
-    if test "$F77" = "fort"; then
+    if test "$FCT" = "fort"; then
       if test x"$FFLAGS" = "x-g"; then
 	FFLAGS="-tune host -r8"
       fi
@@ -173,73 +178,104 @@ dnl alpha linux with Compaq (HP)'s ccc and fort compilers
 dnl PC running linux and Portland Group's C and Portand compilers
   *86-pc-linux-*)
     NOOPT="-O0 -r8"	
-    if test $F77 = pgf77; then
+    if test $FCT = pgf77 || test $FCT = pgf90; then
       dnl do this to get the library path correct
       AC_PATH_PROG([XPGF77],[pgf77],[huh],[$PATH])
       PGF77_LIB_DIR=`echo "$XPGF77/lib" | sed s,/bin/pgf77,,`
       LDFLAGS="-L$PGF77_LIB_DIR $LDFLAGS"
-      CHECK_FAILED=no
-      AC_CHECK_LIB([pgftnrtl], [fio_fmt_write],[LDFLAGS="$LDFLAGS -lpgftnrtl"],
-	[CHECK_FAILED=yes],[-lpgc])
-      if test $CHECK_FAILED = yes; then
-	AC_MSG_ERROR([
-*** could not find libpgftnrtl, check your LDFLAGS environment variable
-    ])
+      test x"$FFLAGS" = x-g && FFLAGS=" -fast -r8"
+    fi    
+    
+    if test $FCT = ifc || test $FCT = ifort; then
+      LD=$F77
+      LDFLAGS="$LDFLAGS -Vaxlib"
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8"
+      LDFLAGS="$LDFLAGS -L$i -static-libcxa"
+
+      if test $FCT = ifort; then
+        LDFLAGS="$LDFLAGS -nofor_main"
       fi
-      CHECK_FAILED=no
-      AC_CHECK_LIB([pgc], [__pgio_errno],[LDFLAGS="$LDFLAGS -lpgc"],
-	[CHECK_FAILED=yes],[-lpgftnrtl])
-      if test $CHECK_FAILED = yes; then
-	AC_MSG_ERROR([
-*** could not find libpgc, check your LDFLAGS environment variable
-    ]) 
-      fi
+    fi
+
+    if test x"$CCT" = xpgcc; then
+      test x"$CFLAGS" = x-g && CFLAGS="-O2"
+    fi
+
+    if test x"$CCT" = xicc; then
+      test x"$CFLAGS" = x-g && CFLAGS="-O2"
+    fi
+
+    if test $FCT = gfortran ; then
+    echo ""
+    echo ""
+    echo "*******************************************************************"
+    echo "*******************************************************************"
+    echo "Using gfortran for OPIUM is experimental... please be extra careful"
+    echo "*******************************************************************"
+    echo "*******************************************************************"
+    echo ""
+    echo ""
+
+    LD=$F77
+    LDFLAGS="-fdefault-real-8 -fno-automatic $LDFLAGS"
+    FFLAGS="$FFLAGS -fdefault-real-8 -fno-automatic"
+    NOOPT="-O0"		     
+    fi
+    if test $FCT = gcc ; then
+      test x"$CFLAGS" = x-g && CFLAGS="-O2"
+    fi
+    ;;
+
+dnl PC running linux and Portland Group's C and Portand compilers
+  *x86_64*linux-*)
+    NOOPT="-O0 -r8"	
+    if test $FCT = pgf77 || test $FCT = pgf90; then
+      dnl do this to get the library path correct
+      AC_PATH_PROG([XPGF77],[pgf77],[huh],[$PATH])
+      PGF77_LIB_DIR=`echo "$XPGF77/lib" | sed s,/bin/pgf77,,`
+      LDFLAGS="-L$PGF77_LIB_DIR $LDFLAGS"
       test x"$FFLAGS" = x-g && FFLAGS=" -fast -r8"
     fi    
 
-    if test $F77 = ifc || test $F77 = ifort; then
-      LD=$F77
+    if test $FCT = ifc || test $FCT = ifort; then
+      LD=$FCT
       LDFLAGS="$LDFLAGS -Vaxlib"
-      test x"$FFLAGS" = x-g && FFLAGS="-O3 -WB -cm -w95 -save -r8 -mp"
-dnl      if test $F77 = ifort; then
-dnl	 FFLAGS="$FFLAGS -assume bscc"
-dnl      fi
-
-dnl      G2Cjunk=`gcc -print-search-dirs | grep '^libraries:' | sed -r 's,libraries: *=? *,,'`
-dnl      ac_save_IFS=$IFS; IFS=:
-dnl      for i in $G2Cjunk
-dnl      do
-dnl	test -f $i/libg2c.a && GOTCHA=1 && break
-dnl      done
-
-dnl      IFS=$ac_save_IFS
-dnl      if test x$GOTCHA = xvv; then
-dnl	AC_MSG_ERROR([
-dnl*** I could not find libg2c.a, contact the maintainers])
-dnl      fi
-
-dnl      LDFLAGS="$LDFLAGS -L$i -lg2c -static-libcxa"
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 "
       LDFLAGS="$LDFLAGS -L$i -static-libcxa"
 
-      if test $F77 = ifort; then
+      if test $FCT = ifort; then
         LDFLAGS="$LDFLAGS -nofor_main"
       fi
 
     fi
 
-    if test $F77 = f77; then
-      LD=f77
+    if test $FCT = pathf77; then
+       FFLAGS="-fast -r8"
     fi
 
-dnl    if test $F77 = g77; then
-dnl      LD=g77
-dnl    fi
-
-    if test x"$CC" = xpgcc; then
-      test x"$CFLAGS" = x-g && CFLAGS="-fast"
+    if test x"$CCT" = xpgcc; then
+      test x"$CFLAGS" = x-g && CFLAGS="-O2"
     fi
 
-    if test x"$CC" = xicc; then
+    if test x"$CCT" = xicc; then
+      test x"$CFLAGS" = x-g && CFLAGS="-O2"
+    fi
+
+    if test $FCT = gfortran ; then
+    echo ""
+    echo ""
+    echo "*******************************************************************"
+    echo "*******************************************************************"
+    echo "Using gfortran for OPIUM is experimental... please be extra careful"
+    echo "*******************************************************************"
+    echo "*******************************************************************"
+    echo ""
+    echo ""
+    LD=$F77
+    LDFLAGS="-lm -fdefault-real-8 -fno-automatic $LDFLAGS"
+    test x"$FFLAGS" = x-g && FFLAGS="-g -O2 -fdefault-real-8 -fno-automatic"
+    fi
+    if test $FCT = gcc ; then
       test x"$CFLAGS" = x-g && CFLAGS="-O2"
     fi
     ;;
@@ -250,8 +286,9 @@ esac
 AC_PATH_PROG([XFORT77],[fort77],[huh],[$PATH])
 
 dnl looks like we are stuck with fort77 and f2c
-if test $F77 = fort77; then
+if test $FCT = fort77; then
   NOOPT="-O0 -r8"
+  FFLAGS="-r8 $FFLAGS"
   if test "${f2c_libraries+set}" = set; then
     LDFLAGS="-L$f2c_libraries $LDFLAGS"
   elif test "${f2c_prefix+set}" = set; then
@@ -295,8 +332,8 @@ if test $F77 = fort77; then
   CFLAGS="$xSAVE_CFLAGS"
   LDFLAGS="$xLDFLAGS_SAVE"
 
-  test x"$FFLAGS" = x-g && FFLAGS="-O3 -r8"
-  test x"$FFLAGS" = "x-g -O2" && FFLAGS="-O3 -r8"
+dnl  test x"$FFLAGS" = x-g && FFLAGS="-O3 -r8"
+dnl  test x"$FFLAGS" = "x-g -O2" && FFLAGS="-O3 -r8"
 dnl Boy! This is a hack EJW
 fi
 

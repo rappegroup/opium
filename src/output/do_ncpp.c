@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,9 @@
 #include "do_ncpp.h"          /* the module's own header */
 #include "nlm.h"
 
+#define MAX(a, b)   (((a) > (b)) ? (a):(b))
+
+
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 void nrelsproj(param_t *param, char *);
 int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
@@ -49,7 +52,7 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
   double zeff;	                /* effective Z */
   int lmax;                     /* max l value */   
   char lcore;                   /* T/F core correction? */ 
-  char xctype[5];               /* pz or pbe for now */
+  char xctype[10];               /* pz or pbe for now */
   double ztt;                   /* store z^2/3 */
   double xmin;                  /* ncpp grid */
   double r_1;
@@ -70,11 +73,13 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
   /* section 0 : check if this potential format is supported */
   /* ncpp doesn't support DNL potentials */
 
+  nrelsproj(param,logfile);
+
   if (param->nboxes > 0) {
     fp_log = fopen(logfile, "a");
-    fprintf(fp_log," ncpp format does not support the use of augmentation operators\n");
+    /*    fprintf(fp_log," ncpp format does not support the use of augmentation operators\n");*/
+    fprintf(fp_log," Making l+1 the local potential %d\n",param->nll+1);
     fclose(fp_log);
-    return 1;
   }
 
   /* read in the local potential from a binary file created by do_nl() */
@@ -112,15 +117,23 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
 
   /* 1st line of ncpp format: the XC type and a comment */  
 
-  if (param->ixc == 0) {
+  if (param->ixc == -1) {
+    sprintf(xctype,"%s"," \'exx\'");
+  }else if (param->ixc == 0) {
     sprintf(xctype,"%s"," \'pz\'");
   }else if (param->ixc == 2) {
     sprintf(xctype,"%s","\'pbe\'");
+  }else if (param->ixc == 3) {
+    sprintf(xctype,"%s"," \'pw91\'");
+  }else if (param->ixc == 4) {
+    sprintf(xctype,"%s","\'wc\'");
+  }else if (param->ixc == 5) {
+    sprintf(xctype,"%s","\'pbesol\'");
   }else{
     sprintf(xctype,"%s","\'pw\'");
   }
 
-  fprintf(fp,"%s %s --Opium generated potential--\n",xctype,param->name);  
+  fprintf(fp,"%s --Opium generated potential--\n",xctype);  
   
   /* 2nd line of ncpp format: symbol, zeff,lmax,0 (for analytic),*/
   /* 0 (for analytic), .T./.F. core-correction?,l-local,.F. (bhstype)*/
@@ -168,27 +181,18 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
      r[k] = r_1 * exp(param->b * k);
    }
 
-   /*  for (i=0;i<4;i++)
-    ill[i]=0;
-   icount=0;
-   for (kk=0; kk<param->nll;kk++)
-     for (k=0; k<param->nval; k++) {
-       if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
-	 ill[nlm_label(param->nlm[k+ncore]).l]++;
-	 fprintf(fp," Pseudo l=%d\n",kk);
-	 for (i=0; i<param->ngrid ; i++) {
-	   fprintf(fp, "%1.15e  ", rvcore[k][i]/r[i]);
-	   if (!((i+1)%4)) fprintf(fp, "\n");
-	 }
-	 if (i%4) fprintf(fp, "\n");
-	 icount++;
-       }
-       }*/
-
    for (k=0; k<param->nll; k++) {
      fprintf(fp," Pseudo l=%d\n",k);
      for (i=0; i<param->ngrid ; i++) {
        fprintf(fp, "%1.15e  ", rvcore[k][i]/r[i]);
+       if (!((i+1)%4)) fprintf(fp, "\n");
+     }
+     if (i%4) fprintf(fp, "\n");
+   }
+   if (param->nboxes > 0) {
+     fprintf(fp," Pseudo l=%d\n",k);
+     for (i=0; i<param->ngrid ; i++) {
+       fprintf(fp, "%1.15e  ", nlcore[i]/r[i]);
        if (!((i+1)%4)) fprintf(fp, "\n");
      }
      if (i%4) fprintf(fp, "\n");
@@ -204,33 +208,12 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
   } 
 
    /* section 4: wavefunctiobns */
-   /*  for (i=0;i<4;i++)
-    ill[i]=0;
-
-  icount=0;
-  for (kk=0; kk<param->nll;kk++)
-    for (k=0; k<param->nval; k++) {
-      if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
-	lchi = nlm_label(param->nlm[k+ncore]).l;
-	locc = param->wnl[k+ncore]; 
-	ill[nlm_label(param->nlm[k+ncore]).l]++;
-	fprintf(fp," Wavefunction %d\n",kk+1);
-	fprintf(fp," %d  %f \n",lchi,locc);
-	for (i=0; i<param->ngrid ; i++) {
-	  fprintf(fp, "%1.15e  ", rnl[k][i]);
-	  if (!((i+1)%4)) fprintf(fp, "\n");
-	}
-	if (i%4) fprintf(fp, "\n");
-	icount++;
-      }
-      }*/
-
    ic=0;
    for (k=0; k<param->nval;k++) {
      if (param->npot[k]==0) {
        
        lchi = nlm_label(param->nlm[k+ncore]).l;
-       locc = param->wnl[k+ncore]; 
+       locc = MAX(param->wnl[k+ncore],0); 
        ill[nlm_label(param->nlm[k+ncore]).l]++;
        fprintf(fp," Wavefunction %d\n",ic+1);
        fprintf(fp," %d  %f \n",lchi,locc);
@@ -241,9 +224,18 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
        if (i%4) fprintf(fp, "\n");
        ic++;
      }
-
    }
-   
+   if (param->nboxes > 0) {
+     fprintf(fp," Wavefunction %d\n",ic+1);
+     fprintf(fp," %d  %f \n",lchi+1,0.0);
+     
+     for (i=0; i<param->ngrid ; i++) {
+       fprintf(fp, "%1.15e  ", 0.0);
+       if (!((i+1)%4)) fprintf(fp, "\n");
+     }
+     if (i%4) fprintf(fp, "\n");
+   }
+
   writeparam(param, fp, fp_param);  
 
   fp_log = fopen(logfile, "a");

@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ c     *************************************************************************
       open(unit=7,file=file_log,form='formatted',access='append')
       
       write (7,*) 'Troullier Martin  pseudopotential ...'
-      
+
       do i=1,np
          rsval(i)=0.0
       enddo

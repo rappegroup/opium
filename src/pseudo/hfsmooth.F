@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine hfsmooth(iqpopt,rlocalr,ixc)
+      subroutine hfsmooth(iqpopt,rlocalr,ixc,tole)
       
 c     *************************************************************************
 c     smooth the hartree-fock potential
@@ -52,7 +52,6 @@ c     *************************************************************************
 
       iprint=0
 
-      tole=1e-6
       tolpp=1e-3
       tolqq=1e-3
 
@@ -177,7 +176,7 @@ c         qq=1e-6
          tolpp=max(tolpp*0.9,1e-7)
          tolqq=max(tolqq*0.9,1e-7)
          
-         write(7,*) 'QP : new tol',tolpp,tolqq
+c         write(7,*) 'QP : new tol',tolpp,tolqq
          do korb=1,nval
             call setgam(iqpopt,ilocalr(korb),fgam)            
 
@@ -257,7 +256,7 @@ c     all orbs have been individually satisfied, check for global convergence
          do i=1,nval
             dd=dd+abs(en(i)-esave(i))            
          enddo
-         write(7,*) 'QP at end of loop:', dd,tole
+c         write(7,*) 'QP at end of loop:', dd,tole
          if ((dd.gt.tole)) then 
             mloop=mloop+1
             if (mloop.gt.500) stop 'EE'
@@ -334,8 +333,8 @@ c      enddo
       close(7)
       return
 
- 9292 format(2x,'nlm',4x,
-     $     '#q',4x,'#p',6x,'pp',10x,'qq',20x,'delta e(mRy)')
+ 9292 format(5x,'nlm',4x,'#it',2x
+     $     '#q',4x,'#p',9x,'pp',13x,'qq',20x,'delta e(mRy)')
  9393 format(1x,'QP',i7,2f16.9,4x,2f16.8)
  9394 format(1x,'QP change in norm',i7,f16.9)
  9335 format(1x,'QP',4i5,2f14.8,4x,3d14.4)

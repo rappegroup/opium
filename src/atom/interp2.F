@@ -1,6 +1,6 @@
       subroutine interp2(f,f2)
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ c     Interpolate onto the 0 origin grid
 
       yp1 = 2e33
       ypn = 2e33
-      
+
       call spline(r,f,np,yp1,ypn,fp)
       
       do j=1,nr
@@ -46,7 +46,7 @@ c     Interpolate onto the 0 origin grid
 
       SUBROUTINE spline(x,y,n,yp1,ypn,y2)
       INTEGER n,NMAX
-      REAL yp1,ypn,x(n),y(n),y2(n)
+      REAL*8 yp1,ypn,x(n),y(n),y2(n)
       PARAMETER (NMAX=5000)
 
 c     Given arrays x(1:n) and y(1:n) containing a tabulated function,
@@ -61,7 +61,7 @@ c     with zero second derivative on that boundary.
 c     Parameter: NMAX is the largest anticipated value of n.
 
       INTEGER i,k
-      REAL p,qn,sig,un,u(NMAX)
+      REAL*8 p,qn,sig,un,u(NMAX)
       if (yp1.gt..99e30) then 
          y2(1)=0. 
          u(1)=0.
@@ -92,9 +92,9 @@ c     Parameter: NMAX is the largest anticipated value of n.
       
       SUBROUTINE splint(xa,ya,y2a,n,x,y)
       INTEGER n
-      REAL x,y,xa(n),y2a(n),ya(n)
+      REAL*8 x,y,xa(n),y2a(n),ya(n)
       INTEGER k,khi,klo
-      REAL a,b,h
+      REAL*8 a,b,h
       klo=1 
       khi=n
  1    if (khi-klo.gt.1) then

@@ -12,7 +12,7 @@ c
 c------------------------------------------------------------
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -89,9 +89,6 @@ c         if ((so(i).lt.0.1).and.lo(i).ne.0) ka(i)=-lo(i)
          enddo
          if (ipsp.eq.0) en(i)=-z*z/(2.d0*no(i)*no(i))
          if (ipsp.ne.0) en(i)=en(i)/2.d0
-
-c         write(7,'(4i5,4f10.6)') i,ka(i),no(i),lo(i),so(i),wnl(i),en(i)
-
       enddo
 
 c     wfirdf
@@ -113,6 +110,9 @@ c     nucdev
             ep(i)=0.d0
          enddo
       enddo
+
+      
+
       do i=1,10
          ceg(i)=0.d0
          cep(i)=0.d0
@@ -146,6 +146,7 @@ c     soldir
      $        (j,no(j),lo(j),en(j), fl(j),bg(1,j),bp(1,j),rvps(1,j), 
      $        ainf,test1,test2, ka(j),nmax(j),ifail,method)
 
+c         write(7,'(4i5,4f10.6)') j,ka(j),no(j),lo(j),so(j),wnl(j),en(j)
          do i=1,10
             bg(i,j)=ag(i)
             bp(i,j)=ap(i) 

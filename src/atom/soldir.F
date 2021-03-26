@@ -12,7 +12,7 @@ c
 c------------------------------------------------------------
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ c      write(7,*) 'av',av(1),api,agi,fl,fk
          if (a.lt.emin) emin=a                                                  
  91   continue                                                                  
 
-c      write(7,*) 'hi',ell,node,kap,emin,nqn
+c      write(7,*) 'hi',emin,a,imax
       if (emin .ge. 0.0) then                                                   
 c         write(6,*) kap,iorb,nqn
 c         stop 'emin ge 0'
@@ -258,7 +258,7 @@ c     search for the maximum of the modulus of large component
          mat=imax-12                                                            
          j=mat                                                                  
          if (mod(mat,2).eq.0) mat=mat+1                                         
-         write(7,*) "warning mat,imax",mat,imax
+c         write(7,*) "warning mat,imax",mat,imax
       endif                                                                     
 c this case can happen due to bad starting point in scf procedure.              
 c ignore this warning unless you are getting it at final norb calls of          
@@ -313,7 +313,7 @@ c *number of attempts to find good number of nodes is over the limit
 c this case can happen due to bad starting point in scf procedure.              
 c ignore this warning unless you are getting it at final norb calls of          
 c soldir	                                                                       
-      write(7,*) "warning jes>nes"
+c      write(7,*) "warning jes>nes"
       ifail=1                                                                   
 c    *redirected by ala 11/21/94.                                               
 c     numerr=255061                                                             
@@ -354,7 +354,7 @@ c        try smaller step in enrgy under above conditions
 c         write(7,*) 'adjusted f',f,g,en
 
          if (g.gt.test1) go to 371                                              
-         write(7,*) 'g > test1'
+c         write(7,*) 'g > test1'
          go to 899                                                              
       endif                                                                     
 
@@ -366,7 +366,7 @@ c      write(7,*) '2nd comp',abs(c),test
 c         write(7,*) ies,nes
          if (ies.le.nes) go to 105                                              
          ifail=1                                                                
-         write(7,*) "warning ies=nes"
+c         write(7,*) "warning ies=nes"
 c     everything is fine unless you are getting this message                    
 c     on the latest stage selfconsistent process.                               
 c     just stopped trying to match lower component                              

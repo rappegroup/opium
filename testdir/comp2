@@ -1,5 +1,5 @@
 #!/bin/csh -f
 
 foreach i (`cat LIST`)
-	kdiff3 save2/"$i"."$1" save3/"$i"."$1"
+	kdiff3 "$i"."$1" results/"$i"."$1"
 end

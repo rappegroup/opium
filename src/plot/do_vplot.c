@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,23 +34,25 @@
 #include "nlm.h"
 
 #define streq(a,b) (!strcasecmp(a,b))
+#define MAX(a, b)   (((a) > (b)) ? (a):(b))
 void nrelsproj(param_t *param, char *);
 int do_vplot(param_t *param, char *logfile, char *pltyp){
 
-  int i;
+  int i,j,k=0,kk=0;
   int scount=0;
   int pcount=0;
   int dcount=0;
   int fcount=0;
   int lcolor=0;
   int lsty=0;
+  int lwid=2.0;
   int ncore;
 
   FILE *parm;
   char *comm;
   char *xc;
   char *met;
-  char lc=0;
+  char lc=0,sc=0;
 
   #define comm_size 240
   #define met_size 45
@@ -59,14 +61,18 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
   met= (char *) malloc(met_size*sizeof(char));
   xc= (char *) malloc(xc_size*sizeof(char));
 
+  if ((!strcmp(param->reltype, "nrl")) || (!strcmp(param->reltype, "srl")) && (param->ixc >= 0)) {
+    nrelsproj(param,logfile);
+  } else {
+    relsproj(param,logfile);
+  }
   ncore=param->norb-param->nval;
 
-  nrelsproj(param,logfile);
   readAE(param);
 
-  /* check for semicore */
-
   if (streq(pltyp,"s")) {
+
+  /* PLOT THE SCREENED POTENTIAL */
 
     parm = fopen("vs.par","w");
 
@@ -108,6 +114,8 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     }else if (param->ixc == 4) {    
       snprintf(xc,xc_size,"XC=Wu-Cohen GGA");
     }else if (param->ixc == 5) {    
+      snprintf(xc,xc_size,"XC=PBESol GGA");
+    }else if (param->ixc == 6) {    
       snprintf(xc,xc_size,"XC=VWN5 LDA");
     }else if (param->ixc == -1) {
       snprintf(xc,xc_size,"Hartree-Fock Exchange");
@@ -130,55 +138,141 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm,"legend loctype view\n");
     fprintf(parm,"legend 0.85, 0.8\n");
 
-    for (i=0; i<param->nval;i++){
-
-      if ((param->lpot[i]) == 0) {
-	scount++;
-	lcolor=1;
-	lsty=scount;
-	lc='s';
-      }else if ((param->lpot[i]) == 1) {
-	pcount++;
-	lcolor=2;
-	lsty=pcount;
-	lc='p';
-      }else if ((param->lpot[i]) == 2) {
-	dcount++;
-	lcolor=3;
-	lsty=dcount;
-	lc='d';
-      }else if ((param->lpot[i]) == 3) {
-	fcount++;
-	lcolor=4;
-	lsty=fcount;
-	lc='f';
+    if (!streq(param->reltype, "frl")){  
+      for (i=0; i<param->nval;i++){
+	
+	if ((param->lpot[i]) == 0) {
+	  scount++;
+	  lcolor=1;
+	  lsty=scount;
+	  lc='s';
+	}else if ((param->lpot[i]) == 1) {
+	  pcount++;
+	  lcolor=2;
+	  lsty=pcount;
+	  lc='p';
+	}else if ((param->lpot[i]) == 2) {
+	  dcount++;
+	  lcolor=3;
+	  lsty=dcount;
+	  lc='d';
+	}else if ((param->lpot[i]) == 3) {
+	  fcount++;
+	  lcolor=4;
+	  lsty=fcount;
+	  lc='f';
+	}
+	fprintf(parm," s%d hidden false \n",i);
+	fprintf(parm," s%d type xydx \n",i);
+	fprintf(parm," s%d symbol 0 \n",i);
+	fprintf(parm," s%d line type 1 \n",i);
+	fprintf(parm," s%d line linestyle %d \n",i,lsty);
+	fprintf(parm," s%d line linewidth 2.0 \n",i);
+	fprintf(parm," s%d line color %d \n",i,lcolor);
+	fprintf(parm," s%d legend \"V\\s%c\\N\" \n",i,lc);
+	fprintf(parm," s%d errorbar on\n",i);
+	fprintf(parm," s%d errorbar place both\n",i);
+	fprintf(parm," s%d errorbar color %d\n",i,lcolor);
+	fprintf(parm," s%d errorbar pattern 1\n",i);
+	fprintf(parm," s%d errorbar size 10.000000\n",i);
+	fprintf(parm," s%d errorbar linewidth 2.0\n",i);
+	fprintf(parm," s%d errorbar linestyle 1\n",i);
       }
-      fprintf(parm," s%d hidden false \n",i);
-      fprintf(parm," s%d type xydx \n",i);
-      fprintf(parm," s%d symbol 0 \n",i);
-      fprintf(parm," s%d line type 1 \n",i);
-      fprintf(parm," s%d line linestyle %d \n",i,lsty);
-      fprintf(parm," s%d line linewidth 2.0 \n",i);
-      fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"V\\s%c\\N\" \n",i,lc);
-      fprintf(parm," s%d errorbar on\n",i);
-      fprintf(parm," s%d errorbar place both\n",i);
-      fprintf(parm," s%d errorbar color %d\n",i,lcolor);
-      fprintf(parm," s%d errorbar pattern 1\n",i);
-      fprintf(parm," s%d errorbar size 10.000000\n",i);
-      fprintf(parm," s%d errorbar linewidth 2.0\n",i);
-      fprintf(parm," s%d errorbar linestyle 1\n",i);
+    }else{
+      for (i=0; i<param->nval;i++) {
+	if (nlm_label(param->nlm[i+ncore]).l == 0) {
+	  scount++;
+	  lcolor=1;
+	  lsty=scount;
+	  lc='s';
+	  sc=' ';
+	  fprintf(parm," s%d hidden false \n",k);
+	  fprintf(parm," s%d type xydx \n",k);
+	  fprintf(parm," s%d symbol 0 \n",k);
+	  fprintf(parm," s%d line type 1 \n",k);
+	  fprintf(parm," s%d line linestyle %d \n",k,lsty);
+	  fprintf(parm," s%d line linewidth 2.0 \n",k);
+	  fprintf(parm," s%d line color %d \n",k,lcolor);
+	  fprintf(parm," s%d legend \"V\\s%c\\N\" \n",k,lc);
+	  fprintf(parm," s%d errorbar on\n",k);
+	  fprintf(parm," s%d errorbar place both\n",k);
+	  fprintf(parm," s%d errorbar color %d\n",k,lcolor);
+	  fprintf(parm," s%d errorbar pattern 1\n",k);
+	  fprintf(parm," s%d errorbar size 10.000000\n",k);
+	  fprintf(parm," s%d errorbar linewidth 2.0\n",k);
+	  fprintf(parm," s%d errorbar linestyle 1\n",k);
+	  k++;
+	}else{
+	  for (j=0;j<2;j++) {
+	    if (j == 0) sc='-';
+	    if (j == 1) sc='+';
+	    if (nlm_label(param->nlm[i+ncore]).l == 1) {	  
+	      pcount++;
+	      lcolor=2;
+	      lwid=2.0;
+	      lsty=1;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
+	      lc='p';
+	      
+	    }else if (nlm_label(param->nlm[i+ncore]).l == 2) {	  
+	      dcount++;
+	      lcolor=3;
+	      lwid=2.0;
+	      lsty=1;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
+	      lc='d';
+	      
+	    }else if (nlm_label(param->nlm[i+ncore]).l == 3) {	  
+	      fcount++;
+	      lcolor=4;
+	      lwid=2.0;
+	      lsty=1;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
+	      lc='f';
+	      
+	    }
+	    fprintf(parm," s%d hidden false \n",k);
+	    fprintf(parm," s%d type xydx \n",k);
+	    fprintf(parm," s%d symbol 0 \n",k);
+	    fprintf(parm," s%d line type 1 \n",k);
+	    fprintf(parm," s%d line linestyle %d \n",k,lsty);
+	    fprintf(parm," s%d line linewidth %d \n",k,lwid);
+	    fprintf(parm," s%d line color %d \n",k,lcolor);
+	    fprintf(parm," s%d legend \"V\\s%c%c\\N\" \n",k,lc,sc);
+	    fprintf(parm," s%d errorbar on\n",k);
+	    fprintf(parm," s%d errorbar place both\n",k);
+	    fprintf(parm," s%d errorbar color %d\n",k,lcolor);
+	    fprintf(parm," s%d errorbar pattern 1\n",k);
+	    fprintf(parm," s%d errorbar size 10.000000\n",k);
+	    fprintf(parm," s%d errorbar linewidth 2.0\n",k);
+	    fprintf(parm," s%d errorbar linestyle 1\n",k);
+	    k++;
+	  }
+	}
+      }
     }
-    i=param->nll;
-    fprintf(parm," s%d hidden false \n",i);
-    fprintf(parm," s%d type xydx \n",i);
-    fprintf(parm," s%d symbol 0 \n",i);
-    fprintf(parm," s%d line type 1 \n",i);
-    fprintf(parm," s%d line linestyle %d \n",i,3);
-    fprintf(parm," s%d line linewidth 3.0 \n",i);
-    fprintf(parm," s%d line color %d \n",i,14);
-    fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,i);
-
+    
+    if (param->ixc >= 0) {
+      kk=param->nll;
+      fprintf(parm," s%d hidden false \n",kk);
+      fprintf(parm," s%d type xydx \n",kk);
+      fprintf(parm," s%d symbol 0 \n",kk);
+      fprintf(parm," s%d line type 1 \n",kk);
+      fprintf(parm," s%d line linestyle %d \n",kk,3);
+      fprintf(parm," s%d line linewidth 3.0 \n",kk);
+      fprintf(parm," s%d line color %d \n",kk,9);
+      fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,kk);
+    }
+    
     fclose(parm);
 
     snprintf(comm,comm_size,"xmgrace -timestamp $XMG_OPTS -settype xydx %s.vs_plt -p vs.par -autoscale y -saveall %s_vs.agr & ",
@@ -186,6 +280,8 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     system(comm);
 
   } else {
+
+  /* PLOT THE DESCREENED (i.e. IONIC) POTENTIAL */
 
     parm = fopen("vi.par","w");
 
@@ -227,6 +323,8 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     }else if (param->ixc == 4) {    
       snprintf(xc,xc_size,"XC=Wu-Cohen GGA");
     }else if (param->ixc == 5) {    
+      snprintf(xc,xc_size,"XC=PBESol GGA");
+    }else if (param->ixc == 6) {    
       snprintf(xc,xc_size,"XC=VWN5 LDA");
     }else if (param->ixc == -1) {
       snprintf(xc,xc_size,"Hartree-Fock Exchange");
@@ -249,65 +347,152 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm,"legend loctype view\n");
     fprintf(parm,"legend 0.85, 0.8\n");
 
-    for (i=0; i<param->nval;i++){
-
-      if (param->lpot[i] == 0) {
-	scount++;
-	lcolor=1;
-	lsty=scount;
-	lc='s';
-      }else if (param->lpot[i] == 1) {
-	pcount++;
-	lcolor=2;
-	lsty=pcount;
-	lc='p';
-      }else if (param->lpot[i] == 2) {
-	dcount++;
-	lcolor=3;
-	lsty=dcount;
-	lc='d';
-      }else if (param->lpot[i] == 3) {
-	fcount++;
-	lcolor=4;
-	lsty=fcount;
-	lc='f';
+    if (!streq(param->reltype, "frl")){  
+      for (i=0; i<param->nval;i++){
+	
+	if (param->lpot[i] == 0) {
+	  scount++;
+	  lcolor=1;
+	  lsty=scount;
+	  lc='s';
+	}else if (param->lpot[i] == 1) {
+	  pcount++;
+	  lcolor=2;
+	  lsty=pcount;
+	  lc='p';
+	}else if (param->lpot[i] == 2) {
+	  dcount++;
+	  lcolor=3;
+	  lsty=dcount;
+	  lc='d';
+	}else if (param->lpot[i] == 3) {
+	  fcount++;
+	  lcolor=4;
+	  lsty=fcount;
+	  lc='f';
+	}
+	fprintf(parm," s%d hidden false \n",i);
+	fprintf(parm," s%d type xydx \n",i);
+	fprintf(parm," s%d symbol 0 \n",i);
+	fprintf(parm," s%d line type 1 \n",i);
+	fprintf(parm," s%d line linestyle %d \n",i,lsty);
+	fprintf(parm," s%d line linewidth 2.0 \n",i);
+	fprintf(parm," s%d line color %d \n",i,lcolor);
+	fprintf(parm," s%d legend \"V\\s%c\\N\" \n",i,lc);
+	fprintf(parm," s%d errorbar on\n",i);
+	fprintf(parm," s%d errorbar place both\n",i);
+	fprintf(parm," s%d errorbar color %d\n",i,lcolor);
+	fprintf(parm," s%d errorbar pattern 1\n",i);
+	fprintf(parm," s%d errorbar size 10.000000\n",i);
+	fprintf(parm," s%d errorbar linewidth 2.0\n",i);
+	fprintf(parm," s%d errorbar linestyle 1\n",i);
       }
-      fprintf(parm," s%d hidden false \n",i);
-      fprintf(parm," s%d type xydx \n",i);
-      fprintf(parm," s%d symbol 0 \n",i);
-      fprintf(parm," s%d line type 1 \n",i);
-      fprintf(parm," s%d line linestyle %d \n",i,lsty);
-      fprintf(parm," s%d line linewidth 2.0 \n",i);
-      fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"V\\s%c\\N\" \n",i,lc);
-      fprintf(parm," s%d errorbar on\n",i);
-      fprintf(parm," s%d errorbar place both\n",i);
-      fprintf(parm," s%d errorbar color %d\n",i,lcolor);
-      fprintf(parm," s%d errorbar pattern 1\n",i);
-      fprintf(parm," s%d errorbar size 10.000000\n",i);
-      fprintf(parm," s%d errorbar linewidth 2.0\n",i);
-      fprintf(parm," s%d errorbar linestyle 1\n",i);
+    }else{
+      for (i=0; i<param->nval;i++) {
+
+	if (nlm_label(param->nlm[i+ncore]).l == 0) {
+	  scount++;
+	  lcolor=1;
+	  lsty=scount;
+	  lc='s';
+	  sc=' ';
+	  fprintf(parm," s%d hidden false \n",k);
+	  fprintf(parm," s%d type xydx \n",k);
+	  fprintf(parm," s%d symbol 0 \n",k);
+	  fprintf(parm," s%d line type 1 \n",k);
+	  fprintf(parm," s%d line linestyle %d \n",k,lsty);
+	  fprintf(parm," s%d line linewidth 2.0 \n",k);
+	  fprintf(parm," s%d line color %d \n",k,lcolor);
+	  fprintf(parm," s%d legend \"V\\s%c\\N\" \n",k,lc);
+	  fprintf(parm," s%d errorbar on\n",k);
+	  fprintf(parm," s%d errorbar place both\n",k);
+	  fprintf(parm," s%d errorbar color %d\n",k,lcolor);
+	  fprintf(parm," s%d errorbar pattern 1\n",k);
+	  fprintf(parm," s%d errorbar size 10.000000\n",k);
+	  fprintf(parm," s%d errorbar linewidth 2.0\n",k);
+	  fprintf(parm," s%d errorbar linestyle 1\n",k);
+	  k++;
+	}else{
+	  for (j=0;j<2;j++) {
+	    if (j == 0) sc='-';
+	    if (j == 1) sc='+';
+	    if (nlm_label(param->nlm[i+ncore]).l == 1) {	  
+	      pcount++;
+	      lcolor=2;
+	      lwid=2.0;
+	      lsty=1;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
+	      lc='p';
+	      
+	    }else if (nlm_label(param->nlm[i+ncore]).l == 2) {	  
+	      dcount++;
+	      lcolor=3;
+	      lwid=2.0;
+	      lsty=1;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
+	      lc='d';
+	      
+	    }else if (nlm_label(param->nlm[i+ncore]).l == 3) {	  
+	      fcount++;
+	      lcolor=4;
+	      lwid=2.0;
+	      lsty=1;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
+	      lc='f';
+	      
+	    }
+	    
+	    fprintf(parm," s%d hidden false \n",k);
+	    fprintf(parm," s%d type xydx \n",k);
+	    fprintf(parm," s%d symbol 0 \n",k);
+	    fprintf(parm," s%d line type 1 \n",k);
+	    fprintf(parm," s%d line linestyle %d \n",k,lsty);
+	    fprintf(parm," s%d line linewidth %d \n",k,lwid);
+	    fprintf(parm," s%d line color %d \n",k,lcolor);
+	    fprintf(parm," s%d legend \"V\\s%c%c\\N\" \n",k,lc,sc);
+	    fprintf(parm," s%d errorbar on\n",k);
+	    fprintf(parm," s%d errorbar place both\n",k);
+	    fprintf(parm," s%d errorbar color %d\n",k,lcolor);
+	    fprintf(parm," s%d errorbar pattern 1\n",k);
+	    fprintf(parm," s%d errorbar size 10.000000\n",k);
+	    fprintf(parm," s%d errorbar linewidth 2.0\n",k);
+	    fprintf(parm," s%d errorbar linestyle 1\n",k);
+	    k++;
+
+	  }
+	}
+      }
     }
     /* add the AE ionic potential */
-    i=param->nll;
-    fprintf(parm," s%d hidden false \n",i);
-    fprintf(parm," s%d type xydx \n",i);
-    fprintf(parm," s%d symbol 0 \n",i);
-    fprintf(parm," s%d line type 1 \n",i);
-    fprintf(parm," s%d line linestyle %d \n",i,3);
-    fprintf(parm," s%d line linewidth 2.0 \n",i);
-    fprintf(parm," s%d line color %d \n",i,15);
-    fprintf(parm," s%d legend \"2Z\\seff\\N /r\"\n" ,i);
+
+    kk=param->nll;
+    fprintf(parm," s%d hidden false \n",kk);
+    fprintf(parm," s%d type xydx \n",kk);
+    fprintf(parm," s%d symbol 0 \n",kk);
+    fprintf(parm," s%d line type 1 \n",kk);
+    fprintf(parm," s%d line linestyle %d \n",kk,3);
+    fprintf(parm," s%d line linewidth 2.0 \n",kk);
+    fprintf(parm," s%d line color %d \n",kk,15);
+    fprintf(parm," s%d legend \"2Z\\seff\\N /r\"\n" ,kk);
 
     if (param->ixc >= 0) {
-      fprintf(parm," s%d hidden false \n",i+1);
-      fprintf(parm," s%d type xydx \n",i+1);
-      fprintf(parm," s%d symbol 0 \n",i+1);
-      fprintf(parm," s%d line type 1 \n",i+1);
-      fprintf(parm," s%d line linestyle %d \n",i+1,3);
-      fprintf(parm," s%d line linewidth 3.0 \n",i+1);
-      fprintf(parm," s%d line color %d \n",i+1,14);
-      fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,i+1);
+      fprintf(parm," s%d hidden false \n",kk+1);
+      fprintf(parm," s%d type xydx \n",kk+1);
+      fprintf(parm," s%d symbol 0 \n",kk+1);
+      fprintf(parm," s%d line type 1 \n",kk+1);
+      fprintf(parm," s%d line linestyle %d \n",kk+1,3);
+      fprintf(parm," s%d line linewidth 3.0 \n",kk+1);
+      fprintf(parm," s%d line color %d \n",kk+1,9);
+      fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,kk+1);
     }
     fclose(parm);
 

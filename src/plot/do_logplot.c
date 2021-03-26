@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */
-/*
- * $Id: do_logplot.c,v 1.13 2004/10/10 22:10:06 ewalter Exp $
  */
 
 #include <stdio.h>
@@ -49,9 +46,10 @@ int do_logplot(param_t *param, char *logfile){
   int lcolor=0;
   int lsty=0;
   int ncore;
+  int donl=1;
   static char filename[160];
 
-  double eae[10],enl[10];
+  double eae[10],enl[10],lae[10],lnl[10];
   int npot[10];
   int ntpot;
   int doifc=0;
@@ -59,6 +57,7 @@ int do_logplot(param_t *param, char *logfile){
   FILE *parm,*fp;
   char *comm;
   char lc = 0;
+  
 
   #define comm_size 240
   comm= (char *) malloc(comm_size*sizeof(char));
@@ -76,17 +75,21 @@ int do_logplot(param_t *param, char *logfile){
 	    param->ilogder,param->nconfigs);
     return 1;
   } else {
-    do_tc(param,logfile,param->ilogder,doifc);
+    do_tc(param,logfile,param->ilogder,doifc,donl);
   }
   sprintf(filename, "%s.logdeAE", param->name);
   fp = fopen(filename, "rb");
-  for (i=0; i<param->nll; i++)
+  for (i=0; i<param->nval; i++) {
     fread(&eae[i], sizeof(double), 1, fp);
+    fread(&lae[i], sizeof(double), 1, fp);
+  }
   fclose(fp);
   sprintf(filename, "%s.logdeNL", param->name);
   fp = fopen(filename, "rb");
-  for (i=0; i<param->nll; i++)
+  for (i=0; i<param->nval; i++) {
     fread(&enl[i], sizeof(double), 1, fp);
+    fread(&lnl[i], sizeof(double), 1, fp);
+  }
   fclose(fp);
 
   if ((parm = fopen("logd.par","w")) != NULL) {
@@ -124,59 +127,27 @@ int do_logplot(param_t *param, char *logfile){
       
       if (nlm_label(param->nlm[i+ncore]).l == 0) {
 	scount++;
-	lcolor=1+(scount-1)*4;
+	lcolor=1;
 	lsty=1;
 	lc='s';
-	fprintf(parm,"with line \n");
-	fprintf(parm,"line on \n");
-	fprintf(parm,"line loctype world \n");
-	fprintf(parm,"line g0 \n");
-	fprintf(parm,"line %lg , %lg , %lg , %lg \n",eae[i],10.0,eae[i],-10.0);
-	fprintf(parm,"line linewidth 2.0 \n");
-	fprintf(parm,"line color %d\n",lcolor);
-	fprintf(parm,"line def \n");
 
       }else if (nlm_label(param->nlm[i+ncore]).l == 1) {
 	pcount++;
-	lcolor=2+(pcount-1)*4;
+	lcolor=2;
 	lsty=1;
 	lc='p';
-	fprintf(parm,"with line \n");
-	fprintf(parm,"line on \n");
-	fprintf(parm,"line loctype world \n");
-	fprintf(parm,"line g0 \n");
-	fprintf(parm,"line %lg , %lg , %lg , %lg \n",eae[i],10.0,eae[i],-10.0);
-	fprintf(parm,"line linewidth 2.0 \n");
-	fprintf(parm,"line color %d\n",lcolor);
-	fprintf(parm,"line def \n");
 
       }else if (nlm_label(param->nlm[i+ncore]).l == 2) {
 	dcount++;
-	lcolor=3+(dcount-1)*4;
+	lcolor=3;
 	lsty=1;
 	lc='d';
-	fprintf(parm,"with line \n");
-	fprintf(parm,"line on \n");
-	fprintf(parm,"line loctype world \n");
-	fprintf(parm,"line g0 \n");
-	fprintf(parm,"line %lg , %lg , %lg , %lg \n",eae[i],10.0,eae[i],-10.0);
-	fprintf(parm,"line linewidth 2.0 \n");
-	fprintf(parm,"line color %d\n",lcolor);
-	fprintf(parm,"line def \n");
 
       }else if (nlm_label(param->nlm[i+ncore]).l == 3) {
 	fcount++;
-	lcolor=4+(fcount-1)*4;
+	lcolor=4;
 	lsty=1;
 	lc='f';
-	fprintf(parm,"with line \n");
-	fprintf(parm,"line on \n");
-	fprintf(parm,"line loctype world \n");
-	fprintf(parm,"line g0 \n");
-	fprintf(parm,"line %lg , %lg , %lg , %lg \n",eae[i],10.0,eae[i],-10.0);
-	fprintf(parm,"line linewidth 2.0 \n");
-	fprintf(parm,"line color %d\n",lcolor);
-	fprintf(parm,"line def \n");
 
       }
 
@@ -187,8 +158,7 @@ int do_logplot(param_t *param, char *logfile){
       fprintf(parm," s%d line linestyle %d \n",i,lsty);
       fprintf(parm," s%d line linewidth 2.0 \n",i);
       fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"%d%c AE\" \n",i,
-	      nlm_label(param->nlm[i+ncore]).n,lc);
+      fprintf(parm," s%d legend \"%c AE\" \n",i,lc);
     }
     
     k=i;
@@ -198,63 +168,31 @@ int do_logplot(param_t *param, char *logfile){
       if (nlm_label(param->nlm[i+ncore]).l == 0) {
 	scount++;
 	scount2++;
-	lcolor=1+(scount2-1)*4;
+	lcolor=1;
 	lsty=3;
 	lc='s';
-	fprintf(parm,"with line \n");
-	fprintf(parm,"line on \n");
-	fprintf(parm,"line loctype world \n");
-	fprintf(parm,"line g0 \n");
-	fprintf(parm,"line %lg , %lg , %lg , %lg \n",enl[i],10.0,enl[i],-10.0);
-	fprintf(parm,"line linewidth 2.0 \n");
-	fprintf(parm,"line linestyle %d\n",2);
-	fprintf(parm,"line color %d\n",lcolor);
-	fprintf(parm,"line def \n");
+
       }else if (nlm_label(param->nlm[i+ncore]).l == 1) {
 	pcount++;
 	pcount2++;
-	lcolor=2+(pcount2-1)*4;
+	lcolor=2;
 	lsty=3;
 	lc='p';
-	fprintf(parm,"with line \n");
-	fprintf(parm,"line on \n");
-	fprintf(parm,"line loctype world \n");
-	fprintf(parm,"line g0 \n");
-	fprintf(parm,"line %lg , %lg , %lg , %lg \n",enl[i],10.0,enl[i],-10.0);
-	fprintf(parm,"line linewidth 2.0 \n");
-	fprintf(parm,"line linestyle %d\n",2);
-	fprintf(parm,"line color %d\n",lcolor);
-	fprintf(parm,"line def \n");
+
       }else if (nlm_label(param->nlm[i+ncore]).l == 2) {
 	dcount++;
 	dcount2++;
-	lcolor=3+(dcount2-1)*4;
+	lcolor=3;
 	lsty=3;
 	lc='d';
-	fprintf(parm,"with line \n");
-	fprintf(parm,"line on \n");
-	fprintf(parm,"line loctype world \n");
-	fprintf(parm,"line g0 \n");
-	fprintf(parm,"line %lg , %lg , %lg , %lg \n",enl[i],10.0,enl[i],-10.0);
-	fprintf(parm,"line linewidth 2.0 \n");
-	fprintf(parm,"line linestyle %d\n",2);
-	fprintf(parm,"line color %d\n",lcolor);
-	fprintf(parm,"line def \n");
+
       }else if (nlm_label(param->nlm[i+ncore]).l == 3) {
 	fcount++;
 	fcount2++;
-	lcolor=4+(fcount2-1)*4;
+	lcolor=4;
 	lsty=3;
 	lc='f';
-	fprintf(parm,"with line \n");
-	fprintf(parm,"line on \n");
-	fprintf(parm,"line loctype world \n");
-	fprintf(parm,"line g0 \n");
-	fprintf(parm,"line %lg , %lg , %lg , %lg \n",enl[i],10.0,enl[i],-10.0);
-	fprintf(parm,"line linewidth 2.0 \n");
-	fprintf(parm,"line linestyle %d\n",2);
-	fprintf(parm,"line color %d\n",lcolor);
-	fprintf(parm,"line def \n");
+	
       }
       fprintf(parm," s%d hidden false \n",i+k);
       fprintf(parm," s%d type xy \n",i+k);
@@ -263,14 +201,47 @@ int do_logplot(param_t *param, char *logfile){
       fprintf(parm," s%d line linestyle %d \n",i+k,lsty);
       fprintf(parm," s%d line linewidth 4.0 \n",i+k);
       fprintf(parm," s%d line color %d \n",i+k,lcolor);
-      fprintf(parm," s%d legend \"%d%c NL\" \n",i+k,
-	      nlm_label(param->nlm[i+ncore]).n,lc);
+      fprintf(parm," s%d legend \"%c NL\" \n",i+k,lc);
+    }
+
+    for (i=0; i<param->nval;i++){
+      
+      fprintf(parm,"with ellipse \n");
+      fprintf(parm,"ellipse on \n");
+      fprintf(parm,"ellipse loctype world \n");
+      fprintf(parm,"ellipse g0 \n");
+      fprintf(parm,"ellipse %lg , %lg , %lg , %lg \n",eae[i]-(param->emax-param->emin)*0.03*0.5,lae[i]-20.0*0.035*0.5,
+	      eae[i]+(param->emax-param->emin)*0.03*0.5,lae[i]+20.0*0.035*0.5);
+
+      fprintf(parm,"ellipse linestyle 1 \n");
+      fprintf(parm,"ellipse linewidth 2.0 \n");
+      fprintf(parm,"ellipse color %d \n",nlm_label(param->nlm[i+ncore]).l+1);
+      fprintf(parm,"ellipse fill color %d\n",0);
+      fprintf(parm,"ellipse fill pattern 4\n");
+      fprintf(parm,"ellipse def \n");
+
+    }
+    for (i=0; i<param->nval;i++){
+      
+      fprintf(parm,"with ellipse \n");
+      fprintf(parm,"ellipse on \n");
+      fprintf(parm,"ellipse loctype world \n");
+      fprintf(parm,"ellipse g0 \n");
+      fprintf(parm,"ellipse %lg , %lg , %lg , %lg \n",enl[i]-(param->emax-param->emin)*0.03*0.5,lnl[i]-20.0*0.035*0.5,
+	      enl[i]+(param->emax-param->emin)*0.03*0.5,lnl[i]+20.0*0.035*0.5);
+      fprintf(parm,"ellipse linestyle 3 \n");
+      fprintf(parm,"ellipse linewidth 2.0 \n");
+      fprintf(parm,"ellipse color %d \n",nlm_label(param->nlm[i+ncore]).l+1);
+      fprintf(parm,"ellipse fill color %d\n",nlm_label(param->nlm[i+ncore]).l+1);
+      fprintf(parm,"ellipse fill pattern 0\n");
+      fprintf(parm,"ellipse def \n");
+
     }
   }
   fclose(parm);
   
   snprintf(comm,comm_size,"xmgrace $XMGRACE_OPTS %s.logd_plt -p logd.par -autoscale xy -saveall %s.logd_agr & ",
-		  param->name,param->name);
+	   param->name,param->name);
   system(comm);
   free(comm);
   

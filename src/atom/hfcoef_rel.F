@@ -11,7 +11,7 @@ c
 c------------------------------------------------------------
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -72,14 +72,34 @@ c     muatco
  601  do i=1,norb                                                           
          if (wnl(i).lt.1e-7) wnl(i)=1e-7
          isumi=wnl(i)
+         pisumi=isumi
          dsumi=wnl(i)-isumi
          li= abs(ka(i))*2-1                                                    
+
+         if (lo(i).ne.0) then
+            if (ka(i).gt.0) rwgt=float(lo(i))/(2.d0*lo(i)+1.d0)
+            if (ka(i).lt.0) rwgt=(lo(i)+1.d0)/(2.d0*lo(i)+1.d0)
+            pisumi=rwgt* nint((wnl(i)/rwgt))
+            dsumi=rwgt* (wnl(i)/rwgt - nint(wnl(i)/rwgt))
+            if (abs(dsumi).lt.1d-10) dsumi=0.d0
+         endif
+         
          do j=1,i                                                           
          if (wnl(j).lt.1e-7) wnl(j)=1e-7
             isumj=wnl(j)
+            pisumj=isumj
             dsumj=wnl(j)-isumj
 
+
             lj= abs(ka(j))*2-1                                                 
+            if (lo(j).ne.0) then
+               if (ka(j).gt.0) rwgt=float(lo(j))/(2.d0*lo(j)+1.d0)
+               if (ka(j).lt.0) rwgt=(lo(j)+1.d0)/(2.d0*lo(j)+1.d0)
+               pisumj=rwgt* nint(wnl(j)/rwgt)
+               dsumj=rwgt* (wnl(j)/rwgt - nint(wnl(j)/rwgt))
+               if (abs(dsumj).lt.1d-10) dsumj=0.d0
+            endif
+
             kmax=(li+lj)/2                                                      
             kmin= abs(li-lj)/2                                                  
 
@@ -94,12 +114,12 @@ c calculate a_k(i,j)
             if (j.ne.i) then
 c               c=wnl(j)
                if (dsumi.ne.0.0.and.dsumj.ne.0.0)
-     $              afgk(j,i,0)=(dsumi*(isumi+1)*isumj+
-     $              dsumj*(isumj+1)*isumi)
+     $              afgk(j,i,0)=(dsumi*(pisumi+1.d0)*pisumj+
+     $              dsumj*(pisumj+1.d0)*pisumi)
             else
 c               c=wnl(i)-1.d0
                if (dsumi.ne.0.0)
-     $              afgk(j,i,0)=(isumi*(wnl(i)+dsumi-1))
+     $              afgk(j,i,0)=(pisumi*(wnl(i)+dsumi-1.d0))
 
             endif
 
@@ -114,7 +134,7 @@ c calculate b_k(i,j)
                afgk(i,j,k/2)=b*(cwig3j(li,k*2,lj,1,0,2)**2)                     
 
 
-c               write(7,'(3i5,3f10.6)') i,j,k,b,
+c               write(6,'(3i5,3f10.6)') i,j,k,b,
 c     $              cwig3j(li,k*2,lj,1,0,2)**2,
 c     $              b*(cwig3j(li,k*2,lj,1,0,2)**2)                    
             enddo

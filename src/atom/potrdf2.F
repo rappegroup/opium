@@ -12,7 +12,7 @@ c
 c------------------------------------------------------------
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine potrdf2 (rvn,rvs,ia,kap,method,cg,cp,yrr,xgg)
+      subroutine potrdf2 (rvn,rvs,ia,kap,method,cg,cp,yrr,xgg,ipsp)
                                                     
 c     this programm uses akeato(bkeato),aprdev,multrk,yzkrdf                 
       implicit double precision (a-h,o-z)                                       
@@ -185,11 +185,10 @@ c     rewind(890+ia)
          eg(i)=(eg(i)+at(i)*r(i))/cl                                           
          
          xgg(i)=0.d0
-         if (abs(cg(i,ia)).gt.1e-15) then
+         if (abs(cg(i,ia)).gt.1e-10) then
             xgg(i)=-2.d0*eg(i)*cl/cg(i,ia)
          endif
-         
-c     write(690+ia,*) r(i),rvs(i)*r(i)*cl,rvn(i)*r(i)*cl
+
 c     x3old = 0.0
 c     diff3o = 1.0e-8
 c     do m = 3,10
@@ -217,6 +216,19 @@ c     if (r(i).lt.4) write(850+ia,*) r(i),rvs(i)*cl
 c     $        +eg(i)*cl/(r(i)*cg(i,ia))
          
  531  continue
+
+      if (ipsp.ne.0) then
+
+         do k=np,1,-1
+            if (r(k).lt.0.1) then
+               if (abs(cg(k,ia)).le.1e-10) xgg(k)=rset*r(k)
+            else
+               rset=xgg(k)/r(k)
+            endif
+         enddo
+
+      endif
+
       return                                                                    
       end                                                                       
 

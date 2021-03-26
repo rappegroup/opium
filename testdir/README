@@ -1,6 +1,7 @@
 
 
 8/22/07  Description of tests in $OPIUM/testdir
+9/28/10 - updated with bi frl test
 
 This directory contains parameter files and sample results for the following
 tests.  After compiling the opium program use the script "run" to cycle
@@ -9,6 +10,7 @@ through these tests.
 al
 au
 b
+bi
 c
 ca
 cu
@@ -41,46 +43,48 @@ to show how to plot log. derivs (only works available for non-relativistic DFT p
 
 3) B  - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential 
 
-4) C  - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, finer grid
+4) Bi - DFT/ Perdew-Zunger LDA, optimized pseudopotential, fully relativistic 
 
-5) Ca - DFT/ Perdew-Zunger LDA, semicore, designed-non-local pseudopotential 
+5) C  - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, finer grid
 
-6) Cu - DFT/ Perdew-Zunger LDA, optimized pseudopotential 
+6) Ca - DFT/ Perdew-Zunger LDA, semicore, designed-non-local pseudopotential 
 
-7) Fe - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, finer grid, partial core correction
+7) Cu - DFT/ Perdew-Zunger LDA, optimized pseudopotential 
 
-8) H  - DFT/ Perdew-Zunger LDA, optimized pseudopotential
+8) Fe - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, finer grid, partial core correction
 
-9) Hf - DFT/ Perdew-Zunger LDA, optimized pseudopotential, scalar-relativistic
+9) H  - DFT/ Perdew-Zunger LDA, optimized pseudopotential
 
-10) Ir - DFT/ Perdew-Zunger LDA, optimized pseudopotential, scalar-relativistic, unbound f-state
+10) Hf - DFT/ Perdew-Zunger LDA, optimized pseudopotential, scalar-relativistic
 
-11) La - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential, scalar-relativistic, bound f-state
+11) Ir - DFT/ Perdew-Zunger LDA, optimized pseudopotential, scalar-relativistic, unbound f-state
 
-12) Li - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential
+12) La - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential, scalar-relativistic, bound f-state
 
-13) Mn_spd, Mn_dsp - HF, optimized pseudopotential, smoothing on (3), this test exists to show that
+13) Li - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential
+
+14) Mn_spd, Mn_dsp - HF, optimized pseudopotential, smoothing on (3), this test exists to show that
 HF psps are independent of the order of the valence orbitals.
 
-14) N - HF, Troullier-Martins pseudopotential, smoothing on (1)
+15) N - HF, Troullier-Martins pseudopotential, smoothing on (1)
 
-15) Ne - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential 
+16) Ne - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential 
 
-16) O - DFT/ Perdew-Zunger LDA, optimized pseudopotential, unbound d-state
+17) O - DFT/ Perdew-Zunger LDA, optimized pseudopotential, unbound d-state
 
-17) P - HF, optimized pseudopotential, smoothing on (3)
+18) P - HF, optimized pseudopotential, smoothing on (3)
 
-18) Pt - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, scalar- relativistic, finer grid
+19) Pt - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, scalar- relativistic, finer grid
 
-19) Rh - DFT/ Perdew-Burke-Ernzerhof GGA, designed non-local  pseudopotential, scalar-relativistic, finer grid
+20) Rh - DFT/ Perdew-Burke-Ernzerhof GGA, designed non-local  pseudopotential, scalar-relativistic, finer grid
 
-20) S - DFT/ Perdew-Zunger LDA, optimized pseudopotential, unbound d-state
+21) S - DFT/ Perdew-Zunger LDA, optimized pseudopotential, unbound d-state
 
-21) Te - HF, optimized pseudopotential, smoothing on (3), scalar-relativistic
+22) Te - HF, optimized pseudopotential, smoothing on (3), scalar-relativistic
 
-22) Ti - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential
+23) Ti - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential
 
-23) Y_spdsp, Y_ssppd - DFT/ Wu-Cohen GGA, semicore, optimized pseudopotential, scalar-relativistic, fine 
+24) Y_spdsp, Y_ssppd - DFT/ Wu-Cohen GGA, semicore, optimized pseudopotential, scalar-relativistic, fine 
 convergence tolerance, this test exists to show that DFT psps are independent of order of the valence
 states.
 

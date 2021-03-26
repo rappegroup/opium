@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ c
       dimension ryt(numfn0),rforold(numfn0)
 
       ncon=2
+      iprint=1
 
       write(7,*) 
       write(7,*) 'Starting KE minimization...'
@@ -61,7 +62,7 @@ c         rlvec(3)=rlvec(3)-rx(i)
 c      enddo
 c      if (ll.eq.0.and.-rlvec(3).lt.0.1) ncon=3
 
-c      call fnset2(1,rx,numfn)
+c      call fnset2(iprint,rx,numfn)
 
       do i=1,ncon
          do j=1,numfn
@@ -266,13 +267,11 @@ c     -------------------------------------------------------
       rkconstant=sKs+Vbs+sVKV + rkcon
       rnormconstant=sNs-rNrem + rncon
 
-      rzsum=0.0
       do i=ncon+1,numfn
          rz(i)=0.0
          do j=ncon+1,numfn
             rz(i)=rz(i)+ry(j)*rJ(i-ncon,j-ncon)
          enddo
-         rzsum=rzsum+rz(i)
       enddo
 
 c     rz is the new vector of coeffs
@@ -432,7 +431,7 @@ c            rlam(i)=-(rkk+rkv)/rnormconstant
          enddo
          rsum=rsum+Vss+vsy2
 
-c     write(7,9030) rkk+rkv+rkconstant,rnn+rnormconstant
+c      write(7,9030) rkk+rkv+rkconstant,rnn+rnormconstant
          if ((mod(ntim-1,10).eq.0).or.(ntim.lt.5)) then
             write(7,9040) ntim,rth,rtop,rbot/2,rkk+rkv+rkconstant,rsum
          endif
@@ -447,8 +446,8 @@ c     write(7,9030) rkk+rkv+rkconstant,rnn+rnormconstant
  911  continue
       write(7,*)
       write(7,9025) ntim
-c      write(7,9020) rkk+rkv+rkconstant
-c      write(7,9030) rsum
+      write(7,9020) rkk+rkv+rkconstant
+      write(7,9030) rsum
 
  9025 format(1x,'# steps: ',i5)
  9020 format(1x,'Final KE error:',f16.10)
@@ -459,32 +458,27 @@ c      write(7,9030) rsum
 c     ----------------------------------------
 c     Lets see if we know how to z -> y -> x
 
-      rzsum=0.0
       do i=ncon+1,numfn
          ryt(i)=0.0
          do j=ncon+1,numfn
-            ryt(i)=ryt(i)+rz(j)*rJi(i-ncon,j-ncon)
+            k=i-ncon
+            kk=j-ncon
+            ryt(i)=ryt(i)+rz(j)*rJi(k,kk)
          enddo
-         rzsum=rzsum+rz(i)
       enddo
 
       do i=1,ncon
          ryt(i)=ry(i)
       enddo
 
-      rxsum=0.0
       do i=1,numfn
          rx(i)=0.0
          do j=1,numfn
             rx(i)=rx(i)+Vmat(j,i)*(ryt(j)-rMisN(j))
          enddo
-         rxsum=rxsum+rx(i)
       enddo
 
-      call fnset2(1,rx,numfn)
-      write(7,*) 
-
- 9010 format(4f12.6)
+      call fnset2(iprint,rx,numfn)
       
       return
       end

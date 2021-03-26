@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,16 +27,16 @@
 #include "common_blocks.h"
 #include "nlm.h"
 
-void kcomp_(char *, double[10][N0] , int[10][N0] );
-
+void kcomp_(int *, char *, double[10][N0] , int[10][N0]);
 static char report[8000];
-void nrelorbnl(param_t *param, int); 
+void nrelorbnl(param_t *param, int, char *logfile); 
 void readAE(param_t *param);
 void readPS(param_t *param);
-char * write_reportke(param_t *param , char *rp, double[10][N0] , int[10][N0] );
+char * write_reportke(param_t *param , char *rp, double[10][N0] , int[10][N0], int);
 int do_ke(param_t *param, char *logfile){
 
-  int i; 
+  int i;
+  int irel;
   int config=-1;
   int ikstor[10][N0];
   double rkstor[10][N0];
@@ -54,24 +54,24 @@ int do_ke(param_t *param, char *logfile){
   /* set the log file */
   sprintf(filenames_.file_log, "%s", logfile);
 
-  aorb_.norb=param->nll;
-  aorb_.nval=param->nll;
+  /*  aorb_.norb=param->nll;
+      aorb_.nval=param->nll;*/
 
-  readAE(param);
+  if (!strcmp(param->reltype, "frl")) { 
+    relsproj(param,logfile);
+    relorbnl(param,config,logfile);
+    irel=1;
+  }else{
+    nrelsproj(param,logfile);
+    nrelorbnl(param,config,logfile);
+    irel=0;
+  }
   readPS(param);
-  nrelorbnl(param,config);
 
-  /*sprintf(filename, "%s.psi_nl", param->name);
-  fp = fopen(filename, "rb");
-  for (i=0; i<param->nval; i++)
-    fread(wfn_.rnl[i], sizeof(double), param->ngrid, fp);
-    fclose(fp);*/
-  
   sprintf(filename, "%s.kedat", param->name);
-  kcomp_(filename,rkstor,ikstor);
+  kcomp_(&irel,filename,rkstor,ikstor);
 
-  /*  printf("  %d %lg \n",ikstor[0][0],rkstor[0][0]);*/
-  rp=write_reportke(param,rp,rkstor,ikstor);
+  rp=write_reportke(param,rp,rkstor,ikstor,aorb_.nval);
   fp_log = fopen(logfile, "a");
 
   fprintf(fp_log,"\n ======================================================================== \n");
@@ -89,20 +89,22 @@ void do_ke_report(FILE *fp){
   fprintf(fp, "%s", report);
 }
 
-char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikstor[10][N0]) {
+char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikstor[10][N0], int nol) {
   
   int i,j;
+  char sgn=' ';
   
   j=0;
   rp+=sprintf(rp, "\t ===   Ecut necessary for ~1    eV convergence error / electron === \n");
   rp+=sprintf(rp, "\t --------------------------------------------------------------- \n");
   rp+=sprintf(rp, "\t\t \t Ecut[Ry] \t error [meV/e] \n");
-  for (i=0; i<param->nll; i++){
+  for (i=0; i<nol; i++){
+    if (!strcmp(param->reltype, "frl")) sgn=(adat_.so[i] > 0) ? '+' : '-' ; 
     if (aval_.ibd[i]==1) {
       if (ikstor[j][i] < 0) {
-	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i]);
+	rp+=sprintf(rp, "\t%3d%c \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i],sgn);
       }else{
-	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",aorb_.nlm[i],ikstor[j][i],rkstor[j][i]);
+	rp+=sprintf(rp, "\t%3d%c \t\t   %d \t %16.3f \n",aorb_.nlm[i],sgn,ikstor[j][i],rkstor[j][i]);
       }
     }
   }     
@@ -110,12 +112,13 @@ char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikst
   rp+=sprintf(rp, "\t ===   Ecut necessary for ~100 meV convergence error / electron === \n");
   rp+=sprintf(rp, "\t --------------------------------------------------------------- \n");
   rp+=sprintf(rp, "\t\t \t Ecut[Ry] \t error [meV/e] \n");
-  for (i=0; i<param->nll; i++){
+  for (i=0; i<nol; i++){
+    if (!strcmp(param->reltype, "frl")) sgn=(adat_.so[i] > 0) ? '+' : '-' ; 
     if (aval_.ibd[i]==1) {
       if (ikstor[j][i] < 0) {
-	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i]);
+	rp+=sprintf(rp, "\t%3d%c \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i],sgn);
       }else{
-	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",aorb_.nlm[i],ikstor[j][i],rkstor[j][i]);
+	rp+=sprintf(rp, "\t%3d%c \t\t   %d \t %16.3f \n",aorb_.nlm[i],sgn,ikstor[j][i],rkstor[j][i]);
       }
     }
   }     
@@ -124,12 +127,13 @@ char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikst
   rp+=sprintf(rp, "\t ===   Ecut necessary for  ~10 meV convergence error / electron === \n");
   rp+=sprintf(rp, "\t --------------------------------------------------------------- \n");
   rp+=sprintf(rp, "\t\t \t Ecut[Ry] \t error [meV/e] \n");
-  for (i=0; i<param->nll; i++){
+  for (i=0; i<nol; i++){
+    if (!strcmp(param->reltype, "frl")) sgn=(adat_.so[i] > 0) ? '+' : '-' ; 
     if (aval_.ibd[i]==1) {
       if (ikstor[j][i] < 0) {
-	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i]);
+	rp+=sprintf(rp, "\t%3d%c \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i],sgn);
       }else{
-	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",aorb_.nlm[i],ikstor[j][i],rkstor[j][i]);
+	rp+=sprintf(rp, "\t%3d%c \t\t   %d \t %16.3f \n",aorb_.nlm[i],sgn,ikstor[j][i],rkstor[j][i]);
       }
     }
   }     
@@ -138,12 +142,13 @@ char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikst
   rp+=sprintf(rp, "\t ===   Ecut necessary for   ~1 meV convergence error / electron === \n");
   rp+=sprintf(rp, "\t --------------------------------------------------------------- \n");
   rp+=sprintf(rp, "\t\t \t Ecut[Ry] \t error [meV/e] \n");
-  for (i=0; i<param->nll; i++){
+  for (i=0; i<nol; i++){
+    if (!strcmp(param->reltype, "frl")) sgn=(adat_.so[i] > 0) ? '+' : '-' ; 
     if (aval_.ibd[i]==1) {
       if (ikstor[j][i] < 0) {
-	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i]);
+	rp+=sprintf(rp, "\t%3d%c \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i],sgn);
       }else{
-	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",aorb_.nlm[i],ikstor[j][i],rkstor[j][i]);
+	rp+=sprintf(rp, "\t%3d%c \t\t   %d \t %16.3f \n",aorb_.nlm[i],sgn,ikstor[j][i],rkstor[j][i]);
       }
     }
   }     

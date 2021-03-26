@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#define VERSION "3.0"
+#define VERSION "3.6"
 #ifndef CHOST
 #define CHOST "unknown"
 #endif
@@ -56,7 +56,8 @@
 #include "do_tc.h"
 #include "do_pwf.h"
 #include "do_recpot.h"
-#include "do_upf.h"
+#include "do_qeupf.h"
+#include "do_spinor.h"
 #include "do_fhi.h"
 #include "do_plot.h"
 #include "do_ncpp.h"
@@ -162,7 +163,7 @@ int main(int argc, char *argv[]){
   fprintf(fp_log,
       " See http://opium.sourceforge.net for help and information                 \n");  
   fprintf(fp_log,
-      " Copyright 2007 : The OPIUM project                         \n");
+      " Copyright 2009 : The OPIUM project                         \n");
 
   fprintf(fp_log,"\n Compile host     : %s\n",CHOST);
   fprintf(fp_log," Compile OS       : %s\n",CSYS);
@@ -347,6 +348,7 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
   char filename[160];
   int c;
   int doifc=0;
+  int donl=1;
   int job=-67;
 
   if (streq(command, "v")) {
@@ -366,48 +368,92 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     if (streq(command, "sl"))
       do_nl(param, logfile,0);
     if (verbosity) do_nl_report(stdout);
-    /*  } else if (streq(command, "fc")){
-	do_fc(param, logfile);
-	if (verbosity) do_fc_report(stdout);*/
-  } else if (streq(command, "tc")){
+    /*}else if (streq(command, "fc")){
+      do_fc(param, logfile);
+      if (verbosity) do_fc_report(stdout);*/
+  } else if (streq(command, "tc")||streq(command, "tcn")){
     doifc=0;
-    do_tc(param, logfile, job, doifc);
+    donl=1;
+    do_tc(param, logfile, job, doifc,donl);
     if (verbosity) do_tc_report(stdout);
+  } else if (streq(command, "tcs")){
+    doifc=0;
+    donl=0;
+    do_tc(param, logfile, job, doifc,donl);
+    if (verbosity) do_tc_report(stdout);
+
     /*} else if (streq(command, "tcf")){
     doifc=1;
     do_tc(param, logfile, job, doifc);
     if (verbosity) do_tc_report(stdout);*/
   } else if (streq(command, "pwf")){
+    if (streq(param->reltype,"frl")) {
+      printf("pwf -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
+      exit(-1);
+    }
     fp = fopen(paramfile, "r"); 
     do_pwf(param, fp, logfile); 
     fclose(fp);
   } else if (streq(command, "recpot")){
+    if (streq(param->reltype,"frl")) {
+      printf("recpot -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
+      exit(-1);
+    }
     fp = fopen(paramfile, "r"); 
     do_recpot(param, fp, logfile); 
     fclose(fp);
   } else if (streq(command, "upf")) {
-    do_upf(param, logfile);
+    fp = fopen(paramfile, "r"); 
+    do_qeupf(param, fp, logfile);
+    fclose(fp);
+  } else if (streq(command, "spinor")) {
+    do_spinor(param, logfile);
   } else if (streq(command, "fhi")) {
+    if (streq(param->reltype,"frl")) {
+      printf("fhi -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
+      exit(-1);
+    }
     fp = fopen(paramfile, "r"); 
     do_fhi(param, fp, logfile);
     fclose(fp);
   } else if (streq(command, "champ")) {
+    if (streq(param->reltype,"frl")) {
+      printf("champ -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
+      exit(-1);
+    }
     fp = fopen(paramfile, "r"); 
     do_champ(param, fp, logfile);
     fclose(fp);
   } else if (streq(command, "siesta")||streq(command, "psf")) {
+    if (streq(param->reltype,"frl")) {
+      printf("siesta/psf -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
+      exit(-1);
+    }
     fp = fopen(paramfile, "r"); 
     do_siesta(param, fp, logfile);
     fclose(fp);
   } else if (streq(command, "ncpp")) {
+    if (streq(param->reltype,"frl")) {
+      printf("ncpp -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
+      exit(-1);
+    }
+
     fp = fopen(paramfile, "r"); 
     do_ncpp(param, fp,logfile);
     fclose(fp);
   } else if (streq(command, "casino")) {
+    if (streq(param->reltype,"frl")) {
+      printf("casino -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
+      exit(-1);
+    }
     fp = fopen(paramfile, "r"); 
     do_casino(param, fp,logfile);
     fclose(fp);
   } else if (streq(command, "cpmd")) {
+    if (streq(param->reltype,"frl")) {
+      printf("cpmd -- ERROR - fully relativistic pseudopotentials can only be written using the \"upf\" command\n");  
+      exit(-1);
+    }
     fp = fopen(paramfile, "r"); 
     do_cpmd(param, fp,logfile);
     fclose(fp);
@@ -460,7 +506,7 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     } else {
       do_nl(param, logfile,1); if (verbosity) do_nl_report(stdout);
     }
-    do_tc(param, logfile, job, doifc); if (verbosity) do_tc_report(stdout);
+    do_tc(param, logfile, job, doifc,donl); if (verbosity) do_tc_report(stdout);
   }else{
     fp = fopen(logfile, "a");
     fprintf(fp,"option [%s] not supported!\n", command);
@@ -506,10 +552,12 @@ static void do_chelp(){
   printf("\tsl                  - semi-local pseudopotential solve of the \n"
          "\t                        atomic ref. configuration\n");
   printf("\tke                  - compute kinetic energy error information \n");
-  printf("\ttc                  - test additional configurations\n");
+  printf("\ttc or tcn           - test additional configurations (non-local solve)\n");
+  printf("\ttcs                 - test additional configurations (semi-local solve)\n");
   printf("\tall                 - run through the complete cycle (ae ps nl tc)\n");
   printf("\n\tpseudo file output style \n");
   /*  printf("\tupf      - generate *.upf  output\n"); */
+  printf("\tupf                 - generate *.upf output (QUANTUM ESPRESSO) \n");
   printf("\tpwf                 - generate *.pwf output\n");
   printf("\trecpot              - generate *.recpot (CASTEP) output\n");
   printf("\tfhi                 - generate *.fhi (ABINIT) output\n");
@@ -630,6 +678,7 @@ static void do_khelp(){
   printf("\t  2 - AWR form #1 for Optimized PSPs \n");
   printf("\t  3 - AWR form #2 for Optimized PSPs \n");
   printf("\t  4 - AWR form #3 for Optimized PSPs \n");
+  printf("\t hf smoothing eigenvalue tolerance (float) \n");
 
   printf("\t  See http://opium.sourceforge.net for more help \n\n\n");
   printf("\t=================================================================\n\n\n");

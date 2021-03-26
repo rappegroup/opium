@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,8 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine dftsolve(zeff,ixc,exccut,ipsp,ifc,iexit,irel,iprint)
+      subroutine dftsolve(zeff,ixc,exccut,ipsp,ifc,iexit,irel,
+     $     irelxc,iprint)
      
 c     *************************************************************************
 c     determine the self-consistent solution
@@ -56,6 +57,7 @@ c     -------------------------------------------------------------------------
       common /adat/ wnl(n0),en(n0),so(n0),xion
       common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
 
+      common /niter/ niter
 c     -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks                
 c     -------------------------------------------------------------------------
@@ -67,7 +69,6 @@ c     -------------------------------------------------------------------------
       common /rold/ rnlold(npdm,n0),rpold(npdm,n0)
 c     -------------------------------------------------------------------------
 
-
 c     *************************************************************************
 c     local variables
 c     *************************************************************************
@@ -75,7 +76,7 @@ c     *************************************************************************
       dimension rsatom(npdm),f(npdm),f2(npdm),f3(npdm)
       dimension pder(npdm),ader(npdm)
       dimension dl(n0), rsatom2(npdm)
-      dimension rsold(npdm)
+      dimension rsold(npdm),wnlfract(npdm)
       dimension wavea(npdm),icarray(n0)
 c     *************************************************************************
 c     Section 1:  set up tolerance params and zero out arrays.
@@ -98,6 +99,34 @@ c     *************************************************************************
 
       open(unit=7,file=file_log,form='formatted',access='append')
 
+c     User supplied eigenvalue guesses were never used in the SRL
+c     routines ; disable for now.
+
+      if (irel.eq.1) then
+         do i=1,ncore
+            en(i)=-z*z/(no(i)*no(i))
+         enddo
+         do i=1,nval
+            ii=i+ncore
+            if (ibd(i).ne.0) en(ii)=-z*z/(no(ii)*no(ii))
+         enddo
+      endif
+
+c      if (ipsp.eq.1) then
+c
+c         do i=1,norb
+c            write(7,*) i,en(i),no(i),lo(i),so(i),ibd(i)
+c         enddo
+c      endif
+
+      write(7,*) '---------Eigenvalue guesses---------'      
+
+      do i=1,norb
+         ipos(i)=0
+         write(7,9339) no(i),xc(lo(i)),en(i)
+      enddo
+ 9339 format(1x,i1,a1,3x,f20.8)
+     
       if (ipsp.eq.1) then
          nlc=nlm(iloc)/100
          llc=(nlm(iloc) - nlc * 100)/10
@@ -140,7 +169,7 @@ c     *************************************************************************
         enddo
       endif
 
-      do i = 1,np
+      do i = 1,np         
         rvcoul(i) = rvps(i,1) - rvcore(i,1)
       enddo
 
@@ -196,7 +225,7 @@ c     *************************************************************************
 c     *************************************************************************
 c     Begin self-consistency loop.
 c     *************************************************************************
-
+      maxit=1000
       etotlast = 0
       ifock=0
       do niter = 1,maxit
@@ -229,14 +258,11 @@ c     ***********************************************************************
 c     Section 3:  call schsl for each orbital & compile charge density.
 c     ***********************************************************************
 
-c     major messy
-
          do m = 1,norb
-            
             if (m.le.ncore) then
                ibound=1
             else
-               ibound=ibd(m-ncore)
+               ibound=ibd(m-ncore)               
             endif
 
             if (ifc.eq.0.or.m.gt.ncore) then
@@ -253,7 +279,7 @@ c     if non-local
                         Flstar(i) = (rvps(i,m) - rvloc(i))
      $                       *phipsref(i,m)/r(i)
                      enddo
-                     
+
                      call schsl (m,no(m),lo(m),en(m),nmax(m),
      $                    rvloc,p,igh,ibound)
 
@@ -355,7 +381,7 @@ c     ***********************************************************************
             do i=1,maxim
                rsatom2(i)=rsatom(i)+rscore(i)
             enddo
-            call excorr(maxim,ixc,exccut,r,rsatom2,rvxc,rexc,irel)
+            call excorr(maxim,ixc,exccut,rsatom2,rvxc,rexc,irelxc)
             
             do i = 1,maxim
                f(i) = 0.5d0 * rvh(i)*rsatom(i)/r(i)
@@ -363,7 +389,7 @@ c     ***********************************************************************
      $              - (rvxc(i)*rsatom(i)+rvh(i)*rsatom(i))/r(i)
             enddo
          else
-            call excorr(maxim,ixc,exccut,r,rsatom,rvxc,rexc,irel)
+            call excorr(maxim,ixc,exccut,rsatom,rvxc,rexc,irelxc)
             
             do i = 1,maxim
                f(i) = (0.5d0 * rvh(i) + rexc(i) - (rvxc(i)+rvh(i)) ) 
@@ -393,14 +419,16 @@ c     ***********************************************************************
          do i = 1,maxim
             coul = rvh(i) + rvxc(i)
             dv = abs(coul - rvcoul(i))
+            if (dv.gt.dvmax) igdd=i
             dvmax = max(dv,dvmax)
             pr = 0.5
             if (npratt.gt.0) pr = pratt(rvn(i),rvf(i),rvcoul(i),coul)
             rvn(i) = rvcoul(i)
             rvf(i) = coul
-            rvcoul(i)= pr * rvcoul(i) + (1 - pr) * coul
+            rvcoul(i)= pr * rvcoul(i) + (1.d0 - pr) * coul
          enddo
-
+ 9103    format(4f20.10)
+         
          do i = maxim + 1,np
             rvcoul(i) = xn2
             rvn(i) = xn2
@@ -436,7 +464,7 @@ c     ***********************************************************************
      $        ,'de_max',3x,'dv_max')
  490     format(1x,i3,2x,f15.7,1x,f15.7,1x,f15.7)
  491     format(1x,i3,2x,f15.7,1x,f15.7,1x,f15.7,1x,e8.2,1x,e8.2)
-         
+
          if (dvmax.lt.vtol.and.edmax.lt.etol) goto 1000
          
 c     ***********************************************************************
@@ -488,12 +516,12 @@ c     911 = terminal error - exit scpot
                endif
             endif
          enddo
-      enddo
 
+      enddo
 
  505  format(1x,'!WARNING! positive eigenvalue predicted',
      $     ' in scpot  nlm=',i4,5x,'new e =',e13.7)
-
+     
  1000 continue
 
 c     ***********************************************************************
@@ -544,7 +572,6 @@ c     ***********************************************************************
                   enddo
                enddo
             else
-               
                do m=1,nval
                   call nllogd(m,lo(m))
                enddo
@@ -671,7 +698,6 @@ c     may want to add bound radius <> rc?
 c               do k = 1,icarray(ic)+20
                do k = 1,np
                   rnl(k,i)=rnl(k,i)/sqrt(pow)
-
                enddo
                do k = 1,icarray(ic)
                   wavea(k) = rnl(k,i) * rnl(k,i)
@@ -679,6 +705,7 @@ c               do k = 1,icarray(ic)+20
                pow = 2 * lo(i) + 2
                call radin(r,wavea,0,icarray(ic),h,pow)            
                rnorm(i) = 1.0-pow
+               
 c     Should be zero right? Should we check?
             endif
          enddo                     
@@ -690,6 +717,7 @@ c     Should be zero right? Should we check?
             do k = 1,np
                wavea(k) = rnla(k,i) * rnla(k,i)
      $              +rnlb(k,i) * rnlb(k,i)
+               rnl(k,i)=rnla(k,i)
             enddo
             pow = 2 * lo(i) + 2
             call radin(r,wavea,0,icarray(ic),h,pow)
@@ -699,6 +727,7 @@ c     Should be zero right? Should we check?
 c               do k = 1,icarray(ic)+20
                do k = 1,np
                   rnla(k,i)=rnla(k,i)/sqrt(pow)
+                  rnl(k,i)=rnla(k,i)
                enddo
                do k = 1,icarray(ic)
                   wavea(k) = rnla(k,i) * rnla(k,i)
@@ -709,6 +738,17 @@ c               do k = 1,icarray(ic)+20
             endif
          enddo
       endif
+
+c      if (ipsp.eq.0) then
+c         do i=ncore+1,norb
+c            do j=1,np
+c               if (r(j).gt.20) goto 943
+c               write(80+i-ncore,*) r(j),rnl(j,i),rvps(j,i)
+c            enddo
+c 943        continue
+c         enddo
+c      endif
+
 
 c     Flip wfn s.t. it is >0 as r->oo
 c     HEY didn't we already do this?? for nmax though?
@@ -857,7 +897,7 @@ c     ***********************************************************************
 
       if (inl.ne.0) then
          call applyaug(rvloc,rvps(1,iloc))
-         call ghostnl (iloc,rvloc)
+         call ghostnl (rvloc)
          call applyaug(rvloc,rvcore(1,iloc))
       endif
 

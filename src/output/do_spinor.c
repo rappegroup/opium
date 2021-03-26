@@ -1,5 +1,9 @@
+/*  This is code for the "spinor" psp format. The suffix for this
+format was originally .upf, but I am changing this to .spinor so 
+the QE UPF output can be introduced.  This format also uses the UniPPlib 
+directory. I am not sure if this output even works anymore?? */
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +21,14 @@
  *
  */
 /*
- * $Id: do_upf.c,v 1.4 2004/10/02 18:34:49 ewalter Exp $
  */
 
 /****************************************************************************
 *                                                                           *
-* generate *.upf output                                                     *
+* generate *.spinor output                                                     *
 *****************************************************************************
 INPUT:  param_t structure, *.nlp, *.loc
-OUTPUT: *.upf
+OUTPUT: *.spinor
 ****************************************************************************/
 
 /* standard libraries */
@@ -35,12 +38,12 @@ OUTPUT: *.upf
 #include <math.h>
 
 #include "parameter.h"        /* defines structure: 'param_t' */
-#include "uniPPlib.h"         /* library for upf pseudopotential format */
+#include "uniPPlib.h"         /* library for spinor pseudopotential format */
 #include "cdim.h"        /* fortran code parameters */
-#include "do_upf.h"           /* the module's own header */
+#include "do_spinor.h"           /* the module's own header */
 
 
-int do_upf(param_t *param, char *logfile){
+int do_spinor(param_t *param, char *logfile){
 
   int i, l;           /* loop counter */
   uniPP unipp;        /* a uniPP object */
@@ -55,7 +58,7 @@ int do_upf(param_t *param, char *logfile){
   static double rnl[N0][NPDM];
 
   fp_log = fopen(logfile, "a");
-  fprintf(fp_log,"<<<do_upf>>>\n");
+  fprintf(fp_log,"<<<do_spinor>>>\n");
   
   /* set nnval to the correct number of orbitals, considering frl case */
   if (!strcmp(param->reltype, "frl"))
@@ -157,8 +160,8 @@ int do_upf(param_t *param, char *logfile){
       unipp.n_pc[i] = rscore[i] / (unipp.r_m[i] * unipp.r_m[i]);
   }
   
-  /* open the file and call the method to write upf format */  
-  sprintf(filename, "%s.upf", param->name);
+  /* open the file and call the method to write spinor format */  
+  sprintf(filename, "%s.spinor", param->name);
   fp = fopen(filename, "w");
   uniPP_write(&unipp, fp);
   fclose(fp);  

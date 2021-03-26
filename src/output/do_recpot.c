@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 
 /* standard libraries */
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "parameter.h"        /* defines structure: 'param_t' */
 #include "cdim.h"        /* fortran code parameters */
@@ -47,6 +48,7 @@ int do_recpot(param_t *param, FILE *fp_param, char *logfile){
 
   fp_log = fopen(logfile, "a");
   fprintf(fp_log,"<<<do_recpot>>>\n");
+  fclose(fp_log);
 
   /* set the log file */
   sprintf(filenames_.file_log, "%s", logfile);
@@ -88,12 +90,18 @@ int do_recpot(param_t *param, FILE *fp_param, char *logfile){
 
   config=-1;
   nrelorbnl(param,config,logfile);
-
-  /* read in the local potential from a binary file created by do_nl() */
+  
   sprintf(filename, "%s.loc", param->name);
-  fp = fopen(filename, "rb");
-  fread(nlcore_.rvloc, sizeof(double), param->ngrid, fp);
-  fclose(fp);
+  if (fp = fopen(filename, "rb")) {
+    fread(nlcore_.rvloc, sizeof(double), param->ngrid, fp);
+    fclose(fp);
+    } else {
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log,"Looks like you never ran nl yet you have augmentation functions :( --EXIT!\n");
+    printf("Looks like you never ran nl yet you have augmentation functions :( --EXIT!\n");
+    fclose(fp_log);
+  }
+
 
   /*  for (i=0; i<param->nll; i++) {
     sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
@@ -133,7 +141,7 @@ int do_recpot(param_t *param, FILE *fp_param, char *logfile){
   return 0;
 }
 
-void writeparam_(FILE *fpp, FILE *fpp_param, double *ecutev) {
+void writeparam_(FILE *fpp, FILE *fpp_param, double *ecutev, int *version) {
   int c;
   int cut;
 
@@ -163,6 +171,5 @@ void writeparam_(FILE *fpp, FILE *fpp_param, double *ecutev) {
 
 
   fprintf(fpp, "END COMMENT \n");
-  fprintf(fpp, " 3 5 \n");
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 
 int do_keplot(param_t *param, char *logfile){
 
-  int i;
+  int i,j,k=0,lwid=2;
   int scount=0;
   int pcount=0;
   int dcount=0;
@@ -47,7 +47,7 @@ int do_keplot(param_t *param, char *logfile){
 
   FILE *parm;
   char *comm;
-  char lc=0;
+  char lc=0,sc=0;
 
   #define comm_size 240
   comm= (char *) malloc(comm_size*sizeof(char));
@@ -57,8 +57,6 @@ int do_keplot(param_t *param, char *logfile){
   readAE(param);
 
   do_ke(param,logfile);
-
-  /* check for semicore */
 
   parm = fopen("ke.par","w");
   
@@ -102,49 +100,110 @@ int do_keplot(param_t *param, char *logfile){
   fprintf(parm,"legend on\n");
   fprintf(parm,"legend loctype view\n");
   fprintf(parm,"legend 0.85, 0.8\n");
-  
-  for (i=0; i<param->nval;i++){
-    
-    if (nlm_label(param->nlm[i+ncore]).l == 0) {
-      scount++;
-      lcolor=1;
-      lsty=scount;
-      lc='s';
-    }else if (nlm_label(param->nlm[i+ncore]).l == 1) {
-      pcount++;
-      lcolor=2;
-      lsty=pcount;
-      lc='p';
-    }else if (nlm_label(param->nlm[i+ncore]).l == 2) {
-      dcount++;
-      lcolor=3;
-      lsty=dcount;
+
+  if (!streq(param->reltype, "frl")){  
+    for (i=0; i<param->nval;i++){
+      
+      if (param->lpot[i] == 0) {
+	scount++;
+	lcolor=1;
+	lsty=scount;
+	lc='s';
+      }else if (param->lpot[i] == 1) {
+	pcount++;
+	lcolor=2;
+	lsty=pcount;
+	lc='p';
+      }else if (param->lpot[i] == 2) {
+	dcount++;
+	lcolor=3;
+	lsty=dcount;
 	lc='d';
-    }else if (nlm_label(param->nlm[i+ncore]).l == 3) {
-      fcount++;
-      lcolor=4;
-      lsty=fcount;
-      lc='f';
+      }else if (param->lpot[i] == 3) {
+	fcount++;
+	lcolor=4;
+	lsty=fcount;
+	lc='f';
+      }
+      fprintf(parm," s%d hidden false \n",i);
+      fprintf(parm," s%d type xy \n",i);
+      fprintf(parm," s%d symbol 0 \n",i);
+      fprintf(parm," s%d line type 1 \n",i);
+      fprintf(parm," s%d line linestyle %d \n",i,lsty);
+      fprintf(parm," s%d line linewidth 2.0 \n",i);
+      fprintf(parm," s%d line color %d \n",i,lcolor);
+      fprintf(parm," s%d legend \"%c\" \n",i,lc);
     }
-    fprintf(parm," s%d hidden false \n",i);
-    fprintf(parm," s%d type xy \n",i);
-    fprintf(parm," s%d symbol 0 \n",i);
-    fprintf(parm," s%d line type 1 \n",i);
-    fprintf(parm," s%d line linestyle %d \n",i,lsty);
-    fprintf(parm," s%d line linewidth 2.0 \n",i);
-    fprintf(parm," s%d line color %d \n",i,lcolor);
-    fprintf(parm," s%d legend \"%d%c\" \n",i,
-	    nlm_label(param->nlm[i+ncore]).n,lc);
+  }else{
+    for (i=0; i<param->nval;i++){
+      
+      if (nlm_label(param->nlm[i+ncore]).l == 0) {
+	scount++;
+	lcolor=1;
+	lsty=scount;
+	lc='s';
+	sc=' ';
+	fprintf(parm," s%d hidden false \n",k);
+	fprintf(parm," s%d type xy \n",k);
+	fprintf(parm," s%d symbol 0 \n",k);
+	fprintf(parm," s%d line type 1 \n",k);
+	fprintf(parm," s%d line linestyle %d \n",k,lsty);
+	fprintf(parm," s%d line linewidth 2.0 \n",k);
+	fprintf(parm," s%d line color %d \n",k,lcolor);
+	fprintf(parm," s%d legend \"%c\" \n",k,lc);
+	k++;
+      }else{
+	for (j=0;j<2;j++) {
+	  if (j == 0) sc='-';
+	  if (j == 1) sc='+';
+	  if (nlm_label(param->nlm[i+ncore]).l == 1) {	  
+	    pcount++;
+	    lcolor=2;
+	    lwid=2.0;
+	    lsty=1;
+	    if (j==1) {
+	      lwid=4.0;
+	      lsty=3;
+	    }
+	    lc='p';
+	    
+	  }else if (nlm_label(param->nlm[i+ncore]).l == 2) {	  
+	    dcount++;
+	    lcolor=3;
+	    lwid=2.0;
+	    lsty=1;
+	    if (j==1) {
+	      lwid=4.0;
+	      lsty=3;
+	    }
+	    lc='d';
+	    
+	  }else if (nlm_label(param->nlm[i+ncore]).l == 3) {	  
+	    fcount++;
+	    lcolor=4;
+	    lwid=2.0;
+	    lsty=1;
+	    if (j==1) {
+	      lwid=4.0;
+	      lsty=3;
+	    }
+	    lc='f';
+	    
+	  }
+	  
+	  fprintf(parm," s%d hidden false \n",k);
+	  fprintf(parm," s%d type xydx \n",k);
+	  fprintf(parm," s%d symbol 0 \n",k);
+	  fprintf(parm," s%d line type 1 \n",k);
+	  fprintf(parm," s%d line linestyle %d \n",k,lsty);
+	  fprintf(parm," s%d line linewidth %d \n",k,lwid);
+	  fprintf(parm," s%d line color %d \n",k,lcolor);
+	  fprintf(parm," s%d legend \"%c%c\" \n",k,lc,sc);
+	  k++;
+	}
+      }
+    }
   }
-  /*i=param->nll;
-  fprintf(parm," s%d hidden false \n",i);
-  fprintf(parm," s%d type xy \n",i);
-  fprintf(parm," s%d symbol 0 \n",i);
-  fprintf(parm," s%d line type 1 \n",i);
-  fprintf(parm," s%d line linestyle %d \n",i,3);
-  fprintf(parm," s%d line linewidth 3.0 \n",i);
-  fprintf(parm," s%d line color %d \n",i,14);
-  fprintf(parm," s%d legend \"V_loc\"\n" ,i);*/
   
   fclose(parm);
   

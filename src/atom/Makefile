@@ -13,7 +13,7 @@ fobjects = cubint.o excorr.o pbe.o ghostnl.o schslrel.o \
 	yzkrdf.o yzkteg.o lagdat.o fdrirk.o etotal.o hfmethd.o hfde.o \
 	hfsolve.o hfenergy.o potrdf2.o hfcoef_rel.o hfint.o hfuncs.o
 
-cobjects = do_ae.o do_nl.o do_tc.o do_fc.o writeae.o startae.o relorbae.o nrelorbae.o
+cobjects = do_ae.o do_nl.o do_tc.o do_fc.o writeae.o startae.o relorbae.o nrelorbae.o relorbnl.o nrelorbnl.o
 
 all_objects = $(fobjects) $(cobjects)
 

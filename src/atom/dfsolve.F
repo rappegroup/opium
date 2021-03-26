@@ -12,7 +12,7 @@ c
 c------------------------------------------------------------
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -144,8 +144,10 @@ c      testy=1.d-5
       if (niter.ge.0) goto 105
  104  call ortdat(j,ka)
  105  method=1
-      if ((nre(j).gt.0).and.ipl.ne.0) call lagdat(i,j,ka)
+
+      if ((nre(j).gt.0).and.ipl.ne.0) call lagdat(j,1,ka)
       call potrdf(rvcore(1,j),rvps(1,j),j,ka,method)
+
       e=en(j)
       npp=nmax(j)
       idim=npp
@@ -153,12 +155,11 @@ c      testy=1.d-5
       ifail=0
 
       ainf=cg(nmax(j),j)
-
+      
       call soldir(j,no(j),lo(j),en(j),
      $     fl(j),bg(1,j),bp(1,j),rvps(1,j),
      $     ainf,test1,test2,
      $     ka(j),nmax(j),ifail,method)
-
 
       if ((ifail.ne.0).and.(jfail.eq.0)) jfail=j
       if ((jfail.eq.j).and.(ifail.eq.0)) jfail=0
@@ -190,7 +191,7 @@ c      testy=1.d-5
  491  format(1x,i6,2x,i6,f18.8,14x,e10.3,8x,e10.3)
  191  format(' iter',7x,'orb',13x,'eig',18x,
      $     'de_max',12x,'dv_max')
-      
+
 c     accel conv
       b=scc(j)
       call cofcon(a,b,pr,scw(j))
@@ -248,6 +249,7 @@ c     accel conv
       goto 451
  421  ind=1
  451  continue
+
       if (nter.le.netir) goto 101
       stop "out of its"
       
@@ -260,6 +262,26 @@ c     accel conv
       endif
 
       call etotal(ka,ebs,eh,ex)
+
+      
+      write(7,*) "Overlap Integrals: {nlk|nlk}"
+      zero=0.d0
+      do 351 i=1,norb-1                                                         
+         do 331 j=i+1,norb                                                      
+            if (ka(j).ne.ka(i)) go to 331                                     
+            at=dsordf(i,j,0,1, zero)                                         
+            if (ka(j).gt.0) then
+               write(7,2091)  no(i),lo(i),iabs(ka(i)),
+     $              no(j),lo(j),iabs(ka(j)),at                 
+            else
+               write(7,2092)  no(i),lo(i),iabs(ka(i)),
+     $              no(j),lo(j),iabs(ka(j)),at                 
+            endif
+ 331     continue                                                               
+ 351  continue                                                                  
+ 2091 format(6x,'{',2i1,'+',i1,'|',2i1,'+',i1,'}=',1pd8.1)
+ 2092 format(6x,'{',2i1,'-',i1,'|',2i1,'-',i1,'}=',1pd8.1)
+
 
       do i=1,norb
          en(i)=en(i)*2.d0
@@ -276,7 +298,7 @@ c     accel conv
          do i=1,norb
             maxim=max(maxim,nmax(i))
             call potrdf2(rvcore(1,i),rvps(1,i),i,ka,method,
-     $           rnla,rnlb,rhart,xg)
+     $           rnla,rnlb,rhart,xg,ipsp)
             do j=1,np
                rnl(j,i)=sqrt(rnla(j,i)**2+rnlb(j,i)**2)
                rvps(j,i)=rvcore(j,i)+2.d0*rhart(j)+xg(j)
@@ -418,13 +440,33 @@ c     ***********************************************************************
       if (iprint.gt.0) write (7,9222)
 
       do i = 1,ncore
-         if (iprint.gt.0) write (7,9223) nlm(i),wnl(i),en(i)
+         if (iprint.gt.0) then 
+            if (lo(i).eq.0) then
+               write (7,9523) nlm(i),wnl(i),en(i)
+            else
+               if (so(i).lt.0) then
+                  write (7,9323) nlm(i),wnl(i),en(i)
+               else
+                  write (7,9423) nlm(i),wnl(i),en(i)
+               endif
+            endif
+         endif
       enddo
+      
       do i = ncore+1,norb
-            if (iprint.gt.0) write (7,9223) nlm(i),wnl(i),
-     $           en(i),rnorm(i),rvap(i)
-       enddo
-
+         if (iprint.gt.0) then
+            if (lo(i).eq.0) then
+               write (7,9523) nlm(i),wnl(i),en(i),rnorm(i),rvap(i)
+            else
+               if (so(i).lt.0) then
+                  write (7,9323) nlm(i),wnl(i),en(i),rnorm(i),rvap(i)
+               else
+                  write (7,9423) nlm(i),wnl(i),en(i),rnorm(i),rvap(i)
+               endif
+            endif
+         endif
+      enddo
+      
       do i=1,norb
          do j=1,np
             cg(j,i)=rnla(j,i)
@@ -438,8 +480,18 @@ c     ***********************************************************************
 
  9222 format(3x,'Orbital',4x,'Filling',7x,'Eigenvalues',4x,
      $     'Norm(rc->oo)',6x,'Peak')
+
  9223 format(4x,'|',i3,'>',5x,f6.3,5x,3f14.6)
- 9224 format(4x,'|',i3,'>',5x,f6.3,5x,f14.6,6x,
+ 9224 format(4x,'|',i3,'>',5x,f6.3,5x,f14.6,"*",5x,
+     $     '---------',5x,'--------')
+ 9323 format(4x,'|',i3,'->',5x,f6.3,5x,3f14.6)
+ 9324 format(4x,'|',i3,'->',5x,f6.3,5x,f14.6,6x,
+     $     '---------',5x,'--------')
+ 9423 format(4x,'|',i3,'+>',5x,f6.3,5x,3f14.6)
+ 9424 format(4x,'|',i3,'+>',5x,f6.3,5x,f14.6,6x,
+     $     '---------',5x,'--------')
+ 9523 format(4x,'|',i3,' >',5x,f6.3,5x,3f14.6)
+ 9524 format(4x,'|',i3,' >',5x,f6.3,5x,f14.6,6x,
      $     '---------',5x,'--------')
 
  9009 format(1x,'partial core radius : ', f10.4)

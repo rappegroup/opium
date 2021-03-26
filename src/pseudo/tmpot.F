@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ c
       idir = 1
       iter = 1
       itmax = 10000
-      
+
       llp=ll+1
 
 c     Save R_nl in rpsi
@@ -243,7 +243,7 @@ c     Calc head norm
       c12=c12n-(1920*c0+384*c2*rc2)/(384.*rc12)
       
 
-      write(7,*) "Troullier-Matrin has converged"
+      write(7,*) "Troullier-Martins has converged"
 
       do i = 1,indrc
          ri2=r(i)*r(i)

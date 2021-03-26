@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
   int lcolor=0;
   int lsty=0;
   int ncore;
+  int lwid=2;
 
   FILE *parm;
   char *comm;
@@ -73,14 +74,15 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
     } else {
       fprintf(parm,"title \"All electron wavefunctions for %s\"\n",param->symbol);
     }
-    if (param->psmeth=='o') {
-      snprintf(met,met_size,"Optimized Pseudopotential Method");
-    }else if (param->psmeth=='k') {
-      snprintf(met,met_size,"Kerker Pseudopotential Method");
-    }else if (param->psmeth=='t') {
-      snprintf(met,met_size,"Troullier-Martins Pseudopotential Method");
+    if (streq(pltyp,"n")) {
+      if (param->psmeth=='o') {
+	snprintf(met,met_size,"Optimized Pseudopotential Method");
+      }else if (param->psmeth=='k') {
+	snprintf(met,met_size,"Kerker Pseudopotential Method");
+      }else if (param->psmeth=='t') {
+	snprintf(met,met_size,"Troullier-Martins Pseudopotential Method");
+      }
     }
-    
     if (param->ixc == 0) {
       snprintf(xc,xc_size,"XC=Perdew-Zunger LDA");
     }else if (param->ixc == 1) {
@@ -92,6 +94,8 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
     }else if (param->ixc == 4) {    
       snprintf(xc,xc_size,"XC=Wu-Cohen GGA");
     }else if (param->ixc == 5) {    
+      snprintf(xc,xc_size,"XC=PBESol GGA");
+    }else if (param->ixc == 6) {    
       snprintf(xc,xc_size,"XC=VWN5 LDA");
     }else if (param->ixc == -1) {
       snprintf(xc,xc_size,"Hartree-Fock Exchange");
@@ -148,7 +152,7 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
 	fprintf(parm," s%d symbol 0 \n",i);
 	fprintf(parm," s%d line type 1 \n",i);
 	fprintf(parm," s%d line linestyle %d \n",i,lsty);
-	fprintf(parm," s%d line linewidth 3.0 \n",i);
+	fprintf(parm," s%d line linewidth 2.0 \n",i);
 	fprintf(parm," s%d line color %d \n",i,lcolor);
 	fprintf(parm," s%d legend \"\\xy\\f{}\\s%d%c\\N\\S\\-AE\\N\" \n",i,
 		nlm_label(param->nlm[i+ncore]).n,lc);
@@ -169,7 +173,7 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
 	  fprintf(parm," s%d symbol 0 \n",k);
 	  fprintf(parm," s%d line type 1 \n",k);
 	  fprintf(parm," s%d line linestyle %d \n",k,lsty);
-	  fprintf(parm," s%d line linewidth 3.0 \n",k);
+	  fprintf(parm," s%d line linewidth 2.0 \n",k);
 	  fprintf(parm," s%d line color %d \n",k,lcolor);
 	  fprintf(parm," s%d legend \"\\xy\\f{}\\s%d%c%c\\N\\S\\-AE\\N\" \n",
 		  k,nlm_label(param->nlm[i+ncore]).n,lc,sc);
@@ -184,19 +188,35 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
 	    if (nlm_label(param->nlm[i+ncore]).l == 1) {	  
 	      pcount++;
 	      lcolor=2;
-	      lsty=pcount;
+	      lsty=1;
+	      lwid=2.0;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
+
 	      lc='p';
 	      
 	    }else if (nlm_label(param->nlm[i+ncore]).l == 2) {	  
 	      dcount++;
 	      lcolor=3;
-	      lsty=dcount;
+	      lsty=1;
+	      lwid=2.0;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
 	      lc='d';
 
 	    }else if (nlm_label(param->nlm[i+ncore]).l == 3) {	  
 	      fcount++;
 	      lcolor=4;
-	      lsty=fcount;
+	      lsty=1;
+	      lwid=2.0;
+	      if (j==1) {
+		lwid=4.0;
+		lsty=3;
+	      }
 	      lc='f';
 
 	    }
@@ -206,7 +226,7 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
 	    fprintf(parm," s%d symbol 0 \n",k);
 	    fprintf(parm," s%d line type 1 \n",k);
 	    fprintf(parm," s%d line linestyle %d \n",k,lsty);
-	    fprintf(parm," s%d line linewidth 3.0 \n",k);
+	    fprintf(parm," s%d line linewidth %d\n",k,lwid);
 	    fprintf(parm," s%d line color %d \n",k,lcolor);
 	    fprintf(parm," s%d legend \"\\xy\\f{}\\s%d%c%c\\N\\S\\-AE\\N\" \n",
 		    k,nlm_label(param->nlm[i+ncore]).n,lc,sc);
@@ -216,7 +236,7 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
 
       }
 
-      if (param->ixc >= 0 ){	  
+      if ((param->ixc >= 0 )&&(streq(param->reltype, "srl"))){	  
 	/* if DFT, there is an average wfn to plot */
 	for (i=0; i<param->nval;i++){
 	  if (nlm_label(param->nlm[i+ncore]).l == 0) {
@@ -256,53 +276,131 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
 
     /* now do the pseudowfns if asked for */    
     if (streq(pltyp,"n")) {
-
-      
-      for (i=0; i<param->nval;i++) {
+      if (!streq(param->reltype, "frl")){  
 	
-	if (nlm_label(param->nlm[i+ncore]).l == 0) {
-	  scount++;
-	  lcolor=1;
-	  lsty=scount;
-	  lc='s';
-	}else if (nlm_label(param->nlm[i+ncore]).l == 1) {
-	  pcount++;
-	  lcolor=2;
-	  lsty=pcount;
-	  lc='p';
-	}else if (nlm_label(param->nlm[i+ncore]).l == 2) {
-	  dcount++;
-	  lcolor=3;
-	  lsty=dcount;
-	  lc='d';
-	}else if (nlm_label(param->nlm[i+ncore]).l == 3) {
-	  fcount++;
-	  lcolor=4;
-	  lsty=fcount;
-	  lc='f';
+	for (i=0; i<param->nval;i++) {
+	  
+	  if (nlm_label(param->nlm[i+ncore]).l == 0) {
+	    scount++;
+	    lcolor=1;
+	    lsty=4;
+	    lc='s';
+	  }else if (nlm_label(param->nlm[i+ncore]).l == 1) {
+	    pcount++;
+	    lcolor=2;
+	    lsty=4;
+	    lc='p';
+	  }else if (nlm_label(param->nlm[i+ncore]).l == 2) {
+	    dcount++;
+	    lcolor=3;
+	    lsty=4;
+	    lc='d';
+	  }else if (nlm_label(param->nlm[i+ncore]).l == 3) {
+	    fcount++;
+	    lcolor=4;
+	    lsty=4;
+	    lc='f';
+	  }
+	  
+	  fprintf(parm," s%d hidden false \n",k+i);
+	  fprintf(parm," s%d type xydx \n",k+i);
+	  fprintf(parm," s%d symbol 0 \n",k+i);
+	  fprintf(parm," s%d line type 1 \n",k+i);
+	  fprintf(parm," s%d line linestyle %d\n",k+i,lsty);
+	  fprintf(parm," s%d line linewidth 2.0 \n",k+i);
+	  fprintf(parm," s%d line color %d \n",k+i,lcolor);
+	  fprintf(parm," s%d legend \"\\xy\\f{}\\s%d%c\\N\\S\\-NL\\N\" \n",i+k,nlm_label(param->nlm[i+ncore]).n,lc);
+	  fprintf(parm," s%d errorbar on\n",k+i);
+	  fprintf(parm," s%d errorbar place both\n",k+i);
+	  fprintf(parm," s%d errorbar color %d\n",k+i,lcolor);
+	  fprintf(parm," s%d errorbar pattern 1\n",k+i);
+	  fprintf(parm," s%d errorbar size 10.000000\n",k+i);
+	  fprintf(parm," s%d errorbar linewidth 2.0\n",k+i);
+	  fprintf(parm," s%d errorbar linestyle 1\n",k+i);
 	}
-	
-	fprintf(parm," s%d hidden false \n",k+i);
-	fprintf(parm," s%d type xydx \n",k+i);
-	fprintf(parm," s%d symbol 0 \n",k+i);
-	fprintf(parm," s%d line type 1 \n",k+i);
-	fprintf(parm," s%d line linestyle %d\n",k+i,lsty);
-	fprintf(parm," s%d line linewidth 3.0 \n",k+i);
-	fprintf(parm," s%d line color %d \n",k+i,lcolor);
-	fprintf(parm," s%d legend \"\\xy\\f{}\\s%d%c\\N\\S\\-NL\\N\" \n",i+k,nlm_label(param->nlm[i+ncore]).n,lc);
-	fprintf(parm," s%d errorbar on\n",k+i);
-	fprintf(parm," s%d errorbar place both\n",k+i);
-	fprintf(parm," s%d errorbar color %d\n",k+i,lcolor);
-	fprintf(parm," s%d errorbar pattern 1\n",k+i);
-	fprintf(parm," s%d errorbar size 10.000000\n",k+i);
-	fprintf(parm," s%d errorbar linewidth 2.0\n",k+i);
-	fprintf(parm," s%d errorbar linestyle 1\n",k+i);
+      }else{
+	for (i=0; i<param->nval;i++) {
+	  if (nlm_label(param->nlm[i+ncore]).l == 0) {
+	    scount++;
+	    lcolor=1;
+	    lsty=7;
+	    lc='s';
+	    sc=' ';
+	    fprintf(parm," s%d hidden false \n",k);
+	    fprintf(parm," s%d type xy \n",k);
+	    fprintf(parm," s%d symbol 0 \n",k);
+	    fprintf(parm," s%d line type 1 \n",k);
+	    fprintf(parm," s%d line linestyle %d \n",k,lsty);
+	    fprintf(parm," s%d line linewidth 3.0 \n",k);
+	    fprintf(parm," s%d line color %d \n",k,lcolor);
+	    fprintf(parm," s%d legend \"\\xy\\f{}\\s%d%c%c\\N\\S\\-NL\\N\" \n",
+		    k,nlm_label(param->nlm[i+ncore]).n,lc,sc);
+	    k++;
+	    
+	  } else {
+	    
+	    for (j=0;j<2;j++) {
+	      if (j == 0) sc='-';
+	      if (j == 1) sc='+';
+	      
+	      if (nlm_label(param->nlm[i+ncore]).l == 1) {	  
+
+		pcount++;
+		lcolor=2;
+		lsty=7;
+		lwid=3.0;
+		if (j==1) {
+		  lwid=5.0;
+		  lsty=3;
+		}
+		lc='p';
+	      
+	      }else if (nlm_label(param->nlm[i+ncore]).l == 2) {	  
+		
+		dcount++;
+		lcolor=3;
+		lsty=7;
+		lwid=3.0;
+		if (j==1) {
+		  lwid=5.0;
+		  lsty=3;
+		}
+		lc='d';
+		
+	      }else if (nlm_label(param->nlm[i+ncore]).l == 3) {	  
+
+		fcount++;
+		lcolor=4;
+		lsty=7;
+		lwid=3.0;
+		if (j==1) {
+		  lwid=5.0;
+		  lsty=3;
+		}
+		lc='f';
+
+	      }
+	      
+	      fprintf(parm," s%d hidden false \n",k);
+	      fprintf(parm," s%d type xy \n",k);
+	      fprintf(parm," s%d symbol 0 \n",k);
+	      fprintf(parm," s%d line type 1 \n",k);
+	      fprintf(parm," s%d line linestyle %d \n",k,lsty);
+	      fprintf(parm," s%d line linewidth 3.0 \n",k);
+	      fprintf(parm," s%d line color %d \n",k,lcolor);
+	      fprintf(parm," s%d legend \"\\xy\\f{}\\s%d%c%c\\N\\S\\-NL\\N\" \n",
+		      k,nlm_label(param->nlm[i+ncore]).n,lc,sc);
+	      k++;
+	    }
+	  }
+	  
+	}
       }
-    }
-    
-    fclose(parm);
       
-  } 
+      fclose(parm);
+      
+    }
+  }
 
   if (streq(pltyp,"n")) {    
     snprintf(comm, comm_size,"xmgrace -timestamp $XMGRACE_OPTS %s.ae_plt -settype xydx %s.nl_plt -p w.par -autoscale y -saveall %s_nl.agr & ", 

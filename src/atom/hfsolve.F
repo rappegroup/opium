@@ -28,7 +28,7 @@ c-----------------------------------------------------------------------
 
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -99,6 +99,7 @@ c     -------------------------------------------------------------------------
       common /ind/ ind(n0)
       common /ameth/ meth(n0),imeth,nfails
 
+      common /ighost/ ighost,ighost2
 c     -------------------------------------------------------------------------
 c     *************************************************************************
 c     local variables
@@ -107,13 +108,13 @@ c     *************************************************************************
       dimension rsatom(npdm),rsold(npdm)
       
       dimension wavea(npdm),icarray(30)
-      dimension x(npdm),yr(npdm)
+      dimension x(npdm),yr(npdm),fr(npdm),fr2(npdm)
+      dimension lcount(10)
 c     *************************************************************************
 c     *************************************************************************
       character*80 file_log
-      logical ilast
+      logical ilast,first
 
-c      iprint=5
       vtl=vtol
       etl=etol*10.d0
       ilast=.false.
@@ -127,7 +128,10 @@ c      iprint=5
       ib=1
       ipr=0
       icorb = norb/4+2
-     
+      ighost=0
+      ighost2=0
+c      iprint=5
+
       open(unit=7,file=file_log,form='formatted',access='append')
 
       iflag=0
@@ -135,20 +139,20 @@ c      iprint=5
 
       call hfcoef(iflag,ipsp)
 
+c     EJW - adding this to keep allow to pick a hyrdogenic wavefunction 
+c     starting guess for channels which don't have a psp-wfn guess 
+      do i=1,10
+         lcount(i)=0
+      enddo
+
       do i=1,norb        
          en(i)=-en(i)
          meth(i)=1
-c         if (wnl(i).lt.1e-8) then
-c            write(7,*) 'Occupation of all states must be > 1e-8'
-c            write(7,*) ' for HF exchange -- STOP'
-c            write(6,*) 'Occupation of all states must be > 1e-8'
-c            write(6,*) ' for HF exchange -- STOP'
-c            stop
-c         endif
          do j=1,norb
             e(i,j)=0.d0
             if (lo(i).eq.lo(j)) e(i,j)=1e-5
          enddo
+
          e(i,i)=en(i)
          
          nmax(i)=np
@@ -204,10 +208,14 @@ c         endif
          enddo
       else
          do i=1,norb
+            lcount(lo(i)+1)=lcount(lo(i)+1)+1
             pnf=hnorm(no(i),lo(i),zeff-s(i))
-            do k=1,np
-c               rnl(k,i)=pnf*hwf(no(i),lo(i),zeff-s(i),r(k))/sqrt(r(k))
-            enddo
+
+            if (lcount(lo(i)+1).gt.1) then
+               do k=1,np
+                 rnl(k,i)=pnf*hwf(no(i),lo(i),zeff-s(i),r(k))/sqrt(r(k))
+               enddo
+            endif
             az(i)=1.d0
          enddo
       endif
@@ -231,6 +239,19 @@ c               rnl(k,i)=pnf*hwf(no(i),lo(i),zeff-s(i),r(k))/sqrt(r(k))
 
       do niter = 1,maxit
 
+C          if (ipsp.ne.0) then
+C             do i=1,norb
+C                do j=1,np
+C                   if (r(j).lt.15) write(850+i,*) r(j),rvps(j,i)
+C                   if (r(j).lt.15) write(860+i,*) r(j),
+C      $                 x(j)/rnl(j,i),rnl(j,i)
+C                   if (r(j).lt.15) write(870+i,*) r(j),yr(j)
+C                   if (r(j).lt.15) write(370+i,*) r(j),rnl(j,i)
+C                enddo
+C             enddo
+C             stop
+C          endif
+
          call grange
 
 c     ***********************************************************************
@@ -246,17 +267,17 @@ c     ***********************************************************************
          enddo
 
          dp1=0.d0
-         nfails=0
+c         nfails=0
          do m=1,norb
             ed1=0
             eold(m)=en(m)
             ed2=e(m,m)
 
             call hfde(m,ipsp,zeff,dpm,iprint)
+c            write(7,*) 'NFAILS', nfails
+            if (nfails.gt.25) goto 911
 
-            if (nfails.gt.5) goto 911
-
-            dp=dpm(m)*dsqrt(wnl(m))
+            dp=dpm(m)
             if (dp1.ge.dp) goto 2
             dp1=dp
             ibad=m
@@ -273,14 +294,14 @@ c     ***********************************************************************
          if (dp1.lt.vtl) goto 66
 
          dp1=0.d0
-         do mm=1,icorb
+         do mm=1,6
             m=ibad
             ed1=0
             ed2=e(m,m)
             eold(m)=en(m)
             call hfde(m,ipsp,zeff,dpm,iprint)
 
-            if (nfails.gt.5) goto 911
+            if (nfails.gt.25) goto 911
             dp1=0.d0
             do j=1,norb
 
@@ -351,6 +372,8 @@ c     ***********************************************************************
  490        format(1x,i3,2x,f15.7,1x,f15.7,1x,f15.7)
  491        format(1x,i3,2x,f15.7,1x,f15.7,1x,f15.7,1x,e8.2,1x,e8.2)
          endif
+c         write(7,*) 'CONVV', dvmax,vtl
+c         write(7,*) 'CONVE', edmax,etl
          if (dvmax.lt.vtl.and.edmax.lt.etl) goto 1000
          
 c     ***********************************************************************
@@ -372,6 +395,86 @@ c     ***********************************************************************
  492  format(7x,f15.7,1x,f15.7,1x,f15.7,1x,f15.7,1x,f15.7)
  192  format(12x,'(Etot2)',13x,'Ekin',13x,'Exx',13x,'Evir',13x,'Edf')
 
+
+c     EJW new ghost section
+c     
+      
+c      do nloc=1,3
+c            
+c         do i=1,3
+c            if (nloc.ne.i) then
+c               ll=lo(i)
+c               do j = 1,np
+c                  fr(j) = -2.d0*rnl(j,i)**2*
+c     $                 (rvcore(j,i)-rvcore(j,nloc))/r(j)
+c
+c               enddo
+c               
+c               tov = (float(ll+ll+2))
+c               call radin(r,fr,0,np,h,tov)
+c               xden = tov
+c               
+c               do j = 1,np
+c                  fr(j) = -2.d0
+c     $                 *fr(j) * (rvcore(j,i)-rvcore(j,nloc))/r(j)
+c               enddo
+c               
+c               tov = (float(ll+ll+2))
+c               call radin(r,fr,0,np,h,tov)
+c               xnum = tov
+c               
+c               elkb = xnum/xden
+c               
+c               write(7,9111) nloc,i,elkb,sqrt(xnum),sqrt(xnum)/elkb
+c 9111          format(2i5,1x,'KB energy : ',f10.6,2x
+c     $              ,'KB strength: ',f10.6,2x,'KB cosine: ',f10.6,2x)
+c            endif
+c         enddo
+c      enddo
+
+      m=1
+      n=2
+      if (ipsp.eq.33) then
+         write(7,*) 'E=',-en(m)
+         iprint=5
+
+         dpm(m)=0.d0
+         ipsp=1
+         first=.false.
+         do k=1,np
+            rsold(k)=rvcore(k,m)
+            rvcore(k,m)=rvcore(k,n)
+            rnl(k,m)=rnl(k,n)
+         enddo
+         ighost=1
+         ighost2=1
+         
+         do k=1,1
+            call hfmethd(m,ipsp,rsold,zeff,azz,fail,iprint)
+            write(7,*) 'E=',-en(m)
+            no(m)=no(m)+1
+
+            call hfmethd(m,ipsp,rsold,zeff,azz,fail,iprint)
+            write(7,*) 'E=',-en(m)
+            no(m)=no(m)-1
+         enddo
+         
+
+         stop
+      endif
+
+
+c      if (ipsp.ne.0) then
+c         do i=1,3
+c            call potl(yr,i)
+c            call xch(x,i,1)
+c            do j=1,np
+c               write(600+i,8585) r(j),-2.d0*rvcore(j,i),2.d0*yr(j)+x(j)
+c            enddo
+c         enddo
+c      endif
+c 8585 format(4f20.10)
+            
       ilast=.true.
       call orthog(ilast)
 
@@ -440,7 +543,7 @@ c     Flip wfn s.t. it is >0 as r->oo
 
       do i = ncore+1,norb
          do j=np,1,-1
-            if (abs(rnl(j,i)).gt.1e-10) then
+            if (abs(rnl(j,i)).gt.1e-6) then
                nmax(i)=j
                goto 939
             endif
@@ -502,7 +605,8 @@ c     radius of outermost peak
       do i=ncore+1,norb
          rvapmax=0.0
          do j=maxim-1,1,-1
-            if (rnl(j,i).lt.rnl(j+1,i)) then
+            if ((rnl(j,i).lt.rnl(j+1,i)).
+     $           and.(abs(rnl(j,i)).gt.1e-6)) then
                rvap(i)=r(j+1)
                if (rvapmax.lt.rvap(i)) rvapmax=rvap(i)
                goto 944

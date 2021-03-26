@@ -9,4 +9,7 @@ foreach i (`cat LIST`)
 	rm fort.*
 	rm vcore
 	mv temp $i.param
+        rm *.psi*
+	rm *.eng
+        rm *.loc
 end

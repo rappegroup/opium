@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:        3.0                             
+           OPIUM  Version:        3.3                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
  Copyright 2007 : The OPIUM project                         
 
- Compile host     : strange.physics.wm.edu
- Compile OS       : Linux 2.4.20-20.9smp i686
- Compile date     : Wed Aug 22 12:15:40 EDT 2007
+ Compile host     : pzt.wm.edu
+ Compile OS       : Linux 2.6.9-42.ELsmp x86_64
+ Compile date     : Wed Aug 13 16:34:20 EDT 2008
 
- Execution host   : strange.physics.wm.edu
- time of execution: Wed Aug 22 12:17:19 2007
+ Execution host   : wave.arc.wm.edu
+ time of execution: Wed Aug 13 16:37:14 2008
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <ir.param> ... 
@@ -22,6 +22,8 @@
  Number of pseudo       orbitals   : 4 
  
  Pseudopotential is scalar-relativistic 
+ Relativistic corrections applied to XC potential 
+ Using individual cut-off radii for srl averaging 
  Exchage-correlation functional is : Perdew-Zunger LDA 
  The p potential is used for the KB construction 
  Optimized (RRKJ) pseudopotential method will be used 
@@ -49,7 +51,7 @@
  Performing relativistic AE calculation...  
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
-   1   -37928.2908456  -23294.0386486  -14634.2521970 0.24E+01 0.74E+01
+   1   -37928.2908456  -23294.0386486  -14634.2521970 0.99E+00 0.74E+01
    2   -35928.4632640  -22254.1803074  -13674.2829567 0.60E+00 0.11E+01
    3   -35636.2789007  -22005.2112460  -13631.0676548 0.44E-01 0.54E+00
    4   -35681.4995448  -21996.2812537  -13685.2182911 0.16E+00 0.32E+00
@@ -117,25 +119,26 @@
  -----------------------------------------------
      Z atom                            : 77.000000
      Z valence                         :  9.000000
-     Ideal tail norms: ...
- 6s  Norm rc->oo                       :  0.768598
- 6p  Norm rc->oo                       :  0.679803
- 5d  Norm rc->oo                       :  0.241999
+     Ideal tail norms and bp radius   :
+ 
+ 6s  Norm rc->oo:   0.768598    bp radius:   1.869600
+ 6p  Norm rc->oo:   0.679803    bp radius:   2.621442
+ 5d  Norm rc->oo:   0.241999    bp radius:   1.869600
  
      Converged in 251 iterations
-     Breakpoint norm error    : 6s   0.193E-12
-     Breakpoint norm error    : 6p   0.189E-13
-     Breakpoint norm error    : 5d   0.957E-13
+     Breakpoint norm error    : 6s   0.866E-13
+     Breakpoint norm error    : 6p   0.405E-13
+     Breakpoint norm error    : 5d   0.169E-13
      Breakpoint norm error    : 5f  -Not bound-
  
      Final averaged tail norms and eigenvalues: ...
- 6s  Norm rc->oo                       :  0.768474
- 6p  Norm rc->oo                       :  0.679107
- 5d  Norm rc->oo                       :  0.241878
- 6s  Avg. eigenvalue                   : -1.090150
- 6p  Avg. eigenvalue                   : -0.592954
- 5d  Avg. eigenvalue                   : -1.302502
- 5f  Avg. eigenvalue                   :  0.100000
+ 6s  Norm rc->oo                       :   0.768474
+ 6p  Norm rc->oo                       :   0.679107
+ 5d  Norm rc->oo                       :   0.241878
+ 6s  Avg. eigenvalue                   :  -1.090150
+ 6p  Avg. eigenvalue                   :  -0.592954
+ 5d  Avg. eigenvalue                   :  -1.302502
+ 5f  Avg. eigenvalue                   :   0.100000
 
  ======================================================================== 
  End AE calculation
@@ -172,11 +175,16 @@
     21   -0.000064    0.002297   17.846396    0.000015    0.023969
  
  # steps:    24
+ Final KE error:    0.0000150131
+ Sum of coeffs :    0.0240904066
+ ---------------------------------------------------------------
+ Coeff:      0.307044 -0.274485  0.041406 -0.042979 -0.007311  0.000843  0.000445 -0.000856  0.001414 -0.001431
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0000150131
- Norm error        :     0.500E-15
- Continuity error  :    -0.555E-16
- Curvature error   :     0.137E-13
- 
+ Norm error        :     0.833E-15
+ Continuity error  :     0.167E-15
+ Curvature error   :    -0.155E-13
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        0.4157920058        0.3070438147
    2        2.2789722082       -0.2744848859
@@ -195,7 +203,7 @@
  Occupancy of this state :     2.0000000000
  Convergence term (Ry/e) :     0.0000150131
  Convergence error (mRy) :     0.0300262799
- Convergence error (meV) :     0.4085315586
+ Convergence error (meV) :     0.4085315592
  
  
  ==================
@@ -224,11 +232,16 @@
     21   -0.000005    0.000253   23.417124    0.000327    0.415842
  
  # steps:    21
+ Final KE error:    0.0003269578
+ Sum of coeffs :    0.4158422159
+ ---------------------------------------------------------------
+ Coeff:      0.512045 -0.086769 -0.013268  0.002008 -0.001029  0.001486 -0.002044  0.002741 -0.003428  0.004099
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0003269578
- Norm error        :    -0.278E-15
- Continuity error  :     0.555E-16
- Curvature error   :     0.433E-14
- 
+ Norm error        :    -0.389E-15
+ Continuity error  :     0.000E+00
+ Curvature error   :    -0.355E-14
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        0.9436813935        0.5120453226
    2        2.1741708846       -0.0867693157
@@ -279,16 +292,21 @@
     51   -0.000019    0.005219  138.924574    0.000017    3.254460
  
  # steps:    59
+ Final KE error:    0.0000077000
+ Sum of coeffs :    3.2282136528
+ ---------------------------------------------------------------
+ Coeff:      1.868186  1.126125  0.221086  0.011253 -0.002637  0.002618 -0.000361  0.000532 -0.000247  0.001660
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0000077000
- Norm error        :    -0.122E-14
- Continuity error  :     0.555E-16
- Curvature error   :    -0.666E-15
- 
+ Norm error        :    -0.111E-15
+ Continuity error  :    -0.389E-15
+ Curvature error   :    -0.345E-13
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        2.1775367332        1.8681855380
-   2        3.8312945619        1.1261249036
-   3        5.4368780059        0.2210855389
-   4        7.0282640160        0.0112532251
+   2        3.8312945619        1.1261249035
+   3        5.4368780059        0.2210855386
+   4        7.0282640160        0.0112532250
    5        8.6134329782       -0.0026369629
    6       10.1953103798        0.0026177182
    7       11.7752309229       -0.0003611958
@@ -296,13 +314,13 @@
    9       14.9316953494       -0.0002470900
   10       16.5088868065        0.0016596724
  
- Total KE           (Ry) :     4.5995207771
- 0  -> qc contribution   :     4.5995130771
+ Total KE           (Ry) :     4.5995207769
+ 0  -> qc contribution   :     4.5995130768
  qc -> oo contribution   :     0.0000077000   (=Convergence term)
  Occupancy of this state :     6.0000000000
  Convergence term (Ry/e) :     0.0000077000
- Convergence error (mRy) :     0.0462001186
- Convergence error (meV) :     0.6285895741
+ Convergence error (mRy) :     0.0462001178
+ Convergence error (meV) :     0.6285895627
  
  
  ==================
@@ -342,7 +360,7 @@
  
  Test  state: 5d
  KB energy : -10.431794  KB strength:   7.359809  KB cosine:  -0.705517
- el0       :  -0.270612  el1        :  -0.091967  eig      :  -1.302502
+ el0       :  -0.270612  el1        :  -0.091966  eig      :  -1.302502
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 5f
@@ -360,7 +378,7 @@
  
  Test  state: 5d
  KB energy :  -9.040914  KB strength:   6.824462  KB cosine:  -0.754842
- el0       :  -0.233251  el1        :  -0.086767  eig      :  -1.302502
+ el0       :  -0.233251  el1        :  -0.086766  eig      :  -1.302502
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 5f
@@ -421,7 +439,7 @@
  
  Test  state: 3d
  KB energy :  -9.040914  KB strength:   6.824462  KB cosine:  -0.754842
- el0       :  -0.233251  el1        :  -0.086757  eig      :  -1.302502
+ el0       :  -0.233251  el1        :  -0.086766  eig      :  -1.302502
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 4f
@@ -454,7 +472,7 @@
         26       0.488614256                 0.072224       0.982659
       ==============================|320>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-        22       4.529306884                70.213787     955.307727
+        22       4.529306883                70.213787     955.307726
         31       4.592932131                 6.588540      89.641694
         38       4.598876101                 0.644570       8.769826
         44       4.599453726                 0.066945       0.910832
@@ -472,7 +490,7 @@
  ===============Configuration 1 AE Calc=============== 
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
-   1   -37263.9873876  -22882.3859753  -14381.6014123 0.23E+01 0.48E+01
+   1   -37263.9873876  -22882.3859753  -14381.6014123 0.10E+01 0.48E+01
  !WARNING! positive eigenvalue predicted in scpot  nlm= 520     new e =-.1798135E+03
    2   -35801.7470365  -22142.7875117  -13658.9595248 0.76E+00 0.16E+01
    3   -35708.5879571  -21965.4240126  -13743.1639445 0.12E+01 0.44E+00
@@ -607,8 +625,8 @@
  ===============Configuration 2 AE Calc=============== 
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
-   1   -37995.9592906  -23299.4995250  -14696.4597656 0.24E+01 0.78E+01
-   2   -35901.0421363  -22229.4755913  -13671.5665450 0.65E+00 0.12E+01
+   1   -37995.9592906  -23299.4995250  -14696.4597656 0.99E+00 0.78E+01
+   2   -35901.0421362  -22229.4755913  -13671.5665450 0.65E+00 0.12E+01
    3   -35644.5006989  -21994.2067793  -13650.2939197 0.50E-01 0.51E+00
    4   -35671.8424764  -21974.3333494  -13697.5091270 0.14E+00 0.21E+00
    5   -35650.1058145  -21943.0634575  -13707.0423570 0.29E-01 0.18E+00
@@ -715,12 +733,12 @@
  
  Test  state: 1s
  KB energy :  -1.444637  KB strength:   0.594848  KB cosine:  -0.411763
- el0       :  -0.832680  el1        :  -0.096550  eig      :  -1.019174
+ el0       :  -0.832680  el1        :  -0.096549  eig      :  -1.019174
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 3d
  KB energy :  -9.040914  KB strength:   6.824462  KB cosine:  -0.754842
- el0       :  -0.217834  el1        :  -0.085843  eig      :  -1.135440
+ el0       :  -0.217834  el1        :  -0.085855  eig      :  -1.135440
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 4f
@@ -763,6 +781,7 @@
 <<<do_cpmd>>>
    ================================================
 <<<do_siesta -- psf>>>
+ Note: the Siesta code redefines the local part of the psp, proceed with caution ...
    ================================================
 ------------- closing opium session ------------
 <<<do_recpot>>>

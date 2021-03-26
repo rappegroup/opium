@@ -118,7 +118,7 @@ int flexi_request_key(char *key, int required, char *fmt, ...){
   c = fmt;
   while (*c!='%') c++;
   for (i=keyc->n-n; i<keyc->n; i++){
-    keyc->param_t[i] = (char *)malloc(4*sizeof(char));
+    keyc->param_t[i] = (char *)malloc(5*sizeof(char));
     keyc->param_p[i] = va_arg(ap, void *);
     if (keyc->param_p[i]==NULL) return 1;  /* not enough arguments in call */ 
     t = keyc->param_t[i];

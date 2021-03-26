@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,13 @@
 /* report feature */
 
 static char report[8000];
+#define streq(a,b) (!strcasecmp(a,b))
 void nrelorbnl(param_t *param, int); 
 char * write_reportfc(param_t *param, char *rp,int,double temp_eigen[], double temp_norm[]);
-void dftsolve_(double  *, int * ,double *, int *, int *, int *, int *, int *);
+void dftsolve_(double  *, int * ,double *, int *, int *, int *, int *, int *, int *);
+void startae(param_t *param, int); 
+void relorbae(param_t *param, int, char *); 
+void nrelorbae(param_t *param, int, char *); 
 
 int do_fc(param_t *param, char *logfile){
 
@@ -47,6 +51,7 @@ int do_fc(param_t *param, char *logfile){
   int iexit=0;
   int iprint=1;
   int irel=1;
+  int irelxc=1;
   int ncore;
   FILE *fp;
   char filename[160];
@@ -62,11 +67,23 @@ int do_fc(param_t *param, char *logfile){
   fprintf(fp_log,"\n ======================================================================== \n");
   fprintf(fp_log," Begin FC calculation\n");
   fprintf(fp_log," ======================================================================== \n");
-  fclose(fp_log);
   
   ipsp = 0;   
 
   ncore = param->norb-param->nval;
+
+  fprintf(fp_log," Performing non-relativistic FC calculation...  \n" );
+  fclose(fp_log);
+
+  if (!strcmp(param->reltype, "nrl")){
+    /* set up the nlm's ; config=-1 is the reference state */
+    nrelorbae(param,config,logfile);
+  }else{
+    relorbae(param,config,logfile);
+  }
+
+  /* starting guess for the AE potential */
+  startae(param, aorb_.norb);
 
   sprintf(filename, "%s.psi_ae_core", param->name);
   fp = fopen(filename, "rb");
@@ -86,11 +103,13 @@ int do_fc(param_t *param, char *logfile){
     fread(&adat_.xion, sizeof(double),1, fp);
     fread(&aval_.ibd[i], sizeof(int),1, fp);
     fread(&etrial_.etrial[i], sizeof(double),1, fp);
+
+    printf(" en: %d %lg \n", i,adat_.en[i]);
   }
   fclose(fp);
   
   zeff=adat_.xion;
-  for (i=0; i<param->nll; i++) {
+  for (i=0; i<param->nval; i++) {
     if (aval_.ibd[i]==0) {
       fp_log = fopen(logfile, "a");
       fprintf(fp_log," !NOTE! State: |%3d> marked as unbound, using reference eigenvalue of %6.3f \n",
@@ -100,7 +119,20 @@ int do_fc(param_t *param, char *logfile){
     zeff +=adat_.wnl[i];
   }
 
-  dftsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+
+  if (!strcmp(param->reltype, "nrl")){
+    irel=0;
+    irelxc=0;
+  }else{
+    irel=1;
+    if (streq(param->relxc,"rxc")){ 
+      irelxc=1;
+    }else{
+      irelxc=0;
+    }
+  }
+
+  dftsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
   
   rp = write_reportfc(param,rp,config,temp_eigen,temp_norm);
 

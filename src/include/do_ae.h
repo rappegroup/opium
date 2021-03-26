@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@ void do_ae_report(FILE *fp);
 void startae(param_t *param, int); 
 void relorbae(param_t *param, int, char *); 
 void nrelorbae(param_t *param, int, char *); 
-char * write_reportae(param_t *param, char *rp,int,double temp_eigen[], double temp_norm[]);
+char * write_reportae(param_t *param, char *rp,int,double temp_eigen[], double temp_norm[],int);
 void writeAE(param_t *param);
-void dftsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *);
+void dftsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *, int *);
 void hfsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *);
 void dfsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *);
 void atm_(double *, int *, int *);

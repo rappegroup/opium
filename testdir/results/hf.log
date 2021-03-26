@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:        3.0                             
+           OPIUM  Version:        3.3                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
  Copyright 2007 : The OPIUM project                         
 
- Compile host     : strange.physics.wm.edu
- Compile OS       : Linux 2.4.20-20.9smp i686
- Compile date     : Wed Aug 22 12:15:40 EDT 2007
+ Compile host     : pzt.wm.edu
+ Compile OS       : Linux 2.6.9-42.ELsmp x86_64
+ Compile date     : Wed Aug 13 16:34:20 EDT 2008
 
- Execution host   : strange.physics.wm.edu
- time of execution: Wed Aug 22 12:17:12 2007
+ Execution host   : wave.arc.wm.edu
+ time of execution: Wed Aug 13 16:36:57 2008
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <hf.param> ... 
@@ -22,6 +22,8 @@
  Number of pseudo       orbitals   : 3 
  
  Pseudopotential is scalar-relativistic 
+ Relativistic corrections applied to XC potential 
+ Using individual cut-off radii for srl averaging 
  Exchage-correlation functional is : Perdew-Zunger LDA 
  The s potential is used for the KB construction 
  Optimized (RRKJ) pseudopotential method will be used 
@@ -48,29 +50,29 @@
  Performing relativistic AE calculation...  
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
-   1   -31432.7848871  -19194.6843248  -12238.1005624 0.20E+01 0.46E+01
+   1   -31432.7848871  -19194.6843248  -12238.1005624 0.10E+01 0.46E+01
  !WARNING! positive eigenvalue predicted in scpot  nlm= 430     new e =-.1188552E+02
  !WARNING! positive eigenvalue predicted in scpot  nlm= 430     new e =-.1188552E+02
  !WARNING! positive eigenvalue predicted in scpot  nlm= 520     new e =-.1498345E+03
  !WARNING! positive eigenvalue predicted in scpot  nlm= 520     new e =-.1498345E+03
-   2   -30037.2663231  -18603.7360840  -11433.5302392 0.91E+00 0.35E+01
-   3   -30395.1284405  -18575.8766307  -11819.2518098 0.15E+02 0.20E+01
-   4   -30160.6826069  -18422.1606296  -11738.5219773 0.60E+00 0.69E+00
-   5   -30071.6740886  -18395.2690290  -11676.4050597 0.83E+00 0.35E+00
-   6   -30092.0981737  -18419.2823482  -11672.8158254 0.87E+00 0.26E+00
-   7   -30146.2705946  -18444.1998347  -11702.0707599 0.12E+01 0.20E+00
-   8   -30137.4058120  -18433.3588704  -11704.0469416 0.18E+00 0.12E+00
-   9   -30119.3321823  -18424.8749174  -11694.4572650 0.17E+00 0.27E-01
-  10   -30113.8888345  -18424.6379187  -11689.2509158 0.38E-01 0.36E-01
+   2   -30037.2663306  -18603.7360840  -11433.5302466 0.91E+00 0.35E+01
+   3   -30395.1284352  -18575.8766271  -11819.2518081 0.15E+02 0.20E+01
+   4   -30160.6826049  -18422.1606284  -11738.5219764 0.60E+00 0.69E+00
+   5   -30071.6740884  -18395.2690291  -11676.4050594 0.83E+00 0.35E+00
+   6   -30092.0981741  -18419.2823485  -11672.8158256 0.87E+00 0.26E+00
+   7   -30146.2705944  -18444.1998345  -11702.0707598 0.12E+01 0.20E+00
+   8   -30137.4058118  -18433.3588704  -11704.0469415 0.18E+00 0.12E+00
+   9   -30119.3321823  -18424.8749174  -11694.4572649 0.17E+00 0.27E-01
+  10   -30113.8888346  -18424.6379187  -11689.2509158 0.38E-01 0.36E-01
   11   -30117.0668804  -18427.2646227  -11689.8022577 0.35E-01 0.15E-01
   12   -30121.8525852  -18429.3466806  -11692.5059047 0.37E-01 0.15E-01
-  13   -30121.3208971  -18428.5052589  -11692.8156383 0.16E-01 0.95E-02
+  13   -30121.3208971  -18428.5052589  -11692.8156382 0.16E-01 0.95E-02
   14   -30118.3311856  -18427.0961502  -11691.2350354 0.26E-01 0.10E-01
   15   -30118.8183938  -18427.6654353  -11691.1529585 0.11E-01 0.57E-02
   16   -30119.7830539  -18428.1144217  -11691.6686322 0.85E-02 0.59E-03
   17   -30120.0613200  -18428.1232915  -11691.9380285 0.45E-03 0.20E-02
   18   -30119.8871094  -18427.9849337  -11691.9021758 0.24E-02 0.77E-03
-  19   -30119.6466603  -18427.8855853  -11691.7610750 0.20E-02 0.77E-03
+  19   -30119.6466604  -18427.8855853  -11691.7610750 0.20E-02 0.77E-03
   20   -30119.6726530  -18427.9284141  -11691.7442389 0.78E-03 0.50E-03
   21   -30119.8168935  -18427.9922069  -11691.8246866 0.13E-02 0.53E-03
   22   -30119.7959006  -18427.9665878  -11691.8293128 0.52E-03 0.30E-03
@@ -122,23 +124,24 @@
  -----------------------------------------------
      Z atom                            : 72.000000
      Z valence                         :  4.000000
-     Ideal tail norms: ...
- 6s  Norm rc->oo                       :  0.856827
- 6p  Norm rc->oo                       :  0.948638
- 5d  Norm rc->oo                       :  0.825438
+     Ideal tail norms and bp radius   :
  
-     Converged in  64 iterations
-     Breakpoint norm error    : 6s   0.422E-12
-     Breakpoint norm error    : 6p   0.353E-12
-     Breakpoint norm error    : 5d   0.170E-12
+ 6s  Norm rc->oo:   0.856827    bp radius:   2.149218
+ 6p  Norm rc->oo:   0.948638    bp radius:   2.415978
+ 5d  Norm rc->oo:   0.825438    bp radius:   1.399485
+ 
+     Converged in  91 iterations
+     Breakpoint norm error    : 6s   0.178E-14
+     Breakpoint norm error    : 6p   0.267E-12
+     Breakpoint norm error    : 5d   0.175E-12
  
      Final averaged tail norms and eigenvalues: ...
- 6s  Norm rc->oo                       :  0.856228
- 6p  Norm rc->oo                       :  0.948170
- 5d  Norm rc->oo                       :  0.824720
- 6s  Avg. eigenvalue                   : -0.329140
- 6p  Avg. eigenvalue                   : -0.076968
- 5d  Avg. eigenvalue                   : -0.129605
+ 6s  Norm rc->oo                       :   0.856228
+ 6p  Norm rc->oo                       :   0.948170
+ 5d  Norm rc->oo                       :   0.824720
+ 6s  Avg. eigenvalue                   :  -0.329140
+ 6p  Avg. eigenvalue                   :  -0.076968
+ 5d  Avg. eigenvalue                   :  -0.129605
 
  ======================================================================== 
  End AE calculation
@@ -172,11 +175,16 @@
      3   -0.005713    0.000336    0.029373    0.000018    0.085664
  
  # steps:     3
+ Final KE error:    0.0000182498
+ Sum of coeffs :    0.0856637116
+ ---------------------------------------------------------------
+ Coeff:      0.176736 -0.123290  0.039158 -0.027285  0.020569 -0.000225
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0000182498
- Norm error        :    -0.833E-16
- Continuity error  :     0.555E-16
- Curvature error   :    -0.999E-15
- 
+ Norm error        :    -0.278E-16
+ Continuity error  :     0.111E-15
+ Curvature error   :     0.444E-15
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1       -0.3128140774        0.1767364687
    2        1.9430472792       -0.1232904909
@@ -190,8 +198,8 @@
  qc -> oo contribution   :     0.0000182498   (=Convergence term)
  Occupancy of this state :     1.0000000000
  Convergence term (Ry/e) :     0.0000182498
- Convergence error (mRy) :     0.0182498355
- Convergence error (meV) :     0.2483036120
+ Convergence error (mRy) :     0.0182498357
+ Convergence error (meV) :     0.2483036151
  
  
  ==================
@@ -219,11 +227,16 @@
     11   -0.000860    0.000866    0.503897    0.002397    0.559250
  
  # steps:    11
+ Final KE error:    0.0023971559
+ Sum of coeffs :    0.5592499351
+ ---------------------------------------------------------------
+ Coeff:      0.518665  0.044905  0.013204 -0.011874  0.017540 -0.023191
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0023971559
- Norm error        :     0.278E-16
- Continuity error  :     0.278E-16
- Curvature error   :     0.208E-15
- 
+ Norm error        :    -0.139E-16
+ Continuity error  :    -0.139E-16
+ Curvature error   :     0.444E-15
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        0.2848162509        0.5186654013
    2        2.2140536718        0.0449048501
@@ -266,11 +279,16 @@
     11   -0.000008    0.000414   25.830056    0.000160    1.603948
  
  # steps:    11
+ Final KE error:    0.0001604801
+ Sum of coeffs :    1.6039477061
+ ---------------------------------------------------------------
+ Coeff:      1.473789  0.153237 -0.034164  0.011806 -0.007523  0.006485 -0.006268  0.006584
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0001604801
- Norm error        :     0.833E-16
- Continuity error  :    -0.389E-15
- Curvature error   :    -0.167E-13
- 
+ Norm error        :    -0.278E-16
+ Continuity error  :    -0.555E-16
+ Curvature error   :    -0.140E-13
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        2.4769252205        1.4737892990
    2        4.9461701175        0.1532373344
@@ -286,8 +304,8 @@
  qc -> oo contribution   :     0.0001604801   (=Convergence term)
  Occupancy of this state :     3.0000000000
  Convergence term (Ry/e) :     0.0001604801
- Convergence error (mRy) :     0.4814403021
- Convergence error (meV) :     6.5503804628
+ Convergence error (mRy) :     0.4814403035
+ Convergence error (meV) :     6.5503804808
  
  ------------------------------
  Descreening potential
@@ -418,9 +436,9 @@
         44       0.218630007                 0.071577       0.973856
       ==============================|210>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-         0       0.146317279                68.025867     925.539540
-        51       0.206997301                 7.345845      99.945366
-       395       0.213753699                 0.589447       8.019833
+         0       0.146317279                68.025867     925.539539
+        51       0.206997301                 7.345845      99.945365
+       395       0.213753700                 0.589446       8.019831
       ==============================|320>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
         12       2.012104534                72.418911     985.309977
@@ -437,7 +455,7 @@
  ===============Configuration 1 AE Calc=============== 
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
-   1   -31395.5959377  -19194.7772352  -12200.8187026 0.20E+01 0.43E+01
+   1   -31395.5959377  -19194.7772352  -12200.8187026 0.10E+01 0.43E+01
  !WARNING! positive eigenvalue predicted in scpot  nlm= 430     new e =-.1201232E+02
  !WARNING! positive eigenvalue predicted in scpot  nlm= 520     new e =-.1499695E+03
  !WARNING! positive eigenvalue predicted in scpot  nlm= 520     new e =-.1499695E+03
@@ -579,17 +597,17 @@
  ===============Configuration 2 AE Calc=============== 
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
-   1   -31414.1694757  -19194.7307800  -12219.4386957 0.20E+01 0.44E+01
+   1   -31414.1694757  -19194.7307800  -12219.4386957 0.10E+01 0.44E+01
  !WARNING! positive eigenvalue predicted in scpot  nlm= 430     new e =-.1194892E+02
  !WARNING! positive eigenvalue predicted in scpot  nlm= 430     new e =-.1194892E+02
  !WARNING! positive eigenvalue predicted in scpot  nlm= 520     new e =-.1499020E+03
  !WARNING! positive eigenvalue predicted in scpot  nlm= 520     new e =-.1499020E+03
-   2   -30095.9798007  -18611.9821822  -11483.9976185 0.88E+00 0.25E+01
-   3   -30340.9400133  -18555.1263874  -11785.8136259 0.81E+01 0.13E+01
-   4   -30148.5211140  -18424.4696969  -11724.0514171 0.52E+00 0.48E+00
-   5   -30084.8736151  -18405.2425645  -11679.6310506 0.61E+00 0.21E+00
+   2   -30095.9798013  -18611.9821822  -11483.9976191 0.88E+00 0.25E+01
+   3   -30340.9400128  -18555.1263871  -11785.8136258 0.81E+01 0.13E+01
+   4   -30148.5211139  -18424.4696969  -11724.0514170 0.52E+00 0.48E+00
+   5   -30084.8736152  -18405.2425645  -11679.6310506 0.61E+00 0.21E+00
    6   -30099.0960735  -18423.3844832  -11675.7115903 0.24E+00 0.17E+00
-   7   -30137.8605625  -18442.0767780  -11695.7837844 0.55E+00 0.13E+00
+   7   -30137.8605624  -18442.0767780  -11695.7837844 0.55E+00 0.13E+00
    8   -30132.0731841  -18434.7321485  -11697.3410356 0.11E+00 0.77E-01
    9   -30119.6945357  -18428.8652862  -11690.8292496 0.79E-01 0.74E-02
   10   -30115.7341269  -18428.6418023  -11687.0923246 0.11E-01 0.25E-01
@@ -749,6 +767,7 @@
 <<<do_cpmd>>>
    ================================================
 <<<do_siesta -- psf>>>
+ Note: the Siesta code redefines the local part of the psp, proceed with caution ...
    ================================================
 ------------- closing opium session ------------
 <<<do_recpot>>>

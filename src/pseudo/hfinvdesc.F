@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ c
       common /nlall/ nlall(n0)
       common /filenames/ file_log      
       common /inelma/ nem                                                         
+      common /psout/ wsumt(n0),sumc(n0),npsghost(n0)
 
       character*80 file_log
       
@@ -55,6 +56,7 @@ c
       xc(2)='d'
       xc(3)='f'
 
+
       rmmax=15.d0
       ipsp=1
       norb=nval
@@ -70,7 +72,7 @@ c     EJW this is for dirac-fock potrdf2.F
             rnljunk(i,nnn)=0.d0
          enddo
       enddo
-      
+
       if (irel.eq.0) then
          call hfcoef(iflag,ipsp)
          do nnn=1,nval
@@ -127,7 +129,7 @@ c     EJW this is for dirac-fock potrdf2.F
             enddo
             
             call potrdf2(rjunk,rjunk,nnn,ka,m,
-     $           rnl,rnljunk,rhart,xg)
+     $           rnl,rnljunk,rhart,xg,ipsp)
 
             do j=1,np
                if (r(j).lt.rmmax) then
@@ -161,10 +163,12 @@ c            write(7,9112) no(k),xc(lo(k)),xst,esave(k),en(k)
 c         enddo
 c      endif
 
+
       if (irel.eq.1) then
          nc=0
          lolast=-444
          do nnn=1,nval
+            write(7,*) "LO",nnn,no(nnn),lo(nnn)
             if (lo(nnn).eq.0) then
                nc=nc+1
                do j=1,np
@@ -176,33 +180,40 @@ c      endif
                wnlnew(nc)=wnl(nnn)
                lo(nc)=lo(nnn)
                no(nc)=lo(nc)+1
+               wsumt(nc)=wsumt(nnn)
+               sumc(nc)=sumc(nnn)
             endif
 
             xt=2.d0*lo(nnn)+1.d0
-            xu=float(lo(nnn))/xt
-            xd=float(lo(nnn)+1)/xt
+            xd=float(lo(nnn))/xt
+            xu=float(lo(nnn)+1)/xt
             
             if ((lo(nnn).ne.0).and.(lo(nnn).ne.lolast)) then
                nc=nc+1
                do j=1,np
-                  rvnew(j,nc)=rvcore(j,nnn)*xu
-                  rvnew2(j,nc)=rvps(j,nnn)*xu
-                  rnnew(j,nc)=rnl(j,nnn)*xu
+                  rvnew(j,nc)=rvcore(j,nnn)*xd
+                  rvnew2(j,nc)=rvps(j,nnn)*xd
+                  rnnew(j,nc)=rnl(j,nnn)*xd
                enddo
-               ennew(nc)=en(nnn)*xu
+               ennew(nc)=en(nnn)*xd
                wnlnew(nc)=wnl(nnn)
+               wsumt(nc)=wsumt(nnn)*xd
+               sumc(nc)=sumc(nnn)*xd
+
             endif
             
             if ((lo(nnn).ne.0).and.(lo(nnn).eq.lolast)) then
                do j=1,np
-                  rvnew(j,nc)=rvnew(j,nc)+rvcore(j,nnn)*xd
-                  rvnew2(j,nc)=rvnew2(j,nc)+rvps(j,nnn)*xd
-                  rnnew(j,nc)=rnnew(j,nc)+rnl(j,nnn)*xd
+                  rvnew(j,nc)=rvnew(j,nc)+rvcore(j,nnn)*xu
+                  rvnew2(j,nc)=rvnew2(j,nc)+rvps(j,nnn)*xu
+                  rnnew(j,nc)=rnnew(j,nc)+rnl(j,nnn)*xu
                enddo
-               ennew(nc)=ennew(nc)+en(nnn)*xd
+               ennew(nc)=ennew(nc)+en(nnn)*xu
                wnlnew(nc)=wnlnew(nc)+wnl(nnn)
                lo(nc)=lo(nnn)
                no(nc)=lo(nc)+1
+               wsumt(nc)=wsumt(nc)+wsumt(nnn)*xu
+               sumc(nc)=sumc(nc)+sumc(nnn)*xu
             endif
             lolast=lo(nnn)
          enddo
@@ -252,6 +263,7 @@ c      endif
       do k=1,nval
          write(7,9111) no(k),xc(lo(k)),esave(k),en(k)
       enddo
+
 
  9111 format(1x,'State: ',i1,a1,2x,'AE eigenvalue = ', f10.6,2x,
      $     'PS eigenvalue = ', f10.6)

@@ -12,7 +12,7 @@ c
 c------------------------------------------------------------
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -46,10 +46,11 @@ c
  11   if (b .ge. 0.2) b = b - 0.1
       go to 31                                                                  
                                                                                 
- 21   if (b .le. 0.8) b = b + 0.1                                               
+ 21   if (b .le. 0.9) b = b + 0.1                                               
                                                                                 
  31   a = 1.0 - b                                                               
-      q=p                                                                       
+      q=p           
+      
       return                                                                    
       end                                                                       
 

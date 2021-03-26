@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,12 +41,11 @@
 
 void interp2_(double *,double *);
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
-void readPS(param_t *param);
+void nrelsproj(param_t *param, char *);
 int do_siesta(param_t *param, FILE *fp_param, char *logfile){
 
   int i,j,k,ic,icount,ncore,ii;
   char filename[180];
-  int ilk[10];
   int nval2=0;
   FILE *fp_file;
   FILE *fp_out;
@@ -85,33 +84,49 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   xao[3]='f';
   xao[4]='g';
 
-  for (i=0;i<10;i++)
-    ilk[i]=0;
-
   ncore=param->norb-param->nval;
+
+  nrelsproj(param,logfile);
 
   fp_log = fopen(logfile, "a");
   fprintf(fp_log,"<<<do_siesta -- psf>>>\n");  
+  fclose(fp_log);
+
+  if (param->nboxes > 0) {
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log," The Siesta format does not support the use of augmentation operators\n");
+    fclose(fp_log);
+    return 1;
+  }
+
+  fp_log = fopen(logfile, "a");
+  fprintf(fp_log," Note: the Siesta code redefines the local part of the psp, proceed with caution ...\n");
+  /*printf(" Note: the Siesta code redefines the local part of the psp, proceed with caution ...\n");*/
   fclose(fp_log);
 
   zeff = param->z;
   for (i=0; i<param->norb - param->nval; i++)
     zeff -= param->wnl[i];
 
-  sprintf(filename, "%s.loc", param->name);
+  /*  sprintf(filename, "%s.loc", param->name);
   fp_file = fopen(filename, "rb");
   fread(rvloc, sizeof(double), param->ngrid, fp_file);
   fclose(fp_file);
-  interp2_(rvloc,rvloc2);
 
+  interp2_(rvloc,rvloc2);*/
+    
   for (i=0; i<param->nll; i++) {
     sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    
     fp_file = fopen(filename, "rb");
-    fread(dumm, sizeof(double), param->ngrid, fp_file);
+    fread(dumm, sizeof(double), param->ngrid, fp_file);    
+
     interp2_(dumm,dumm2);
+
     for (j=0; j<ngg; j++){
       rvv[i][j]=dumm2[j];
     }
+
     fclose(fp_file);
   }
 
@@ -123,24 +138,9 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
     icount++;
   }
 
-
   lmax=param->nll-1;
   lloc=nlm_label(param->nlm[param->localind+ncore]).l;
   
-  if (param->nboxes > 0) {
-      lmax++;
-      lloc=lmax;
-      
-      fp_log = fopen(logfile, "a");
-      fprintf(fp_log," Making l+1 the local potential %d\n",lloc);
-      fclose(fp_log);
-      
-      for (i=0; i<ngg; i++){
-	  rvv2[icount][i] = rvloc2[i];
-      }
-  } 
-  
-  /* End new section */  
   
   if (param->rpcc > 0.){
       sprintf(filename, "%s.rho_pcore", param->name);
@@ -149,17 +149,32 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
       interp2_(rscore,rscore2);
       fclose(fp_file);
   }
-  
+
   sprintf(filename, "%s.rho_nl", param->name);
-  fp_file = fopen(filename, "rb");
-  fread(rho, sizeof(double), param->ngrid, fp_file);
-  fclose(fp_file);
+  if (fp_file = fopen(filename, "rb")) {
+    fread(rho, sizeof(double), param->ngrid, fp_file);
+    fclose(fp_file);
+  } else {
+    sprintf(filename, "%s.rho_sl", param->name);
+    if (fp_file = fopen(filename, "rb")) {
+      fread(rho, sizeof(double), param->ngrid, fp_file);
+      fclose(fp_file);
+    } else {
+      fp_log = fopen(logfile, "a");
+      fprintf(fp_log,"No valence charge density avaliable :( --EXIT!\n");
+      printf("No valence charge density avaliable :( --EXIT!\n");
+      fclose(fp_log);
+      exit(1);
+    }
+  }
+
   interp2_(rho,rho2);
 
   /* section 1 : header */
 
   sprintf(filename, "%s.psf", param->name);
   fp_out = fopen(filename, "w");
+
 
   /* 1st line of siesta format: The atom symbol, icorr, irel, nicore */
  

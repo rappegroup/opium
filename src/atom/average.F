@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -19,9 +19,11 @@ c
       subroutine average(ixc,exccut,iexit)
       
 c     *************************************************************************
-c     This code reads in the relativ. atomic information from fort.22. and 
-c     processes it for the scalar-relativistic pseudopotential procedure.
-c     The file *.ae is generated.
+c     This code computes the j-averaged wfns from the all-electron ones
+c     This is procedure comes from I. Grinbeg, N. J. Ramer, and A. M. Rappe, 
+c     PRB 62, 2311 (1999). Referred to as "GRR" in this routine.
+
+c     This routine was originally written by I. Grinberg and cleaned up by EJW
 c     *************************************************************************
 
       implicit double precision (a-h,o-z)
@@ -42,6 +44,8 @@ c     *************************************************************************
       common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
      $     rsval(npdm)
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+
+      common /iavgtype/ iavgtype
 
       dimension rvxct(npdm),rexct(npdm),v(npdm)
       dimension ibp(n0),indall(n0),rsatom(npdm),rv(npdm)
@@ -68,6 +72,7 @@ c     *************************************************************************
       write(7,*) "Starting j-averaging procedure                 "
       write(7,*) "-----------------------------------------------"
 
+      irelxc=0
       zv=xion
       do iorb=ncore+1,norb
          zv=zv+wnl(iorb)
@@ -75,8 +80,14 @@ c     *************************************************************************
       write (7,9000) z
       write (7,9010) zv
       write (7,9015)
- 9015 format(5x,"Ideal tail norms: ...")
+      write(7,*)
 
+c     Keep a copy of rel eigenvalues, eigenvalues come into 
+c     this routine in "en" and are copied into enrel.
+
+c     "lo" is an array of the "l" values for each orbital
+
+c     first get the core eigenvalues
       norb_rel=0
       do k=1,ncore
          do j=1,2
@@ -88,7 +99,8 @@ c     *************************************************************************
       enddo
 
       ncore_rel=norb_rel
-      
+
+c     now get the valence eigenvalues
       do k=ncore+1,norb
          do j=1,2
             if (lo(k).gt.0.or.j.eq.1) then
@@ -99,16 +111,25 @@ c     *************************************************************************
       enddo
       nval_rel=norb_rel-ncore_rel
 
+c     set maxim (virtual infinity for integrals) 
+c     to be based on when charge density vanished
       do j=1,np
          if (rsval(j).gt.0.0) maxim=j
-         
       enddo
 
+      minrc=1e4
       kk=ncore_rel
       do i=ncore+1,norb
          ic=i-ncore
          kk=kk+1
+
+         do j = 1,np
+            if (rcall(ic).gt.r(j)) indall(ic) = j
+         enddo
          
+         minrc=min(indall(ic),minrc)
+         
+c     if we are NOT an 's' state, then grab next wfn         
          if (lo(i).ne.0) kk=kk+1
 
          do j=1,maxim
@@ -118,75 +139,121 @@ c     *************************************************************************
          call radin(r,phom,0,maxim,h,pow)
       enddo
          
+c     Step #1: get a trial j-average of the wavefns and set the
+c     norm from 0->rc (=indall) and 0->"breakpoint" = ibp = MIN(over all rc) - 5 grid points
+c     This section gets equations 3 and 4 from "GRR".
 
       kk=ncore_rel
       do i=ncore+1,norb
          ic=i-ncore
+         
          kk=kk+1
          fe_old(ic)=0.0
-         
-         xt=4.d0*float(lo(i))+2.d0
-         xd=(2.d0*float(lo(i))+2.d0)/xt
-         xu=(2.d0*float(lo(i)))/xt
 
+c     get the j weights
+         xt=4.d0*float(lo(i))+2.d0
+         xu=(2.d0*float(lo(i))+2.d0)/xt
+         xd=(2.d0*float(lo(i)))/xt
+
+c     get j+ contribution
          do j=1,maxim
-            rhowf(j)=rnla(j,kk)**2*xu
+            rhowf(j)=rnla(j,kk)**2*xd
          enddo
-         
+
+c     if this an unbound state skip this next section
+
+c     if we are NOT an 's' state, then grab next wfn
          if (lo(i).ne.0) kk=kk+1
 
+c     add in the j- component
          do j=1,maxim
-            rhowf(j)=rhowf(j)+rnla(j,kk)**2*xd
+            rhowf(j)=rhowf(j)+rnla(j,kk)**2*xu
          enddo
+
          if (ibd(ic).eq.0) goto 934
 
+c     compute the integral from 0 -> oo
          pow=2*lo(i)+2
          call radin(r,rhowf,0,maxim,h,pow)
          totalint=pow
          do j = 1,np
             if (rcall(ic).gt.r(j)) indall(ic) = j
          enddo
-         ibp(ic) = indall(ic) - 5
-         
+
+c     OLD way the can cause problems if rc's are not all the same
+         if (iavgtype.eq.0) then
+            ibp(ic) = indall(ic) - 5         
+         else
+c     NEW way, use the min of all rc's
+            ibp(ic) = minrc-5
+         endif
+
+c     compute the integral from 0 -> rc 
          pow=2*lo(i)+2
          call radin(r,rhowf,0,indall(ic),h,pow)
          rnorm(ic) = 1- pow
-         write (7,9050) no(i),xc(lo(i)+1),rnorm(ic)
+         write (7,9050) no(i),xc(lo(i)+1),rnorm(ic),r(ibp(ic))
+
+c     compute the integral from 0 -> "breakpoint"
          pow=2*lo(i)+2
          call radin(r,rhowf,0,ibp(ic),h,pow)
          powall = 1- pow
          
          rcint=pow
          partint=abs(totalint-rcint)
+
+c     now we store the partial norm from breakpoint -> oo for each 'l'
          fe_old(ic)=partint
+         
  934     continue
       enddo
-      
+
+c     Step #2: find the initial  "c_nl" from equation 5 in "GRR"
       kk=ncore_rel
       do i=ncore+1,norb
          ic=i-ncore
+
+c     get j-averaged wfns again
+
+         xt=4.d0*float(lo(i))+2.d0
+         xu=(2.d0*float(lo(i))+2.d0)/xt
+         xd=(2.d0*float(lo(i)))/xt
+
          kk=kk+1
          do j=1,maxim
-            rnlt(j,ic)=rnla(j,kk)**2*xu
+            rnlt(j,ic)=rnla(j,kk)**2*xd
          enddo
          if (lo(i).ne.0) kk=kk+1
          do j=1,maxim
-            rnlt(j,ic)=rnlt(j,ic)+rnla(j,kk)**2*xd
+            rnlt(j,ic)=rnlt(j,ic)+rnla(j,kk)**2*xu
          enddo
          do j=1,maxim
             rnlt(j,ic)=sqrt(rnlt(j,ic))
          enddo
 
+c     skip ahead if unbound 
          if (ibd(ic).eq.0) goto 935
 
+c     find c_nl, using equation 5, solve |phi_nl(r)|^2 for c_nl
          do j=1,ibp(ic)
+
             rl=r(j)**(lo(i)+1)
+c     r^(l+1)
+
             chiro=rnlt(ibp(ic),ic)/r(ibp(ic))**(lo(i)+1)
+c     phi_nl(r_breakpoint)/(r_breakpoint^(l+1))
+
             oneminus=(1-(r(j)/r(ibp(ic)))**4)
+c     (1-r/r_breakpoint)^4
+
+c     multiply by r^(l+1)
             temp1(j)=(rl*chiro)**2
             temp2(j)=(rl*oneminus)**2
+
+c     |phi_nl(r)|^2
             tempx(j)=2*rl*rl*chiro*oneminus
          enddo
+
          pow=2*lo(i)+2
          call radin(r,temp1,0,ibp(ic),h,pow)
          temp_int1=pow
@@ -196,6 +263,8 @@ c     *************************************************************************
          pow=2*lo(i)+2
          call radin(r,tempx,0,ibp(ic),h,pow)
          temp_intx=pow
+
+c     find roots
          const1=(-temp_intx+sqrt(temp_intx**2-4*temp_int2
      $        *(temp_int1-1+fe_old(ic))))/2.d0/temp_int2
          
@@ -204,6 +273,8 @@ c     *************************************************************************
          c=const1
          if(const1.ge.0.0) c=const1
          if(const2.ge.0.0) c=const2
+
+c     now apply c_nl and find trial phi_nl(r)
          do j=1,ibp(ic)
             rl=r(j)**(lo(i)+1)
             chiro=rnlt(ibp(ic),ic)/r(ibp(ic))**(lo(i)+1)
@@ -212,12 +283,13 @@ c     *************************************************************************
          enddo
  935     continue
       enddo
-      
+
       c=1.d0
       do j=1, np
          rsval(j)=0
       enddo
-      
+
+c     collect new rho(r) (rsval)
       kk=ncore_rel
       do i=ncore+1,norb
          ic=i-ncore
@@ -237,6 +309,10 @@ c     eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 c     jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
 c     wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 
+c     Section #3:  Find set of {c_nl}'s s.t. norm from 0->r_breakpoint
+c     is the same as it is for the initial j-averaged wavefunctions
+
+
       do ijk=1,250
          do j=1,np
             rsatom(j)=rsval(j)+rscore(j)
@@ -245,37 +321,50 @@ c     wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
             rvh(j) = 0.0
          enddo
 
-         irel=0
-         call excorr (np,ixc,exccut,r,rsatom,rvxct,rexct,irel)
+c     3a: Find new xc and hartree potentials since rho has changed
+         call excorr (np,ixc,exccut,rsatom,rvxct,rexct,irelxc)
          call hrtree (np,h,r,rsatom,rvh)
+
+c     rvscr is the screening potential
+c     rv is the effective potential
          do j=1,np
             rvscr(j)=rvh(j)+rvxct(j)
             rv(j)=-2*z+rvscr(j)
          enddo
 
+c     3b: Do inward integration to find new wfns using the new effective
+c     potential and the reference eigenvalues
          kk=ncore_rel
          do i=ncore+1,norb
             ic=i-ncore
             kk=kk+1
-            if (ibd(ic).eq.0) goto 933
+
+c     Skip ahead if unbound
+            if (ibd(ic).eq.0) then
+               kk=kk+1
+               if (lo(i).ne.0) kk=kk+1
+               goto 933
+            endif
 
             xt=4.d0*float(lo(i))+2.d0
-            xd=(2.d0*float(lo(i))+2.d0)/xt
-            xu=(2.d0*float(lo(i)))/xt
-            
+            xu=(2.d0*float(lo(i))+2.d0)/xt
+            xd=(2.d0*float(lo(i)))/xt
+
+c     EJW: From here until 933, this is just code from schsl.F and should 
+c     be a subroutine call NOT a duplicate of the code.  
             x2=(lo(i)+0.5)**2
             h2=h*h/12.d0
 
-            ei=enrel(kk)*xu
+            ei=enrel(kk)*xd
             if (lo(i).ne.0) kk=kk+1
-            ei=ei+enrel(kk)*xd
-
+            ei=ei+enrel(kk)*xu
             do j = 1, np
                v(j) = ((rv(j) - ei * r(j)) * r(j) + x2) * h2
             enddo
             do j = 1,np
                if (rsval(j).gt.0.0) maxim = j
             enddo
+
             imax=maxim
             imat=ibp(ic)+1
             imp1=imat+1
@@ -299,11 +388,15 @@ c     wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
             enddo
  933        continue
          enddo
-         
+
+c     3c: piece together new rho and compute partial norms for each 'l'
          kk=ncore_rel
          do i=ncore+1,norb
             ic=i-ncore
+
+c     Skip ahead if not bound
             if (ibd(ic).eq.0) goto 937
+
             fe(ic)=0
             do j=1,ibp(ic)-1
                rhowf(j)=rnlt(j,ic)*rnlt(j,ic)
@@ -323,6 +416,9 @@ c     wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
             rcint=pow
             partint=abs(totalint-rcint)
 
+
+c     Now we have the new partial norm and original partial norm for this 'l'
+c     find the ratio of the two:
             fe(ic)=partint
             ratio(ic)=fe_old(ic)/fe(ic)
             rtsqrt=sqrt(ratio(ic))
@@ -333,6 +429,9 @@ c     wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
             do j=1,np
                rhowf(j)=rnlt(j,ic)*rnlt(j,ic)
             enddo
+
+c     using the new wfns, find a new c_nl, this code should be a subroutine call 
+c     since it is copied from above.
 
             do j=1,ibp(ic)
                rl=r(j)**(lo(i)+1)
@@ -370,6 +469,9 @@ c     wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
  937        continue
          enddo
 
+c     perhaps we should check this BEFORE computing the new trial wfns?
+c     kind of wasteful but ok (since we are self-consistent at this point).
+
          rttot=0.0
          do i=1,nval
             rttot=rttot+abs((ratio(i)-1.d0))
@@ -378,19 +480,13 @@ c     wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
             goto 998
          endif
 
-c     EJW:  now we exit when each norm error is < 1e-13
-c         iexit=0
-c         do i=1,nval
-c            if (abs(ratio(i)-1.d0).lt.1d-13) iexit=iexit+1
-c         enddo
-c         if (iexit.eq.nval) goto 998
-c     EJW
-
          do j=1, np
             rsval(j)=0
          enddo
          do i=ncore+1,norb
             ic=i-ncore
+
+c     compute new rho for bound states
             if (ibd(ic).ne.0) then
                do j=1,np
                   rsval(j)=rsval(j)+rnlt(j,ic)**2*wnl(i)
@@ -405,6 +501,7 @@ c     *************************************************************************
 
  998  write(7,9060) ijk
 
+c     Section #4: print out the results since we are done
       do i=ncore+1,norb
          ic=i-ncore
          if (ibd(ic).ne.0) then
@@ -418,18 +515,19 @@ c     *************************************************************************
       write (7,9016)
  9016 format(5x,"Final averaged tail norms and eigenvalues: ...")
 
+c     recompute the partial norms one last time
       kk=ncore_rel
       do i=ncore+1,norb
          ic=i-ncore
          kk=kk+1
 
          xt=4.d0*float(lo(i))+2.d0
-         xd=(2.d0*float(lo(i))+2.d0)/xt
-         xu=(2.d0*float(lo(i)))/xt
+         xu=(2.d0*float(lo(i))+2.d0)/xt
+         xd=(2.d0*float(lo(i)))/xt
          
-         en(ic)=enrel(kk)*xu
+         en(ic)=enrel(kk)*xd
          if (lo(i).ne.0) kk=kk+1
-         en(ic)=en(ic)+enrel(kk)*xd
+         en(ic)=en(ic)+enrel(kk)*xu
          
          do j=1,np
             rnl(j,ic)=rnlt(j,ic)
@@ -439,12 +537,10 @@ c     *************************************************************************
             pow=2*lo(i)+2
             call radin(r,rhowf,0,indall(ic),h,pow)
             rnorm(ic) = 1- pow
-            write (7,9050) no(i),xc(lo(i)+1),rnorm(ic)
+            write (7,9058) no(i),xc(lo(i)+1),rnorm(ic)
 
             pow=2*lo(i)+2
             call radin(r,rhowf,0,maxim,h,pow)
-         else
-c            write(7,*) 'NB2'
          endif
          
       enddo
@@ -453,13 +549,14 @@ c            write(7,*) 'NB2'
          rsatom(i) = rsval(i) + rscore(i)
          if (rsatom(i).gt.0.0) maxim = i
       enddo
+c     why recompute maxim again??
 
+c     compute new v_xc and v_h
       pow = 2.0
       call radin(r,rsatom,0,maxim,h,pow)
       pow = 2.0
       call radin(r,rscore,0,maxim,h,pow)
-      irel=0
-      call excorr (maxim,ixc,exccut,r,rsatom,rvxct,rexct,irel)
+      call excorr (maxim,ixc,exccut,rsatom,rvxct,rexct,irelxc)
       call hrtree (maxim,h,r,rsatom,rvh)
       do  i = maxim+1,np
         rvh(i)  = z + z - xion - xion
@@ -485,10 +582,12 @@ c            write(7,*) 'NB2'
       enddo
       tch=2.d0
 
+c     print final average eigenvalues
       do i = ncore+1,norb
          ic=i-ncore
          write(7,9070) no(i),xc(lo(i)+1),en(ic)
-         
+
+c     flip wfn if approaches 0 as r->oo from the negative side
          do k=np,1,-1
             if (abs(rnl(k,ic)).gt.1e-10) then
                if (rnl(k,ic).lt.0.0) then
@@ -501,28 +600,29 @@ c            write(7,*) 'NB2'
          enddo
  770     continue
 
+c     This is not used later I don't think
          do k=1,np
             if (rnl(k,ic).gt.1e-18) nmax(ic)=k
          enddo
 
-      enddo
-
-      
+      enddo      
       
  9000 format(5x,"Z atom                            :",f10.6)
  9010 format(5x,"Z valence                         :",f10.6)
  9020 format(5x,"Total valence charge              :",f10.6)
+ 9015 format(5x,"Ideal tail norms and bp radius   :")
 
  9030 format(1x,i1,a1,2x,"- eigenvalue                      :",f10.6)
  9040 format(1x,i1,a1,2x,"+ eigenvalue                      :",f10.6)
 
- 9050 format(1x,i1,a1,2x,"Norm rc->oo                       :",f10.6)
+ 9050 format(1x,i1,a1,2x,"Norm rc->oo: ",f10.6,4x,"bp radius: ",f10.6)
+ 9058 format(1x,i1,a1,2x,"Norm rc->oo                       : ",f10.6)
 
  9060 format(5x,"Converged in ", i3,1x,"iterations")
  9061 format(5x,"Breakpoint norm error    :",1x,i1,a1,2x,e10.3)  
  9077 format(5x,"Breakpoint norm error    :",1x,i1,a1,2x, "-Not bound-")  
 
- 9070 format(1x,i1,a1,2x,"Avg. eigenvalue                   :",f10.6)
+ 9070 format(1x,i1,a1,2x,"Avg. eigenvalue                   : ",f10.6)
 
 c     *************************************************************************
 

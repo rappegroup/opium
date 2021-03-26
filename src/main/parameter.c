@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   int ncore; 
   char loc='s';
   char pccmeth='l';
+  char avgtype='b';
   int loctemp=0;
   int npot[10];
   int ntemp,nbtemp,nt1,nt2;
@@ -67,28 +68,6 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   param->symbol = (char *) malloc(160*sizeof(char));
   param->longname = (char *) malloc(160*sizeof(char));
   flexi_request_key("Atom",1,"%s %d", param->symbol, &param->norb);
-
-  /* [Relativity] */
-  param->reltype = (char *) malloc(80*sizeof(char));
-  flexi_request_key("Relativity",0,"%s",param->reltype);
-  /* default */
-  strcpy(param->reltype, "nrl");
-
-  /* [Grid] */
-  flexi_request_key("Grid",0,"%d %lg %lg", &param->ngrid, 
-		    &param->a, &param->b);
-  /* default */
-  param->a = .0001;
-  param->b = .013;
-  param->ngrid = 1201;
-  
-  /* [RelGrid] */
-  flexi_request_key("Relgrid",0,"%d %lg %lg", &param->ngrid2, 
-		    &param->a2, &param->b2);
-  /* default */
-  param->b2=1.0/70.0;
-  param->a2=exp(-4.0*2.3025851);
-  param->ngrid2 = 2201;
 
   /* [Configs] */
   flexi_request_key("Configs",0,"%d", &param->nconfigs);
@@ -132,7 +111,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   flexi_request_key("XC",0,"%s",param->xcparam);
   flexi_request_key("XC",0,"%lg",&param->exccut);
   /* default */
-  param->exccut=-1;
+  param->exccut=-600;
   strcpy(param->xcparam, "lda");
   
   /* [Conmax] */
@@ -169,9 +148,9 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   }
   
   param->z = symtoz(param->symbol,param->longname);
-  /*rxccut_.rxccut=param->rxccut;*/
   
   param->ixc = -100;
+  if (streq(param->xcparam, "pbesol")) param->ixc = 5;
   if (streq(param->xcparam, "wcgga")) param->ixc = 4;
   if (streq(param->xcparam, "pw91gga")) param->ixc = 3;
   if (streq(param->xcparam, "gga")) param->ixc = 2;
@@ -180,8 +159,8 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   if (streq(param->xcparam, "pwlda")) param->ixc = 1;
   if (streq(param->xcparam, "pzlda")) param->ixc = 0;
   if (streq(param->xcparam, "lda")) param->ixc = 0;
-  /*  if (streq(param->xcparam, "vwn5lda")) param->ixc = 5;
-      if (streq(param->xcparam, "vwn5")) param->ixc = 5;*/
+  /*  if (streq(param->xcparam, "vwn5lda")) param->ixc = 6;
+      if (streq(param->xcparam, "vwn5")) param->ixc = 6;*/
   if (streq(param->xcparam, "hf")) param->ixc = -1;
 
   if (param->ixc == -100) {
@@ -190,7 +169,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     printf("like this: \n\n ");
     printf("  [XC] \n ");
     printf("  pzlda \n\n\n ");
-    printf("acceptable values are:  pzlda, pwlda, pw91gga, pbegga, wcgga, and hf \n"); 
+    printf("acceptable values are:  pzlda, pwlda, pw91gga, pbegga, wcgga, pbesol, and hf \n"); 
 
     exit(1);
   }    
@@ -293,8 +272,9 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   /* [HFsmooth] */  
   param->qpopt=0;
+  param->qptol=1e-6;
   param->rlocalr = (double *)malloc(param->norb*sizeof(double));  
-  flexi_request_key("HFsmooth",0,"%d", &param->qpopt);
+  flexi_request_key("HFsmooth",0,"%d %lg", &param->qpopt,&param->qptol);
   for (i=0; i<param->nval; i++) {
     param->rlocalr[i]=0.0;
     flexi_request_key("HFsmooth",0,"%lg", &param->rlocalr[i]);
@@ -308,7 +288,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   b_start = (double *)malloc(param->nboxes*sizeof(double));
   b_end = (double *)malloc(param->nboxes*sizeof(double));
   for (i=0; i<param->nboxes; i++){
-    b_unit[i] = (char *)malloc(2*sizeof(char));
+    b_unit[i] = (char *)malloc(3*sizeof(char));
     flexi_request_key("KBdesign",0,"%s %lg %lg %lg", 
 		      b_unit[i], &b_start[i], &b_end[i], &param->box_height[i]);
   }
@@ -333,6 +313,72 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   if (flexi_gather_keys(fp)) return 1;
 
 
+  /* Prepare for 7th flexi_gather_keys() */
+  flexi_clear_keys();
+  rewind(fp);
+
+  /* [Grid] */
+  flexi_request_key("Grid",0,"%d %lg %lg", &param->ngrid, 
+		    &param->a, &param->b);
+  /* default */
+  param->a = .0001;
+  param->b = .013;
+  param->ngrid = 1201;
+  
+  /* [RelGrid] */
+  flexi_request_key("Relgrid",0,"%d %lg %lg", &param->ngrid2, 
+		    &param->a2, &param->b2);
+  /* default */
+  param->b2=1.0/70.0;
+  param->a2=exp(-4.0*2.3025851);
+  param->ngrid2 = 2201;
+
+  if (flexi_gather_keys(fp)) return 1;
+
+  /* Prepare for 8th flexi_gather_keys() */
+  flexi_clear_keys();
+  rewind(fp);
+
+  /* [Relativity] */
+  param->reltype = (char *) malloc(80*sizeof(char));
+  param->relxc = (char *) malloc(80*sizeof(char));
+  flexi_request_key("Relativity",0,"%s %s",param->reltype,param->relxc);
+  /* default */
+  strcpy(param->reltype, "nrl");
+
+  if (flexi_gather_keys(fp)) return 1;
+
+  /* Prepare for 9th flexi_gather_keys() */
+  flexi_clear_keys();
+  rewind(fp);
+
+  /* [Relativity] */
+  flexi_request_key("Average",0,"%c",&avgtype);
+  /* default */
+  avgtype='b';
+  if (streq(param->reltype,"srl")) {
+    if ((param->ixc >= 2)&&(param->ixc < 6)) {   /* if GGA */
+      avgtype='m';
+    }
+  }
+  if (flexi_gather_keys(fp)) return 1;
+
+  /*  printf("avgtype  %c \n", avgtype);*/
+  if (streq(param->reltype,"srl")) {
+    if ((avgtype == 'b') || (avgtype == 'B')) {
+      iavgtype_.iavgtype=0; 
+      if ((param->ixc >= 2)&&(param->ixc < 6)) {   /* if GGA */
+	printf("NOTE: averaging \"byrc\" is not correct when using a GGA XC functional ; use caution! \n");
+	fprintf(fp_log,"NOTE: averaging \"byrc\" is not correct when using a GGA XC functional ; use caution! \n");
+      }
+    }else if ((avgtype=='m') || (avgtype=='M')) {
+      iavgtype_.iavgtype=1; 
+    }else {
+      printf("WARNING: Can not determine rel. average type ; must be either \"byrc\" or \"minrc\"  \n");
+      fprintf(fp_log,"WARNING: Can not determine rel. average type ; must be either \"byrc\" or \"minrc\" \n");
+      exit(1);
+    }
+  }
 
   /* Reorder ATOM, PSEUDO, and CONFIGS blocks to be in s p d f s p d f order */
 
@@ -606,24 +652,29 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   grid_.z=param->z;
   
   grid_.np=0;
-  grid_.r[0] = param->a * pow(param->z, -1./3.);
+
+  /* if (streq(param->reltype,"nrl")) { */
+    grid_.r[0] = param->a * pow(param->z, -1./3.);
+    /*  } else {
+    grid_.r[0] = param->a / param->z;
+    }*/
   for (i=1; i<NPDM; i++) {
     grid_.r[i]=grid_.r[0] * exp(param->b * (i));
     if (grid_.r[i]>120.0) break;
     grid_.np++;
   }
-
   if (grid_.np > param->ngrid) {
-    printf("check Non-rel grid; # points needed > max np \n");
+    printf("check grid; # points needed %d > max np %d \n",grid_.np,param->ngrid);
     return 1;
   }
   if (grid_.r[grid_.np]<30.0) {
-    printf("check Non-rel grid; grid extends to less than 30 Bohr \n");
+    printf("check grid; grid extends to less than 30 Bohr \n");
     return 1;
   }
 
   param->ngrid=grid_.np;
   
+
   /* non-rel grid ok, how about rel-grid */
   
   rgrid_.b=param->b2;
@@ -637,27 +688,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     nrgrid_.nr++;
   }
 
-/*  rgrid_.b=param->b;
-    rgrid_.a=param->a; */
-  
-/*  nrgrid_.nr=0;
-  for (i=0; i<NPDM; i++){
-    rgrid_.r[i]=param->a * pow(param->z,-1/3)*exp(param->b*(i));
-    rgrid_.rab[i] =(rgrid_.r[i]+rgrid_.a*pow(param->z,-1/3))*rgrid_.b;
-    if (rgrid_.r[i]>80.0) break;
-    nrgrid_.nr++;
-    }*/
-
-  /*  if (nrgrid_.nr > param->ngrid2) {
-    printf("check Rel grid; # points needed > max np \n");
-    return 1;
-    }*/
-/*  if (rgrid_.r[nrgrid_.nr]<30.0) {
-    printf("check Rel grid; grid extends to less than 30 Bohr %d \n",nrgrid_.nr);
-    return 1;
-    }*/
-  
-    /* process the box limits in the KBdesign key-block and free temp arrays */
+  /* process the box limits in the KBdesign key-block and free temp arrays */
   for (i=0; i<param->nboxes; i++){
     if (streq(b_unit[i], "au") || streq(b_unit[i], "a.u.") 
 	|| streq(b_unit[i], "AU") || streq(b_unit[i], "A.U.")){
@@ -707,16 +738,24 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   free(b_end);  
 
 
-  /* enforce GGA damping from 0.0 -> 0.001 au 
-     for heavy atoms (>z=30). param->exccut=-1 when not set */
-  if ((param->z > 30)&&(param->ixc >= 2)&&(param->ixc < 5)&&(param->exccut <0.0)) param->exccut=1e-3;
-  
+  /* enforce GGA damping from 0.0 -> 0.001 au */
+  if ((param->ixc >= 2)&&(param->ixc < 6)) {   /* if GGA */
+    if (fabs(param->exccut + 600) < 1e-6 ) {   /* if exccut not set */
+      param->exccut=1e-3;     
+    }
+  }else{
+    param->exccut=0.0;
+  }
+
+  /*  printf(" exccut= %lg \n",param->exccut);*/
+
   /* set up DNL stuff */
    
   local_.iloc = param->localind+1;
   box_.numbox = param->nboxes;
 
-  for (i=0 ; i<4; i++) {
+  /*  for (i=0 ; i<4; i++) {*/
+  for (i=0; i<N0; i++) { /* BST 09/08/10: N0 (defined in cdim.h) replaces hard coded value of 4 here. */
     if (i < param->nboxes){
       box_.iboxstart[i] = param->box_start[i];
       box_.iboxend[i]   = param->box_end[i];
@@ -737,6 +776,22 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   param->ehost = (char *) malloc(160*sizeof(char));
   param->edate = (char *) malloc(160*sizeof(char));
 
+
+  
+  if (streq(param->reltype,"nrl")) {
+    if (streq(param->relxc,"rxc")) { 
+      strcpy(param->relxc, "nxc");
+      fprintf(fp_log, " WARNING!! Can't use rel corrections for XC in nrl calculation ; rel corrections removed \n");
+      printf(" WARNING!! Can't use rel corrections for XC in nrl calculation ; rel corrections removed \n");
+    }else if (!streq(param->relxc,"nxc")) {
+      strcpy(param->relxc, "nxc");
+    }
+  }else {
+    if (  (!streq(param->relxc,"nxc"))&&(!streq(param->relxc,"rxc"))) {
+      strcpy(param->relxc, "rxc");
+    }
+  }
+
 /* Finally! Write the log file header */
   
   fprintf(fp_log, " File prefix             : %s \n",param->name);
@@ -750,11 +805,30 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   if (streq(param->reltype,"nrl")) {
     fprintf(fp_log, " Pseudopotential is non-relativistic \n");
   }else if (streq(param->reltype,"srl")){
-    fprintf(fp_log, " Pseudopotential is scalar-relativistic \n");
+    fprintf(fp_log, " Pseudopotential is scalar-relativistic \n");         
+    if ( (streq(param->relxc,"rxc")) && (!streq(param->reltype,"nrl")) ) {
+      fprintf(fp_log, " Relativistic corrections applied to XC potential \n");         
+    }else{
+      fprintf(fp_log, " Relativistic corrections NOT applied to XC potential \n");         
+    }
+    if (iavgtype_.iavgtype == 0) {
+      fprintf(fp_log, " Using individual cut-off radii for srl averaging \n");         
+    }else if (iavgtype_.iavgtype == 1) {
+      fprintf(fp_log, " Using the minimum cut-off radius for srl averaging \n");         
+    }
   }else if (streq(param->reltype,"frl")){
-    fprintf(fp_log, " Fully relativistic pseudopotentials are not implemented \n");
+    fprintf(fp_log, " Fully relativistic pseudopotential \n");
+    if ( (streq(param->relxc,"rxc")) && (!streq(param->reltype,"nrl")) ) {
+      fprintf(fp_log, " Relativistic corrections applied to XC potential \n");         
+    }else{
+      fprintf(fp_log, " Relativistic corrections NOT applied to XC potential \n");         
+    }
+  }else{
+    fprintf(fp_log, " !!ERROR!! Can not determine relativity \n");
+    printf(" !!ERROR!! Can not determine relativity \n");
     exit(1);
   }
+    
   if (streq(param->xcparam,"lda")|| streq(param->xcparam,"pzlda")) {
     fprintf(fp_log, " Exchage-correlation functional is : Perdew-Zunger LDA \n");
   }else if (streq(param->xcparam,"pwlda")){
@@ -774,24 +848,26 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 	fprintf(fp_log, " HF smoothing method: AWR#3 for Optimized/RRKJ \n");
       if (param->qpopt == 4) 
 	fprintf(fp_log, " HF smoothing method: AWR#4 for Optimized/RRKJ \n");
+      fprintf(fp_log, " HF smoothing eigenvalue tol: %10.3e \n",param->qptol);
     }else{
       fprintf(fp_log, " !!WARNING!! Unknown HF smoothing method! \n");
     }
+    
   }else if (streq(param->xcparam,"gga")|| streq(param->xcparam,"pbegga")) {
     fprintf(fp_log, " Exchage-correlation functional is : Perdew, Burke, Ernzerhof GGA \n");
-    if (param->exccut > 0.0) {
-      fprintf(fp_log, " GGA smoothed from 0 to %f bohr \n",param->exccut);
-    }
   }else if (streq(param->xcparam,"pw91gga")){
     fprintf(fp_log, " Exchage-correlation functional is : Perdew Wang 91 GGA \n");
-    if (param->exccut > 0.0) {
-      fprintf(fp_log, " GGA smoothed from 0 to %f bohr \n",param->exccut);
-    }
   }else if (streq(param->xcparam,"wcgga")){
     fprintf(fp_log, " Exchage-correlation functional is : Wu-Cohen GGA \n");
-    if (param->exccut > 0.0) {
-      fprintf(fp_log, " GGA smoothed from 0 to %f bohr \n",param->exccut);
-    }
+  }else if (streq(param->xcparam,"pbesol")){
+    fprintf(fp_log, " Exchage-correlation functional is : PBEsol \n");
+  }
+  if (param->exccut > 0.0) {
+    fprintf(fp_log, " GGA smoothed from 0 to %f bohr using switch to LDA \n",fabs(param->exccut));
+    /*fprintf(fp_log, " GGA smoothed in all steps of calculation \n");*/
+  } else if (param->exccut < 0.0) {
+    fprintf(fp_log, " GGA smoothed from 0 to %f bohr using quadratic extrapolation\n",fabs(param->exccut));
+    fprintf(fp_log, " GGA smoothed in descreening step only \n");
   }
 
   ncore=param->norb - param->nval;
@@ -856,18 +932,18 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   fprintf(fp_log," Grid definitions: \n");
 
-  if (streq(param->reltype,"nrl")){
-    fprintf(fp_log," a_grid=%-11.2e b_grid=%-11.2e # points=%d \n r(1)=%-11.2e   r(np)=%-11.2e \n",
-	    param->a,param->b,grid_.np,grid_.r[0],grid_.r[grid_.np]);
-  }
+  /*  if (streq(param->reltype,"nrl")){*/
+  fprintf(fp_log," a_grid=%-11.2e b_grid=%-11.2e # points=%d \n r(1)=%-11.2e   r(np)=%-11.2e \n",
+	  param->a,param->b,grid_.np,grid_.r[0],grid_.r[grid_.np-1]);
+  /* }
   
-  if (streq(param->reltype,"srl")){
+ if (streq(param->reltype,"srl")){
     fprintf(fp_log," Non-relativitic grid:  a_grid=%-11.2e b_grid=%-11.2e # points=%d \n  r(1)=%-11.2e r(np)=%-11.2e \n",
-	    param->a,param->b,grid_.np,grid_.r[0],grid_.r[grid_.np]);
+	    param->a,param->b,grid_.np,grid_.r[0],grid_.r[grid_.np-1]);
     
-/*    fprintf(fp_log," Relativistic grid   :  a_grid=%-11.2e b_grid=%-11.2e # points=%d \n  r(1)=%-11.2e r(np)=%-11.2e \n",
-      param->a2,param->b2,nrgrid_.nr,rgrid_.r[0],rgrid_.r[nrgrid_.nr-1]);*/
-  }
+    fprintf(fp_log," Relativistic grid   :  a_grid=%-11.2e b_grid=%-11.2e # points=%d \n  r(1)=%-11.2e r(np)=%-11.2e \n",
+      param->a2,param->b2,nrgrid_.nr,rgrid_.r[0],rgrid_.r[nrgrid_.nr-1]);
+  }*/
   
   fprintf(fp_log, "\n");
   

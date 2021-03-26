@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -232,7 +232,7 @@ c      write (iout,9102) iter,iorb,nqn,lang,ei,de,imat
       do i = 1, np
          v(i) = (rv(i) + x1/r(i))/r(i) + wnlf(i)
       enddo
-      
+
       if (lang.ne.0) then
          elim = v(1)
          do i = 2,np

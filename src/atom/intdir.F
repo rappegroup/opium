@@ -11,7 +11,7 @@ c
 c------------------------------------------------------------
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -196,7 +196,9 @@ c     initial values for inward integration
 c      write(7,*) 'init a test1 ggmat,ainf',a,test1,abs(ggmat),ainf
       a=test1* abs(ggmat)                                                       
       if (ainf.gt.a) ainf=a                                                     
-      imax=np-1                                                                 
+c      imax=np+2                                                            
+      imax=np+1
+      if (mod(np+1,2).eq.0) imax=np
  73   a=7.0d+02/cl                                                              
  75   imax=imax-2                                                               
          if ((imax+1).le.(mat+npi)) then                                        

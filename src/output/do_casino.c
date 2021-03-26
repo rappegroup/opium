@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,9 @@
 #include "cdim.h"        /* fortran code parameters */
 #include "do_casino.h"          /* the module's own header */
 #include "nlm.h"
+#include "common_blocks.h"
 
+void interp2_(double *,double *);
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 void nrelsproj(param_t *param, char *);
 int do_casino(param_t *param, FILE *fp_param, char *logfile){
@@ -43,12 +45,16 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
   FILE *fp;
   FILE *fp_log;
   double zeff;	                
-  char xctype[10];              
+  char xctype[20];              
   double r_1;
   double zz=0;
+  int ngg=nrgrid_.nr-10;
   
   static double rvcore[N0][NPDM];
   static double r[NPDM];
+  static double dumm[NPDM];
+  static double dumm2[NPDM];
+  static double rvv[N0][NPDM];
 
   fp_log = fopen(logfile, "a");
   fprintf(fp_log,"<<<do_casino>>>\n");  
@@ -56,7 +62,6 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
 
   /* section 0 : check if this potential format is supported */
   /* casino doesn't support DNL potentials */
-
 
   nrelsproj(param,logfile);
   /* new routine to set the arrays for semicore states */
@@ -77,9 +82,14 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
 
   for (i=0; i<param->nll; i++) {
     sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+
     fp = fopen(filename, "rb");
-    fread(rvcore[i], sizeof(double), param->ngrid, fp);
+    fread(dumm, sizeof(double), param->ngrid, fp);    
     fseek(fp,sizeof(double) ,param->ngrid);
+    interp2_(dumm,dumm2);
+    for (j=0; j<ngg; j++){
+      rvv[i][j]=dumm2[j];
+    }
     fclose(fp);
   }
 
@@ -87,7 +97,7 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
   zeff = param->z;
   for (i=0; i<param->norb - param->nval; i++)
     zeff -= param->wnl[i];
-
+  
   /* section 1 : header */
 
   sprintf(filename, "%s.casino", param->name);
@@ -150,11 +160,22 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
       exit(1);
     };break;
 
+  case 5 :
+    switch ((!strcmp(param->reltype, "nrl")) ? 0:1){
+    case 0 : sprintf(xctype,"%s","PBEsolGGA-NREL"); break;
+    case 1 : sprintf(xctype,"%s","PBEsolGGA-REL"); break;
+    default :
+      printf(" Problem with Casino header \n");
+      exit(1);
+    };break;
+
   default :
     printf(" Problem with Casino header \n");
     exit(1);
   }
+
   
+
   fprintf(fp,"%s Opium generated real space pseudopotential for %s \n",xctype,param->name);  
   fprintf(fp,"Atomic number and pseudo-charge \n");  
   fprintf(fp,"%-1.0f %-2.2f \n",param->z,zeff);
@@ -165,23 +186,17 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
   fprintf(fp,"NLRULE override (1) VMC/DMC (2) config gen (0 ==> input/default value) \n");
   fprintf(fp,"0 0 \n");  
   fprintf(fp,"Number of grid points \n");
-  fprintf(fp,"%d \n",param->ngrid);  
+  fprintf(fp,"%d \n",ngg);  
   fprintf(fp,"R(i) in atomic units\n");
 
-  r_1 = param->a * pow(param->z,-1./3.);
-  for (k=0; k<param->ngrid ; k++) {
-    r[k] = r_1 * exp(param->b * k);
-  }
-    fprintf(fp,"    % 2.15E \n",zz);
-  for (i=0; i<param->ngrid ; i++) {    
-    fprintf(fp,"    % 2.15E \n",r[i]);
+  for (i=0; i<ngg ; i++) {    
+    fprintf(fp,"    % 2.15E \n",rgrid_.r[i]);
   }
   
   for (j=0;j<param->nll ; j++) {
     fprintf(fp,"r*potential (L=%d) in Ry \n",j);
-    fprintf(fp,  "    % 2.15E \n",zz);
-    for (i=0; i<param->ngrid ; i++) {    
-      fprintf(fp,"    % 2.15E \n",rvcore[j][i]);
+    for (i=0; i<ngg ; i++) {    
+      fprintf(fp,"    % 2.15E \n",rvv[j][i]);
     }
   }
   

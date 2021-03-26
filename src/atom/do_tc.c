@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,16 +35,18 @@ void startae(param_t *param, int);
 void relorbae(param_t *param, int, char *); 
 void nrelorbnl(param_t *param, int, char *); 
 void nrelorbae(param_t *param, int, char *); 
-char * write_reportae(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[]);
-char * write_reportnl(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[], int);
+char * write_reportae(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[],int);
+char * write_reportnl(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[], int, int);
 char * write_reportfc(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[]);
 void hfsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *);
 void dfsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *);
 void readPS(param_t *param);
 void readAE(param_t *param);
-void dftsolve_(double  *, int * ,double *, int *, int *, int *, int *, int *);
+void dftsolve_(double  *, int * ,double *, int *, int *, int *, int *, int *, int *);
 
-int do_tc(param_t *param, char *logfile, int job, int doifc){
+#define streq(a,b) (!strcasecmp(a,b))
+
+int do_tc(param_t *param, char *logfile, int job, int doifc, int donl){
 
   int i, j,k, kk; 
   FILE *fp_log;
@@ -54,7 +56,9 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
   int ncore,ifrl; 
   double zeff;
   int irel=0;
-  double e,dele;
+  int irelxc=0;
+  int iminne=0;
+  double e,dele,minne;
   int ifc=0;
   int iexit=0;
   int iprint=1;
@@ -62,14 +66,29 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
   int ipsp,ncoreAE;
   double temp_eigen[10];
   double temp_norm[10];
+  double exccut_temp;
   int ntpot;
   int ill[10];
   int insl=1;
+  char box[80];
+  double boxval;
 
   sprintf(filename, "%s.logd_plt", param->name);
   fp=fopen(filename,"w");
   fclose(fp);
 
+  if (param->exccut < 0) {
+    exccut_temp=0.0;
+  } else {
+    exccut_temp=param->exccut;
+  }
+
+  /*  fp = fopen("boxfile", "r");
+  while(fgets(box, 80, fp) != NULL)
+    sscanf (box, "%lg", &boxval);
+  fclose(fp);
+  printf("boxval %lg \n",boxval);
+  */
   ncore = param->norb-param->nval;
 
   fp_log = fopen(logfile, "a");
@@ -120,10 +139,27 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
       
       irel=0;
       iprint=1;
+      irelxc=0;
       if (param->ixc < 0){ 
-	hfsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+	hfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
       } else {
-	dftsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+
+	/*        for (i=0; i<param->ngrid+1; i++)
+          for (j=0; j<aorb_.norb; j++)
+	    if (aorb_.lo[j]  == 3)
+	      totpot_.rvcore[j][i] += boxval*grid_.r[i];
+	
+        printf("box %lg \n", boxval);
+	*/
+	dftsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
+
+	/*
+        for (i=0; i<param->ngrid+1; i++)
+          for (j=0; j<aorb_.norb; j++)
+	    if (aorb_.lo[j]  == 3)
+            totpot_.rvcore[j][i] -= boxval*grid_.r[i];
+        printf("box %lg \n", boxval);
+	*/
       }
       if (iexit) {
 	printf("Terminal error in: scpot <-- config #%d AE <-- do_tc\n EXITING OPIUM \n",config+1);
@@ -139,14 +175,34 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
       }
 
       irel=1;
+      if (streq(param->relxc,"rxc")){ 
+	irelxc=1;
+      }else{
+	irelxc=0;
+      }
       relorbae(param,config,logfile);
       startae(param,aorb_.norb);
 
       if (param->ixc < 0) {
-	dfsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+	dfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
       }else {
-	dftsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+	/*
+        for (i=0; i<param->ngrid+1; i++)
+          for (j=0; j<aorb_.norb; j++)
+	    if (aorb_.lo[j]  == 3)
+            totpot_.rvcore[j][i] += boxval*grid_.r[i];
+	*/
+	dftsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
+	
+	/*
+        for (i=0; i<param->ngrid+1; i++)
+          for (j=0; j<aorb_.norb; j++)
+	    if (aorb_.lo[j]  == 3)
+            totpot_.rvcore[j][i] -= boxval*grid_.r[i];
+	
+	*/
       }
+
       if (iexit) {
 	printf("Terminal error in: atm <-- config #%d AE <-- do_tc\n EXITING OPIUM \n",config+1);
 	exit(1);
@@ -165,7 +221,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
 
       sprintf(filename, "%s.logd.%d", param->name,config+1);
       fp = fopen(filename, "wb");
-      for (k=0; k<param->nval; k++)
+      for (k=0; k<param->nll; k++)
 	fwrite(logarith_.dlwf[k], sizeof(double), NPL0, fp);
       fclose(fp);
     
@@ -173,7 +229,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
       fp = fopen(filename, "a");
 
       dele = (param->emax - param->emin)/(NPL0-1);
-      for (k=0; k<param->nval; k++) {
+      for (k=0; k<param->nll; k++) {
 	for (j=0; j < NPL0; j++) {
 	  e=param->emin + dele * j; 
 	  fprintf(fp,"%lg %lg \n",e,logarith_.dlwf[k][j]);
@@ -184,27 +240,46 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
 
       sprintf(filename, "%s.logdeAE", param->name);
       fp = fopen(filename, "wb");
-      for (k=0; k<param->nval; k++)
+      for (k=0; k<param->nval; k++) {
+	minne=1000000.0;
+	for (j=0; j < NPL0; j++) {
+	  e=param->emin + dele * j; 
+	  if ((fabs(e-adat_.en[k+ncoreAE])) < fabs(minne-adat_.en[k+ncoreAE])) {
+	    minne=e;
+	    iminne=j;
+	  }
+	}
 	fwrite(&adat_.en[k+ncoreAE], sizeof(double), 1, fp);
-      fclose(fp);
+	fwrite(&logarith_.dlwf[k][iminne], sizeof(double), 1, fp);
+      }
+      fclose(fp);    
     }
 
-    rp=write_reportae(param,rp,config,temp_eigen,temp_norm);
+    rp=write_reportae(param,rp,config,temp_eigen,temp_norm,aorb_.norb);
     enae[config+1] = aval_.etot;
 
     /* NL or SL */
 
     if (param->ixc <0) {
-      nlpot2_.inl = 0;  
-      insl=0;
-    }else{
-      nlpot2_.inl = 1;  
-      insl=1;
+      if (donl != 0) {
+	printf("!!NOTE!!: All Hartree-Fock tests are done with the semi-local form of the potential \n");
+	printf("!!NOTE!!: Use the 'sl' command instead of the 'nl' command to remove this warning...\n");
+
+	fp_log = fopen(logfile, "a");
+	
+	fprintf(fp_log,"!!NOTE!!: All Hartree-Fock tests are done with the semi-local form of the potential \n");
+	fprintf(fp_log,"!!NOTE!!: Use the 'sl' command instead of the 'nl' command to remove this warning...\n");
+	
+	fclose(fp_log);
+	donl=0;	
+      }
     }
 
+    nlpot2_.inl = donl;  
+
     fp_log = fopen(logfile, "a");
-    if (insl==0) fprintf(fp_log,"\n\n ===============Configuration %d SL: Calc ===============\n",config+1);
-    if (insl==1) fprintf(fp_log,"\n\n ===============Configuration %d NL: Calc ===============\n",config+1);
+    if (donl==0) fprintf(fp_log,"\n\n ===============Configuration %d SL: Calc ===============\n",config+1);
+    if (donl==1) fprintf(fp_log,"\n\n ===============Configuration %d NL: Calc ===============\n",config+1);
     fclose(fp_log);
 
     ilogder_.ilogder = 0;
@@ -213,24 +288,41 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
     logarith_.elogmin = param->emin;
     logarith_.elogmax = param->emax;
 
+
+    if (!strcmp(param->reltype, "frl")) { 
+      relorbnl(param,config,logfile);
+    }else{
+      nrelorbnl(param,config,logfile);
+    }
+
     readPS(param);
-    nrelorbnl(param,config,logfile);
+
 
     zeff=adat_.xion;
     for (i=0; i<param->nval; i++){
       zeff +=adat_.wnl[i];
     }
 
-    aorb_.norb = param->nval;
-    aorb_.ncore = 0; 
-    nlpot2_.inl = 1;  
+    irelxc=0;
     ifc=0;
     ipsp=1;
     irel=0;
     if (param->ixc < 0) {
-      hfsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+      hfsolve_(&zeff,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
     }else {
-      dftsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+      /*
+        for (i=0; i<param->ngrid+1; i++)
+          for (j=0; j<aorb_.norb; j++)
+	    if (aorb_.lo[j]  == 3)
+            totpot_.rvcore[j][i] += boxval*grid_.r[i];
+      */
+	dftsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
+	/*
+        for (i=0; i<param->ngrid+1; i++)
+          for (j=0; j<aorb_.norb; j++)
+	    if (aorb_.lo[j]  == 3)
+            totpot_.rvcore[j][i] -= boxval*grid_.r[i];
+	*/
     }
 
     sprintf(filename, "%s.psi_last", param->name);
@@ -244,12 +336,13 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
     fclose(fp);
 
     if (iexit) {
-      if (insl==0) printf("Terminal error in: scpot <-- config #%d SL <-- do_tc\n EXITING OPIUM \n",config+1);
-      if (insl==1) printf("Terminal error in: scpot <-- config #%d NL <-- do_tc\n EXITING OPIUM \n",config+1);
+      if (donl==0) printf("Terminal error in: scpot <-- config #%d SL <-- do_tc\n EXITING OPIUM \n",config+1);
+      if (donl==1) printf("Terminal error in: scpot <-- config #%d NL <-- do_tc\n EXITING OPIUM \n",config+1);
       exit(1);
     }
 
-    rp = write_reportnl(param,rp,config,temp_eigen,temp_norm,insl);
+
+    rp = write_reportnl(param,rp,config,temp_eigen,temp_norm,donl,aorb_.nval);
     ennl[config+1] = aval_.etot;
 
   /* now dump the Log derivs from the NL calc */
@@ -257,7 +350,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
     if (job != -67){
       sprintf(filename, "%s.logd.%d", param->name,config+1);
       fp = fopen(filename, "ab");
-      for (k=0; k<param->nval; k++)
+      for (k=0; k<param->nll; k++)
 	fwrite(logarith_.dlwf[k], sizeof(double), NPL0, fp);
       fclose(fp);
       
@@ -266,7 +359,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
       
       dele = (param->emax - param->emin)/(NPL0-1);
 
-      for (k=0; k<param->nval; k++){
+      for (k=0; k<param->nll; k++){
 	for (j=0; j < NPL0; j++) {
 	  e=param->emin + dele * j; 
 	  fprintf(fp,"%lg %lg \n",e,logarith_.dlwf[k][j]);
@@ -277,14 +370,24 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
       
       sprintf(filename, "%s.logdeNL", param->name);
       fp = fopen(filename, "wb");
-      for (k=0; k<param->nval; k++)
+      for (k=0; k<param->nval; k++) {
+	minne=1000000.0;
+	for (j=0; j < NPL0; j++) {
+	  e=param->emin + dele * j; 
+	  if ((fabs(e-adat_.en[k])) < fabs(minne-adat_.en[k])) {
+	    minne=e;
+	    iminne=j;
+	  }
+	}
 	fwrite(&adat_.en[k], sizeof(double), 1, fp);
-      fclose(fp);
+	fwrite(&logarith_.dlwf[k][iminne], sizeof(double), 1, fp);
+      }
+      fclose(fp);    
     }
 
   }
   
-  if (insl==0) {
+  if (donl==0) {
     rp+=sprintf(rp,
 		"\n  Comparison of total energy differences.           \n "
 		"  DD_ij = (E_i - E_j)_AE - (E_i-E_j)_SL     \n\n "
@@ -300,7 +403,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
   
   for(k=0;k<param->nconfigs+1;k++){
     for(kk=k+1;kk<param->nconfigs+1;kk++){
-      if (insl==0) {
+      if (donl==0) {
 	sprintf(report+strlen(report), " AE-SL- %3d %3d   %14.6f %14.6f\n",
 		k,kk,((enae[k] - enae[kk]) - (ennl[k] - ennl[kk]))*1000.,((enae[k] - enae[kk]) - (ennl[k] - ennl[kk]))*1000*13.6057);
       }else{

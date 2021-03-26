@@ -30,7 +30,7 @@
 #include "nlm.h"
 
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
-void readPS(param_t *param);
+void nrelsproj(param_t *param, char *);
 int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
 
   int i, l, k, j;
@@ -57,7 +57,7 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
 
   ncore=param->norb - param->nval;
 
-  readPS(param);
+  nrelsproj(param,logfile);
 
   for (i=0; i<param->nll; i++) {
     sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
@@ -74,15 +74,11 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
     fclose(fp);
   }
   
-  sprintf(filename, "%s.loc", param->name);
-  fp = fopen(filename, "rb");
-  fread(rvloc, sizeof(double), param->ngrid, fp);
-  fclose(fp);
-
   if (param->rpcc > 0.){
     fprintf(stderr, "CPMD format not working for pcc yet, sorry!\n");
     exit(1);
   }
+
   if (param->rpcc > 0.){
     sprintf(filename, "%s.rho_pcore", param->name);
     fp = fopen(filename, "rb");
@@ -98,10 +94,6 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
   for (i=0; i<param->norb - param->nval; i++)
     unipp.z_ion -= param->wnl[i];
   unipp.l_max = param->nll;
-  if (param->nboxes > 0)
-    unipp.l_loc = param->nll;
-  else
-    unipp.l_loc = nlm_label(param->nlm[param->localind+ncore]).l;
   unipp.rel = 0;        /* this format does not support fully relativistic */
   if (param->rpcc > 0.)
     unipp.nlcc = 1;
@@ -152,7 +144,6 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
      and, of these, arrange them in increasing l-order */
 
 
-  icount=0; 
   for (kk=0; kk<param->nll;kk++){
     /*    for (k=0; k<param->nval; k++){
 	  if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
@@ -167,15 +158,28 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
   }
   /* New section to add DNL to cpmd */
   if (param->nboxes > 0) {
+    sprintf(filename, "%s.loc", param->name);
+    if (fp = fopen(filename, "rb")) {
+      fread(rvloc, sizeof(double), param->ngrid, fp);
+      fclose(fp);
+    } else {
       fp_log = fopen(logfile, "a");
-      fprintf(fp_log," Making l+1 the local potential %d\n",kk);
+      fprintf(fp_log,"Looks like you never ran nl yet you have augmentation functions :( --EXIT!\n");
+      printf("Looks like you never ran nl yet you have augmentation functions :( --EXIT!\n");
       fclose(fp_log);
-      for (i=0; i<param->ngrid; i++){
-	  unipp.v_ps[icount][0][i] = rvloc[i]/(2.*unipp.r_m[i]);
-	  unipp.u_ps[icount][0][i] = 0.0;
-      }
-      unipp.l_max++;
-      unipp.l_loc = param->nll;
+      exit(1);
+    }
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log," Making l+1 the local potential %d\n",kk);
+    fclose(fp_log);
+
+    for (i=0; i<param->ngrid; i++){
+      unipp.v_ps[kk][0][i] = rvloc[i]/(2.*unipp.r_m[i]);
+      unipp.u_ps[kk][0][i] = 0.0;
+    }
+    unipp.l_max++;
+
+    /*    unipp.l_loc = param->nll;*/
   }
   /* End new section */  
 

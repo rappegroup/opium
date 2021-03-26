@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:        3.0                             
+           OPIUM  Version:        3.3                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
  Copyright 2007 : The OPIUM project                         
 
- Compile host     : strange.physics.wm.edu
- Compile OS       : Linux 2.4.20-20.9smp i686
- Compile date     : Wed Aug 22 12:15:40 EDT 2007
+ Compile host     : pzt.wm.edu
+ Compile OS       : Linux 2.6.9-42.ELsmp x86_64
+ Compile date     : Wed Aug 13 16:34:20 EDT 2008
 
- Execution host   : strange.physics.wm.edu
- time of execution: Wed Aug 22 12:17:40 2007
+ Execution host   : wave.arc.wm.edu
+ time of execution: Wed Aug 13 16:37:55 2008
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <li.param> ... 
@@ -129,14 +129,19 @@
    101   -0.000016    0.007908  244.746337    0.000159    3.719505
  
  # steps:   109
+ Final KE error:    0.0001589036
+ Sum of coeffs :    3.7201395756
+ ---------------------------------------------------------------
+ Coeff:      1.556062  1.714170  0.457037 -0.009111  0.007159 -0.005148  0.004403 -0.004210  0.004350 -0.004572
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0001589036
- Norm error        :    -0.999E-15
- Continuity error  :     0.111E-15
- Curvature error   :    -0.188E-13
- 
+ Norm error        :    -0.222E-15
+ Continuity error  :     0.167E-15
+ Curvature error   :    -0.158E-13
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        1.6395060232        1.5560622428
-   2        3.5654711109        1.7141696817
+   2        3.5654711109        1.7141696816
    3        5.6344404064        0.4570373119
    4        7.7547856535       -0.0091110004
    5        9.8967920522        0.0071585431
@@ -151,8 +156,8 @@
  qc -> oo contribution   :     0.0001589036   (=Convergence term)
  Occupancy of this state :     2.0000000000
  Convergence term (Ry/e) :     0.0001589036
- Convergence error (mRy) :     0.3178072199
- Convergence error (meV) :     4.3240214722
+ Convergence error (mRy) :     0.3178072198
+ Convergence error (meV) :     4.3240214714
  
  
  ==================
@@ -180,11 +185,16 @@
     11   -0.000218    0.005154   11.815997    0.000023    0.744391
  
  # steps:    16
+ Final KE error:    0.0000077420
+ Sum of coeffs :    0.7359787625
+ ---------------------------------------------------------------
+ Coeff:      0.612293  0.106884  0.012466  0.001464  0.001336  0.000484  0.000530  0.000364 -0.000747  0.000905
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0000077420
- Norm error        :     0.555E-16
- Continuity error  :    -0.555E-16
- Curvature error   :    -0.261E-14
- 
+ Norm error        :     0.694E-16
+ Continuity error  :     0.111E-15
+ Curvature error   :     0.761E-14
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        1.5456600097        0.6122927521
    2        4.1320631611        0.1068841440
@@ -202,8 +212,8 @@
  qc -> oo contribution   :     0.0000077420   (=Convergence term)
  Occupancy of this state :     0.1000000000
  Convergence term (Ry/e) :     0.0000077420
- Convergence error (mRy) :     0.0007742011
- Convergence error (meV) :     0.0105336256
+ Convergence error (mRy) :     0.0007742009
+ Convergence error (meV) :     0.0105336231
  
  ------------------------------
  Descreening potential
@@ -485,6 +495,7 @@
 <<<do_cpmd>>>
    ================================================
 <<<do_siesta -- psf>>>
+ Note: the Siesta code redefines the local part of the psp, proceed with caution ...
    ================================================
 ------------- closing opium session ------------
 <<<do_recpot>>>

@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -95,10 +95,10 @@ c     *************************************************************************
         rsatom(i)=rsval(i)+rscore(i)
       enddo
 
-      irel=0
-      call excorr (maxim,ixc,exccut,r,rsval,rvxcv,rexcv,irel)        
+      irelxc=0
+      call excorr (maxim,ixc,exccut,rsval,rvxcv,rexcv,irelxc)
       call hrtree (maxim,h,r,rsval,rvhv)
-      call excorr (maxim,ixc,exccut,r,rsatom,rvxct,rexct,irel)        
+      call excorr (maxim,ixc,exccut,rsatom,rvxct,rexct,irelxc)
       call hrtree (maxim,h,r,rscore,rvhc)
       
 c     compute ionic pseudopotential by subtracting off screening terms.     

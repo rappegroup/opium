@@ -12,7 +12,7 @@ c
 c------------------------------------------------------------
 
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -89,8 +89,9 @@ c     coulomb terms
 
           a=akeato(ia,j,k)/wnl(ia)                                              
          
-c         write(8,8333) ia,j,k,a*wnl(ia),wnl(ia),a
+c         write(6,8333) ia,j,k,a*wnl(ia),wnl(ia),akeato(ia,j,k)
  8333    format('hart ', 3i5,3f10.6)
+
          if (a.eq.0.0d 00) go to 51                                             
          m=nmax(j)                                                              
          do 35 i=1,m                                                            
@@ -103,7 +104,7 @@ c         write(8,8333) ia,j,k,a*wnl(ia),wnl(ia),a
             m=n-2+i                                                             
  41         ag(m)=ag(m)+a*(aprdev(bgj,bgj,i)+                                   
      1            aprdev(bpj,bpj,i))                                            
- 51      max0= max(max0,nmax(j))                                                
+ 51   max0= max(max0,nmax(j))                                                
       call yzkrdf (0,max0,k,cg,cp)                                                    
       do 61 i=1,10                                                            
          l=k+i+3                                                                
@@ -180,6 +181,7 @@ c       their development limits by speed of light
          av(i)=av(i)/cl                                                         
          cep(i)=cep(i)/cl                                                       
  527     ceg(i)=ceg(i)/cl                                                       
+
 
       do 531 i=1,np                                                           
 

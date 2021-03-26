@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
  *
  */
 /*
- * $Id: do_spsplt.h,v 1.4 2004/10/02 18:34:49 ewalter Exp $
  */
 
 #include "parameter.h"

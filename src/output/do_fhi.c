@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include "nlm.h"
 
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
+void nrelsproj(param_t *param, char *);
 
 int do_fhi(param_t *param, FILE *fp_param, char *logfile){
 
@@ -58,10 +59,8 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   
   /* read in the local potential from a binary file created by do_nl() */
 
-  sprintf(filename, "%s.loc", param->name);
-  fp = fopen(filename, "rb");
-  fread(rvloc, sizeof(double), param->ngrid, fp);
-  fclose(fp);
+  nrelsproj(param,logfile);
+
 
   for (i=0; i<param->nll; i++) {
     sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
@@ -165,9 +164,23 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   /* New section to add DNL to abinit */
   if (param->nboxes > 0) {
     /*    fprintf(fp_log," fhi format does not support the use of augmentation operators\n");*/
+
+    sprintf(filename, "%s.loc", param->name);
+    if (fp = fopen(filename, "rb")) {
+      fread(rvloc, sizeof(double), param->ngrid, fp);
+      fclose(fp);
+    } else {
+      fp_log = fopen(logfile, "a");
+      fprintf(fp_log,"Looks like you never ran nl yet you have augmentation functions :( --EXIT!\n");
+      printf("Looks like you never ran nl yet you have augmentation functions :( --EXIT!\n");
+      fclose(fp_log);
+      exit(1);
+    }
+
     fp_log = fopen(logfile, "a");
     fprintf(fp_log," Making l+1 the local potential %d\n",kk);
     fclose(fp_log);
+
     for (i=0; i<param->ngrid; i++){
       unipp.v_ps[kk][0][i] = rvloc[i]/(2.*unipp.r_m[i]);
       unipp.u_ps[kk][0][i] = 0.0;
@@ -197,6 +210,7 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   if (param->ixc == 2) lixc=11;
   if (param->ixc == 3) lixc=99;
   if (param->ixc == 4) lixc=23;
+  if (param->ixc == 5) lixc=24;
 
   /* open the file and call the method to write cpi format */  
   sprintf(filename, "%s.cpi", param->name);

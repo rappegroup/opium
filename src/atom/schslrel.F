@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@ c     integrate the relativistic Dirac equation:
 c     find eigenvalue ev and the major and minor
 c     components of the wavefunction, ar and br
 c
-c     Revision 1.1  89/10/26  19:53:21  sverre
-c     Initial revision
+c     Orignal author info:
+c     **Revision 1.1  89/10/26  19:53:21  sverre**
 c     
 
 #include "fortdim.h"
@@ -35,6 +35,8 @@ c
       common /adat/ wnl(n0),en(n0),so(n0),xion
       common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
       common /grid/ h,r1,z,r(npdm),np
+      
+      common /ipos/ ipos(n0),itermcount
 
       dimension v(nrmax),ar(nrmax),br(nrmax)
       dimension 
@@ -234,6 +236,7 @@ c     too many nodes -- decrease ev
 c     
             if (ev(iorb) .lt. emax) emax = ev(iorb)
             if (devmax .gt. 0.D0) devmax = -devmax / 2
+c            write(7,*) 'EV ',iorb,ev(iorb),devmax
             ev(iorb) = ev(iorb) + devmax
             goto 190
          else if (nodes .lt. no(iorb)-lo(iorb)-1) then
@@ -242,6 +245,7 @@ c     too few nodes -- increase ev
 c     
             if (ev(iorb) .gt. emin) emin = ev(iorb)
             if (devmax .lt. 0.D0) devmax = -devmax / 2
+c            write(7,*) 'EV ',iorb,ev(iorb),devmax
             ev(iorb) = ev(iorb) + devmax
             goto 190
          end if
@@ -387,7 +391,9 @@ c
          if (ev(iorb) .gt. emax) ev(iorb) = (evold + emax) / 2
          if (ev(iorb) .lt. emin) ev(iorb) = (evold + emin) / 2
          if (abs(dev) .lt. tol*(1+abs(ev(iorb)))) goto 220
+
   190 continue
+
 c     
 c     eigenpar not converged in itmax iterations
 c     
@@ -416,8 +422,15 @@ c
 c     error message
 c     
       write(nout,210) iorb,ev(iorb),nodes,dev
+c         ipos(iorb)=ipos(iorb)+1
+c         if (nodes.gt.12) then
+c            write(7,*) 'Doing reset of this eigenvalue',ev(iorb)
+c            ev(iorb)=-z*z/(no(iorb)**2)
+c            write(7,*) 'New value', en(iorb)
+c         endif
+
   210 format(' orb #',i3,' did not converge',/,
-     +     ' ev =',e18.10,' nodes =',i2,' dev =',e18.10)
+     +     ' ev =',e18.10,' nodes =',i8,' dev =',e18.10)
 c     
 c     normalize wavefunction
 c     

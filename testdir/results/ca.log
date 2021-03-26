@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:        3.0                             
+           OPIUM  Version:        3.3                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
  Copyright 2007 : The OPIUM project                         
 
- Compile host     : strange.physics.wm.edu
- Compile OS       : Linux 2.4.20-20.9smp i686
- Compile date     : Wed Aug 22 12:15:40 EDT 2007
+ Compile host     : pzt.wm.edu
+ Compile OS       : Linux 2.6.9-42.ELsmp x86_64
+ Compile date     : Wed Aug 13 16:34:20 EDT 2008
 
- Execution host   : strange.physics.wm.edu
- time of execution: Wed Aug 22 12:16:47 2007
+ Execution host   : wave.arc.wm.edu
+ time of execution: Wed Aug 13 16:36:15 2008
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <ca.param> ... 
@@ -126,14 +126,19 @@
     31   -0.000069    0.029906  218.041774    0.000468    0.601503
     41   -0.000034    0.013773  203.966651    0.000456    0.608502
     51   -0.000036    0.011707  161.223038    0.000449    0.617045
-    61   -0.000016    0.006267  201.194957    0.000447    0.623822
+    61   -0.000016    0.006267  201.194958    0.000447    0.623822
  
  # steps:    65
+ Final KE error:    0.0004468154
+ Sum of coeffs :    0.6237002838
+ ---------------------------------------------------------------
+ Coeff:      1.450859 -0.556930 -0.297891  0.032924 -0.016026  0.010722 -0.009098  0.008703 -0.008904  0.009341
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0004468154
- Norm error        :     0.000E+00
+ Norm error        :     0.333E-15
  Continuity error  :    -0.111E-15
- Curvature error   :    -0.799E-14
- 
+ Curvature error   :    -0.985E-13
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        1.5873194497        1.4508592158
    2        3.8128909837       -0.5569297904
@@ -151,8 +156,8 @@
  qc -> oo contribution   :     0.0004468154   (=Convergence term)
  Occupancy of this state :     2.0000000000
  Convergence term (Ry/e) :     0.0004468154
- Convergence error (mRy) :     0.8936307737
- Convergence error (meV) :    12.1585615811
+ Convergence error (mRy) :     0.8936307733
+ Convergence error (meV) :    12.1585615759
  
  
  ==================
@@ -174,16 +179,21 @@
  Starting KE minimization...
   step #    theta       slope       curv       KEresid    coeffsum
      1    0.001726   -0.794320  230.065139    0.000051    2.830347
-     2   -0.000397    0.048246   60.814205    0.000041    2.833033
+     2   -0.000397    0.048246   60.814204    0.000041    2.833033
      3   -0.000240    0.028627   59.543215    0.000038    2.829639
      4   -0.000317    0.021560   34.008332    0.000034    2.827592
  
  # steps:     8
+ Final KE error:    0.0000092470
+ Sum of coeffs :    2.7966886315
+ ---------------------------------------------------------------
+ Coeff:      1.944928  0.809244  0.040402  0.005640 -0.004415  0.003298 -0.002946  0.001519 -0.002914  0.001933
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0000092470
- Norm error        :    -0.111E-15
- Continuity error  :     0.167E-15
- Curvature error   :     0.766E-14
- 
+ Norm error        :     0.111E-15
+ Continuity error  :    -0.222E-15
+ Curvature error   :    -0.236E-13
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        2.0524803228        1.9449276198
    2        3.9913636164        0.8092442104
@@ -201,8 +211,8 @@
  qc -> oo contribution   :     0.0000092470   (=Convergence term)
  Occupancy of this state :     6.0000000000
  Convergence term (Ry/e) :     0.0000092470
- Convergence error (mRy) :     0.0554819543
- Convergence error (meV) :     0.7548763736
+ Convergence error (mRy) :     0.0554819536
+ Convergence error (meV) :     0.7548763643
  
  
  ==================
@@ -233,11 +243,16 @@
     41   -0.000006    0.001991  165.878470    0.016954    3.564593
  
  # steps:    48
+ Final KE error:    0.0169536575
+ Sum of coeffs :    3.5646353102
+ ---------------------------------------------------------------
+ Coeff:      2.566928  1.065766 -0.073789  0.040104 -0.017211  0.001572  0.010691 -0.021098  0.030380 -0.038707
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0169536575
- Norm error        :     0.555E-15
- Continuity error  :    -0.444E-15
- Curvature error   :    -0.231E-13
- 
+ Norm error        :     0.167E-15
+ Continuity error  :     0.000E+00
+ Curvature error   :     0.755E-13
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        3.0638044573        2.5669277244
    2        5.8471069467        1.0657658995
@@ -354,7 +369,7 @@
  
  Test  state: 3d
  KB energy : -17.783254  KB strength:   7.642679  KB cosine:  -0.429768
- el0       :  -0.673708  el1        :  -0.313363  eig      :  -1.193267
+ el0       :  -0.673708  el1        :  -0.313362  eig      :  -1.193267
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 2s
@@ -466,9 +481,9 @@
  iter       Etot             Ebs             Ehxc       de_max   dv_max
    1      -86.2256791     -30.1756995     -56.0499795 0.69E-04 0.40E+01
    2      -78.9089387     -24.3088272     -54.6001115 0.48E+00 0.20E+01
-   3      -73.6074528     -20.0087178     -53.5987351 0.69E+00 0.20E+02
-   4      -73.2011798     -19.6671290     -53.5340507 0.17E+00 0.20E+02
-   5      -73.1968352     -19.6960711     -53.5007642 0.17E-01 0.10E+02
+   3      -73.6074528     -20.0087177     -53.5987351 0.69E+00 0.75E-01
+   4      -73.2011797     -19.6671290     -53.5340508 0.17E+00 0.21E-01
+   5      -73.1968352     -19.6960711     -53.5007642 0.17E-01 0.97E-02
    6      -73.2319441     -19.7366787     -53.4952654 0.19E-01 0.44E-02
    7      -73.2509123     -19.7523783     -53.4985340 0.66E-02 0.83E-03
    8      -73.2516099     -19.7519942     -53.4996157 0.38E-03 0.55E-03
@@ -507,7 +522,7 @@
  
  Test  state: 2p
  KB energy : -10.668194  KB strength:   6.265641  KB cosine:  -0.587320
- el0       :  -0.667592  el1        :  -0.026669  eig      :  -2.060198
+ el0       :  -0.667592  el1        :  -0.026689  eig      :  -2.060198
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 3d
@@ -633,12 +648,12 @@
  
  Test  state: 3d
  KB energy : -17.783254  KB strength:   7.642679  KB cosine:  -0.429768
- el0       :  -0.306502  el1        :  -0.105911  eig      :  -0.640182
+ el0       :  -0.306502  el1        :  -0.106024  eig      :  -0.640182
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 2s
  KB energy :  -6.760000  KB strength:   4.705900  KB cosine:  -0.696139
- el0       :  -0.450557  el1        :  -0.151162  eig      :  -0.671592
+ el0       :  -0.450557  el1        :  -0.151175  eig      :  -0.671592
  No ghosts!  Ekb<0  and eig < el0
  ------------------------------
  
@@ -665,7 +680,8 @@
  Making l+1 the local potential 3
    ================================================
 <<<do_ncpp>>>
- ncpp format does not support the use of augmentation operators
+ Making l+1 the local potential 4
+   ================================================
 <<<do_rpt>>>
 <<calling: writerecpot>>
  number of angular momentum states    3
@@ -678,7 +694,6 @@
  Making l+1 the local potential 3
    ================================================
 <<<do_siesta -- psf>>>
- Making l+1 the local potential 3
-   ================================================
+ The Siesta format does not support the use of augmentation operators
 ------------- closing opium session ------------
 <<<do_recpot>>>

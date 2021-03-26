@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:        3.0                             
+           OPIUM  Version:        3.3                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
  Copyright 2007 : The OPIUM project                         
 
- Compile host     : strange.physics.wm.edu
- Compile OS       : Linux 2.4.20-20.9smp i686
- Compile date     : Wed Aug 22 12:15:40 EDT 2007
+ Compile host     : pzt.wm.edu
+ Compile OS       : Linux 2.6.9-42.ELsmp x86_64
+ Compile date     : Wed Aug 13 16:34:20 EDT 2008
 
- Execution host   : strange.physics.wm.edu
- time of execution: Wed Aug 22 12:16:23 2007
+ Execution host   : wave.arc.wm.edu
+ time of execution: Wed Aug 13 16:35:31 2008
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <al.param> ... 
@@ -117,11 +117,16 @@
      4   -0.001049    0.001992    0.949135    0.000798    0.149205
  
  # steps:     6
+ Final KE error:    0.0007973536
+ Sum of coeffs :    0.1476302393
+ ---------------------------------------------------------------
+ Coeff:      0.344388 -0.208832  0.003346 -0.013700  0.022428
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0007973536
- Norm error        :    -0.555E-16
- Continuity error  :     0.000E+00
- Curvature error   :     0.777E-14
- 
+ Norm error        :    -0.278E-16
+ Continuity error  :    -0.555E-16
+ Curvature error   :    -0.233E-14
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        0.3280426093        0.3443882077
    2        2.8363213795       -0.2088321410
@@ -134,8 +139,8 @@
  qc -> oo contribution   :     0.0007973536   (=Convergence term)
  Occupancy of this state :     2.0000000000
  Convergence term (Ry/e) :     0.0007973536
- Convergence error (mRy) :     1.5947072627
- Convergence error (meV) :    21.6972680745
+ Convergence error (mRy) :     1.5947072628
+ Convergence error (meV) :    21.6972680758
  
  
  ==================
@@ -163,11 +168,16 @@
     11   -0.001098    0.002501    1.138818    0.004835    0.719829
  
  # steps:    13
+ Final KE error:    0.0048344208
+ Sum of coeffs :    0.7181033758
+ ---------------------------------------------------------------
+ Coeff:      0.623042  0.079508 -0.007956 -0.022779  0.046289
+ ---------------------------------------------------------------
  Resid KE (Ry)     :        0.0048344208
- Norm error        :    -0.416E-16
- Continuity error  :    -0.555E-16
- Curvature error   :    -0.183E-14
- 
+ Norm error        :    -0.278E-16
+ Continuity error  :     0.111E-15
+ Curvature error   :     0.139E-14
+ ---------------------------------------------------------------
  Bessel wavevectors and final coefficients
    1        1.0809513634        0.6230417902
    2        3.6933016643        0.0795080625
@@ -180,8 +190,8 @@
  qc -> oo contribution   :     0.0048344208   (=Convergence term)
  Occupancy of this state :     1.0000000000
  Convergence term (Ry/e) :     0.0048344208
- Convergence error (mRy) :     4.8344208455
- Convergence error (meV) :    65.7761631390
+ Convergence error (mRy) :     4.8344208459
+ Convergence error (meV) :    65.7761631445
  
  ------------------------------
  Descreening potential
@@ -362,7 +372,7 @@
  
  Test  state: 2p
  KB energy : -10.826292  KB strength:   0.670834  KB cosine:  -0.061963
- el0       :  -0.648530  el1        :  -0.082360  eig      :  -0.673218
+ el0       :  -0.648530  el1        :  -0.082354  eig      :  -0.673218
  No ghosts!  Ekb<0  and eig < el0
  ------------------------------
  
@@ -489,6 +499,7 @@
 <<<do_cpmd>>>
    ================================================
 <<<do_siesta -- psf>>>
+ Note: the Siesta code redefines the local part of the psp, proceed with caution ...
    ================================================
 ------------- closing opium session ------------
 <<<do_recpot>>>

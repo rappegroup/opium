@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -51,18 +51,18 @@ c
       enddo
 
       if (ipr.ne.0) then
-c         write(7,9004)
-c         write(7,9005) (rc(i),i=1,numfn)
-c         write(7,9004)
+         write(7,9004)
+         write(7,9005) (rc(i),i=1,numfn)
+         write(7,9004)
          write(7,9000) rkin+rkcon
          write(7,9001) rnorm+rncon
          write(7,9002) rlcon(1)+rlvec(1)
          write(7,9003) rlcon(2)+rlvec(2)
          if (ncon.eq.3) write(7,9007) rlcon(3)+rlvec(3)
-c         write(7,9004)
+         write(7,9004)
       endif
  
- 9000 format(1x,'Resid KE (Ry)     :    ',f16.10)
+ 9000 format(1x,'Resid KE (Ry)     :    ',2f16.10)
  9001 format(1x,'Norm error        :    ',e10.3)
  9002 format(1x,'Continuity error  :    ',e10.3)
  9003 format(1x,'Curvature error   :    ',e10.3)

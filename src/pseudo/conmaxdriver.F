@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -307,11 +307,11 @@ c        write(7,*) (a(i),i=1,numfn),((d(i,j),i=1,numfn),j=1,numfn)
         write(7,9596) sum2,sum2-f,f
         write(7,9597) 
         write(7,*)
-        write(6,9595)
-        write(6,9596) sum2,sum2-f,f
-        write(6,9597) 
-        write(6,*)
-        stop
+c        write(6,9595)
+c        write(6,9596) sum2,sum2-f,f
+c        write(6,9597) 
+c        write(6,*)
+c        stop
  9595   format(1x,
      $   '!!WARNING!! Resid became negative (Total,lowq,highq)')
  9596   format(1x,3f20.10)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 The OPIUM Group
+ * Copyright (c) 1998-2010 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,10 +29,13 @@
 #include "common_blocks.h"   
 #include "energy.h"
 
+#define streq(a,b) (!strcasecmp(a,b))
+
 int do_ae(param_t *param, char *logfile){
   
   int i,j,k;
   int irel=0;
+  int irelxc=0;
   int ncore;
   int mcore;
   FILE *fp_log;
@@ -43,6 +46,7 @@ int do_ae(param_t *param, char *logfile){
   int ifc=0;
   int iexit=0;
   int iprint=1;
+  double exccut_temp;
   double temp_eigen[10];
   double temp_norm[10];
   int ikstor[3];
@@ -61,6 +65,12 @@ int do_ae(param_t *param, char *logfile){
   fprintf(fp_log," Begin AE calculation\n");
   fprintf(fp_log,  " ======================================================================== \n");
 
+  if (param->exccut < 0) {
+    exccut_temp=0.0;
+  } else {
+    exccut_temp=param->exccut;
+  }
+
   if (!strcmp(param->reltype, "nrl")){
     
     /* do the NRL type AE solve */
@@ -76,10 +86,11 @@ int do_ae(param_t *param, char *logfile){
 
     /* find the SCF solution */
     irel=0;
+    irelxc=0;    
     if (param->ixc < 0) {
-      hfsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+      hfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
     }else {
-      dftsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+      dftsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
     }
     if (iexit) {
       printf("Terminal error in: scpot <-- do_ae\n EXITING OPIUM \n");
@@ -91,7 +102,6 @@ int do_ae(param_t *param, char *logfile){
     fprintf(fp_log," Performing relativistic AE calculation...  \n" );
     fclose(fp_log);
 
-
     /* turn the l-orbitals into j-orbitals */
     relorbae(param,config,logfile);
 
@@ -99,10 +109,16 @@ int do_ae(param_t *param, char *logfile){
     startae(param, aorb_.norb);
 
     irel=1;
+    if (streq(param->relxc,"rxc")){ 
+      irelxc=1;
+    }else{
+      irelxc=0;
+    }
+
     if (param->ixc < 0) {
-      dfsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+      dfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
     }else {
-      dftsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
+      dftsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
     }
 
     if (iexit) {
@@ -115,11 +131,13 @@ int do_ae(param_t *param, char *logfile){
     param->nvalrel=aorb_.nval;
     param->ncorerel=aorb_.ncore;
 
-    if (param->ixc < 0) {
-      /*printf(" nval= %d \n ", aorb_.nval);*/
-    }else{
-      nrelorbae(param,config,logfile);
-      average_(&param->ixc,&param->exccut, &iexit); 
+    if (!strcmp(param->reltype, "srl")) {
+      if (param->ixc < 0) {
+	/*printf(" nval= %d \n ", aorb_.nval);*/
+      }else{
+	nrelorbae(param,config,logfile);
+	average_(&param->ixc,&param->exccut, &iexit); 
+      }
     }
     if (iexit) {
       printf("Terminal error in: average <-- do_ae\n EXITING OPIUM \n");
@@ -155,7 +173,7 @@ int do_ae(param_t *param, char *logfile){
     fclose(fp_log);
   }
   /* record data in report */
-  rp = write_reportae(param,rp,config,temp_eigen,temp_norm);
+  rp = write_reportae(param,rp,config,temp_eigen,temp_norm,aorb_.norb);
   
   writeAE(param);
   
@@ -175,27 +193,41 @@ void do_ae_report(FILE *fp){
   fprintf(fp, "%s", report);
 }
 
-char * write_reportae(param_t *param, char *rp,int config, double temp_eigen[], double temp_norm[]) {
+char * write_reportae(param_t *param, char *rp,int config, double temp_eigen[], double temp_norm[], int nol) {
   
   int i,j,l,ncore;
   double e_rel,n_rel;
+  char sgn='+';
 
-  ncore=param->norb - param->nval;
+  ncore=aorb_.norb - aorb_.nval;
 
   rp += sprintf(rp, 
 		" AE:Orbital    Filling       Eigenvalues[Ry]          Norm\n"
 		"    ----------------------------------------------------------\n");
 
-  if (!strcmp(param->reltype, "nrl")){
-    for (i=0; i<param->norb; i++)
+  if (!strcmp(param->reltype, "nrl")||!strcmp(param->reltype, "frl")){
+    for (i=0; i<nol; i++)
       if (i>ncore-1) {
-	rp += sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\n",
-		      aorb_.nlm[i], adat_.wnl[i], adat_.en[i],aval_.rnorm[i]);
+	if (!strcmp(param->reltype, "frl")) {
+	  sgn=(adat_.so[i] > 0) ? '+' : '-' ; 
+	  rp += sprintf(rp, "\t%3d%c\t%6.3f\t%19.10f\t%14.10f\n",
+			aorb_.nlm[i],sgn, adat_.wnl[i], adat_.en[i],aval_.rnorm[i]);
+	}else{
+	  rp += sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\n",
+			aorb_.nlm[i], adat_.wnl[i], adat_.en[i],aval_.rnorm[i]);
+	}	  
 	temp_eigen[i-ncore]=adat_.en[i];
 	temp_norm[i-ncore]=aval_.rnorm[i];
       }else{
-	rp += sprintf(rp, "\t%3d\t%6.3f\t%19.10f\n",
-		      aorb_.nlm[i], adat_.wnl[i], adat_.en[i]);
+	if (!strcmp(param->reltype, "frl")) {
+	  sgn=(adat_.so[i] > 0) ? '+' : '-' ; 
+	  rp += sprintf(rp, "\t%3d%c\t%6.3f\t%19.10f\n",
+			aorb_.nlm[i],sgn,adat_.wnl[i], adat_.en[i]);
+	}else{
+	  rp += sprintf(rp, "\t%3d\t%6.3f\t%19.10f\n",
+			aorb_.nlm[i], adat_.wnl[i], adat_.en[i]);
+	}
+
       }
 
   } else if (!strcmp(param->reltype, "srl")){
@@ -222,7 +254,8 @@ char * write_reportae(param_t *param, char *rp,int config, double temp_eigen[], 
 	}
 	temp_eigen[i]=e_rel;
 	temp_norm[i]=n_rel;
-
+	
+	ncore=param->norb-param->nval;
 	if (config<0) {
 	  rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\n",
 		      param->nlm[i+ncore], param->wnl[i+ncore],e_rel, n_rel);

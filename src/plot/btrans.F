@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -51,11 +51,11 @@ c
 
       do m=1,nval
          l = nlm(m)/10 - 10 * (nlm(m)/100)
-         qmax=20
-         qp=500
+         qmax=20.d0
+         qp=500.d0
          dql=qmax/qp
 
-         do j=1,qp                                                    
+         do j=1,nint(qp)
             ql=dql*dble(j-1)                                             
 
             do k=1,maxim                                                
@@ -72,10 +72,10 @@ c
 
       do m=1,nll
          l = nlm(m)/10 - 10 * (nlm(m)/100)
-         qmax=100
-         qp=1000
+         qmax=100.d0
+         qp=1000.d0
          dql=qmax/qp
-         do j=1,qp                                                    
+         do j=1,nint(qp)
             ql=dql*dble(j-1)                                             
             do k=1,maxim                                                
                qr=r(k)*ql                                             
@@ -90,7 +90,7 @@ c
          write(60,*) '@'
       enddo
 
-      do j=1,qp                                                    
+      do j=1,nint(qp)                                                    
          ql=dql*dble(j-1)                                             
          do k=1,maxim                                                
             qr=r(k)*ql                                             
@@ -108,7 +108,7 @@ c
 
       if (rpcc.gt.1e-6) then
 
-         do j=1,qp                                                    
+         do j=1,nint(qp)
             ql=dql*dble(j-1)                                             
             do k=1,maxim                                                
                qr=r(k)*ql                                             

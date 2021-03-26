@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2008 The OPIUM Group
+c Copyright (c) 1998-2010 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -103,6 +103,7 @@ c     *************************************************************************
                enddo
                call cubint(istate,pder,rvloc,g,e,lang,dlwfinhm)
                dlwf(j,istate) = dlwfinhm
+               write(600,*) istate,j,dlwf(j,istate)
             enddo
          else
             write(7,9333) rphas,istate,rcall(istate)
@@ -129,35 +130,45 @@ c -------------------------------------------------------------------------
 
       dimension rvl(npdm),rvs(npdm)
 
-      IA     = iboxstart(1)
-      IB     = iboxend(1)
-      ADEPTH = boxheight(1)
-      IC     = iboxstart(2)
-      ID     = iboxend(2)
-      BDEPTH = boxheight(2)
-      IE     = iboxstart(3)
-      IG     = iboxend(3)
-      CDEPTH = boxheight(3)
-      IH     = iboxstart(4)
-      IJ     = iboxend(4)
-      DDEPTH = boxheight(4)
+c      IA     = iboxstart(1)
+c      IB     = iboxend(1)
+c      ADEPTH = boxheight(1)
+c      IC     = iboxstart(2)
+c      ID     = iboxend(2)
+c      BDEPTH = boxheight(2)
+c      IE     = iboxstart(3)
+c      IG     = iboxend(3)
+c      CDEPTH = boxheight(3)
+c      IH     = iboxstart(4)
+c      IJ     = iboxend(4)
+c      DDEPTH = boxheight(4)
       
       do i = 1,np
         rvl(i) = rvs(i)
       enddo
 
-      do i = IA,IB
-         rvl(i) = rvl(i) + ADEPTH * r(i)
-      enddo
-      do i = IC,ID
-         rvl(i) = rvl(i) + BDEPTH * r(i)
-      enddo
-      do i = IE,IG
-         rvl(i) = rvl(i) + CDEPTH * r(i)
-      enddo
-      do i = IH,IJ
-         rvl(i) = rvl(i) + DDEPTH * r(i)
-      enddo
+c      do i = IA,IB
+c         rvl(i) = rvl(i) + ADEPTH * r(i)
+c      enddo
+c      do i = IC,ID
+c         rvl(i) = rvl(i) + BDEPTH * r(i)
+c      enddo
+c      do i = IE,IG
+c         rvl(i) = rvl(i) + CDEPTH * r(i)
+c      enddo
+c      do i = IH,IJ
+c         rvl(i) = rvl(i) + DDEPTH * r(i)
+c      enddo
 
+c     Replacement for the blocks commented out above; allows for more
+c     than four boxes. src/main/parameter.c updated accordingly.
+c     BST 09/08/10
+      do i = 1,min(numbox,n0)
+         do j = iboxstart(i),iboxend(i)
+            rvl(j) = rvl(j) + boxheight(i) * r(j)
+         enddo
+      enddo
+      
       return
       end
+
