@@ -171,5 +171,5 @@ void writeparam_(FILE *fpp, FILE *fpp_param, double *ecutev, int *version) {
 
 
   fprintf(fpp, "END COMMENT \n");
-
+  fprintf(fpp, " 3 %d \n",*version);
 }

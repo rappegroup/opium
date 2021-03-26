@@ -49,7 +49,7 @@ c -- PWF pseudopotential file format
       dimension psp(npspt0),dpsp(npspt0)
       dimension rrvloc(npdm)
 
-      character*2 xrpcc
+      character*1 xrpcc
       character*5 xproj
 
       character*8 xform
@@ -57,6 +57,7 @@ c -- PWF pseudopotential file format
 
       common /filenames/ file_log
       character*80 file_log
+      character*80 namepwf
 
       data bohrad,ryd / 0.529177,13.6057 /
       
@@ -256,15 +257,17 @@ c     linearly interpolate dpsp at endpoints  1,npspts-1 see note at top
 
 c -- use the C I/O call to output the local potential coefficients
 c
-      call nclear(ifp)
+c      call nclear(ifp)
       do i=1,npspts
-        call nwrite(ifp, "", 4, "%18.8f", psp(i))
+         call nwrite2(ifp, 4, "%18.8f", psp(i))
       enddo
       call nclear(ifp)
       do i=1,npspts
-        call nwrite(ifp, "", 4, "%18.8f", dpsp(i))
+         call nwrite2(ifp, 4, "%18.8f", dpsp(i))
       enddo
       call nclear(ifp)
+      
+      
         
 c     for kleinman-bylander non-local psp                               
 c     change units
@@ -293,12 +296,12 @@ c -- New lines that omit the 0's but still produce the BH format
          ill(i)=0
       enddo
 
-      xform="%20.10f"
+c      xform="%20.10f"
       call nclear(ifp)
       do k=1,nll
          if (k.ne.ilocal+1) then
             do i=1,nflq
-               call nwrite(ifp, "", 3, "%20.10f ", flq(i,k))
+               call nwrite2(ifp, 3, "%20.10f", flq(i,k))
             enddo
          endif
       enddo
@@ -307,7 +310,7 @@ c -- New lines that omit the 0's but still produce the BH format
       do k=1,nll
          if (k.ne.ilocal+1) then
             do i=1,nflq
-               call nwrite(ifp, "", 3, "%20.10f ", dflq(i,k))
+               call nwrite2(ifp,  3, "%20.10f", dflq(i,k))
             enddo
          endif
       enddo
@@ -315,7 +318,7 @@ c -- New lines that omit the 0's but still produce the BH format
       
       do k=1,nll
          if (k.ne.ilocal+1) then
-            call nwrite(ifp, "", 3, "%20.10f ", eta(k))
+            call nwrite2(ifp, 3, "%20.10f", eta(k))
          endif
       enddo
       call nclear(ifp)
@@ -333,8 +336,8 @@ c -- New lines that omit the 0's but still produce the BH format
 
       if (rpcc.gt.1e-12) then
          do i=1,np
-          call nwrite(ifp, "", 2, "%26.16e",r(i))
-          call nwrite(ifp, "", 2, "%26.16e",rscore(i))
+          call nwrite2(ifp, 2, "%26.16e",r(i))
+          call nwrite2(ifp, 2, "%26.16e",rscore(i))
         enddo
       endif
 

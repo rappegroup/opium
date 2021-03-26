@@ -3293,7 +3293,7 @@ case $ac_cv_host in
       if test x"$CFLAGS" = "x-g"; then
 	CFLAGS="-O3"
       fi
-      NOOPT="-O0 -r8"
+      NOOPT="-O0"
     fi
     ;;
 
@@ -3312,12 +3312,12 @@ case $ac_cv_host in
       else
 	LDFLAGS="$LDFLAGS -lUfor -lFutil -lfor"
       fi
-      NOOPT="-O0 -r8"
+      NOOPT="-O0"
     fi
     ;;
 
   *86-pc-linux-*)
-    NOOPT="-O0 -r8"
+    NOOPT="-O0"
     if test $FCT = pgf77 || test $FCT = pgf90; then
             # Extract the first word of "pgf77", so it can be a program name with args.
 set dummy pgf77; ac_word=$2
@@ -3367,7 +3367,7 @@ fi
     if test $FCT = ifc || test $FCT = ifort; then
       LD=$F77
       LDFLAGS="$LDFLAGS -Vaxlib"
-      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8"
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 -fp-model strict"
       LDFLAGS="$LDFLAGS -L$i -static-libcxa"
 
       if test $FCT = ifort; then
@@ -3410,7 +3410,7 @@ fi
     if test $FCT = ifc || test $FCT = ifort; then
       LD=$FCT
       LDFLAGS="$LDFLAGS -Vaxlib"
-      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 "
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 -fp-model strict"
       LDFLAGS="$LDFLAGS -L$i -static-libcxa"
 
       if test $FCT = ifort; then
@@ -3444,7 +3444,7 @@ fi
 
 
   *x86_64*linux-*)
-    NOOPT="-O0 -r8"
+    NOOPT="-O0"
     if test $FCT = pgf77 || test $FCT = pgf90; then
             # Extract the first word of "pgf77", so it can be a program name with args.
 set dummy pgf77; ac_word=$2
@@ -3494,7 +3494,7 @@ fi
     if test $FCT = ifc || test $FCT = ifort; then
       LD=$FCT
       LDFLAGS="$LDFLAGS -Vaxlib"
-      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 "
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 -fp-model strict"
       LDFLAGS="$LDFLAGS -L$i -static-libcxa"
 
       if test $FCT = ifort; then
@@ -3579,7 +3579,7 @@ fi
 
 
 if test $FCT = fort77; then
-  NOOPT="-O0 -r8"
+  NOOPT="-O0"
   FFLAGS="-r8 $FFLAGS"
   if test "${f2c_libraries+set}" = set; then
     LDFLAGS="-L$f2c_libraries $LDFLAGS"

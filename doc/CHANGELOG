@@ -401,17 +401,43 @@ Patch to enable partial core corrections for the .recpot (castep) format
 
 6) worked more on gfortran compatibility
 
+3.5 -> 3.6 
+
+1) Added fully-relativisitc psps -- needed significant modifications which resulted in many routines needed changing 
+
+2) Restored most if not all of the support for separate command line action (>>opium al log ae ; >>opium al log ps ; etc..) which had been lost in previous releases. 
+
+3) Implemented QuantumESPRESSO's upf version 1 psp output. Version 2 is in progress. 
+
+4) Added DNL modifications from Ben Truscott 
+
+5) Added Flexib corrections submitted by Keith Refson 
 
 
+3.6 -> 3.7 
+
+1) Added "teter" output which is format usable for frl/spin-orbit in ABINIT 
+
+2) Added "upf" (version 1) output which can be used for Quantum-Espresso (including frl/spin-orbit calculations) 
+
+3) Added "qso" output which is suitable for "QBOX" calculations 
+
+4) Added "QSOMesh" keyblock to define a linear mesh upon which the psp can be defined 
+
+5) Cleaned up a number of warning and error message output 
+
+6) Changed the printing in pwf and recpot output so gfortran will now work. 
+
+7) NOTE to MAC users: This will be the first Mac release that was prepared on "Lion". The Mac executable should be fine on older Intel systems, however, PPC Mac can no longer use the static Mac binary.
 
 
+3.7 -> 3.8 
 
+1) Restored the PCC version number for the recpot output.
 
+2) Added PCC for the QE upf output.
 
-
-
-
-
+3) Cleaned up a lot of the printing errors for the gfortran version.
 
 	
 	

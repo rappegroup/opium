@@ -154,7 +154,7 @@ dnl SGI's native C and fortran compilers
       if test x"$CFLAGS" = "x-g"; then
 	CFLAGS="-O3"
       fi
-      NOOPT="-O0 -r8"
+      NOOPT="-O0"
     fi
     ;;
 
@@ -174,13 +174,13 @@ dnl alpha linux with Compaq (HP)'s ccc and fort compilers
       else
 	LDFLAGS="$LDFLAGS -lUfor -lFutil -lfor"
       fi
-      NOOPT="-O0 -r8"
+      NOOPT="-O0"
     fi
     ;;
 
 dnl 32 bit PC running linux
   *86-pc-linux-*)
-    NOOPT="-O0 -r8"	
+    NOOPT="-O0"	
     if test $FCT = pgf77 || test $FCT = pgf90; then
       dnl do this to get the library path correct
       AC_PATH_PROG([XPGF77],[pgf77],[huh],[$PATH])
@@ -192,7 +192,7 @@ dnl 32 bit PC running linux
     if test $FCT = ifc || test $FCT = ifort; then
       LD=$F77
       LDFLAGS="$LDFLAGS -Vaxlib"
-      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8"
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 -fp-model strict"
       LDFLAGS="$LDFLAGS -L$i -static-libcxa"
 
       if test $FCT = ifort; then
@@ -235,7 +235,7 @@ dnl 32 bit PC running linux
     if test $FCT = ifc || test $FCT = ifort; then
       LD=$FCT
       LDFLAGS="$LDFLAGS -Vaxlib"
-      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 "
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 -fp-model strict"
       LDFLAGS="$LDFLAGS -L$i -static-libcxa"
 
       if test $FCT = ifort; then
@@ -270,7 +270,7 @@ dnl 32 bit PC running linux
 
 dnl 64bit PC running linux 
   *x86_64*linux-*)
-    NOOPT="-O0 -r8"	
+    NOOPT="-O0"	
     if test $FCT = pgf77 || test $FCT = pgf90; then
       dnl do this to get the library path correct
       AC_PATH_PROG([XPGF77],[pgf77],[huh],[$PATH])
@@ -282,7 +282,7 @@ dnl 64bit PC running linux
     if test $FCT = ifc || test $FCT = ifort; then
       LD=$FCT
       LDFLAGS="$LDFLAGS -Vaxlib"
-      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 "
+      test x"$FFLAGS" = x-g && FFLAGS="-O3 -save -r8 -fp-model strict"
       LDFLAGS="$LDFLAGS -L$i -static-libcxa"
 
       if test $FCT = ifort; then
@@ -329,7 +329,7 @@ AC_PATH_PROG([XFORT77],[fort77],[huh],[$PATH])
 
 dnl looks like we are stuck with fort77 and f2c
 if test $FCT = fort77; then
-  NOOPT="-O0 -r8"
+  NOOPT="-O0"
   FFLAGS="-r8 $FFLAGS"
   if test "${f2c_libraries+set}" = set; then
     LDFLAGS="-L$f2c_libraries $LDFLAGS"

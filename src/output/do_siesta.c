@@ -33,6 +33,8 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#define MAX(a, b)   (((a) > (b)) ? (a):(b))
+
 #include "parameter.h"        /* defines structure: 'param_t' */
 #include "cdim.h"        /* fortran code parameters */
 #include "do_siesta.h"          /* the module's own header */
@@ -211,7 +213,7 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   for (i=0; i<param->nval;i++){
     if (param->npot[i]==0) {
       ii=i+ncore;
-      fprintf(fp_out,"%d%c%5.2f  r=%5.2f/",nlm_label(param->nlm[ii]).n,xao[nlm_label(param->nlm[ii]).l],param->wnl[ii],param->rc[i]);
+      fprintf(fp_out,"%d%c%5.2f  r=%5.2f/",nlm_label(param->nlm[ii]).n,xao[nlm_label(param->nlm[ii]).l],MAX(param->wnl[ii],0),param->rc[i]);
     }
   }
   fprintf(fp_out,"\n");

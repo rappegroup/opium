@@ -33,8 +33,19 @@ static int counter;
 
 void nwrite_(FILE *fp, char *linetag, int *n, char *format, double *x){
   
-  if (counter==0) fprintf(fp, "%s", linetag);
+  if (counter==0) fprintf(fp, "%s", "E");
 
+  fprintf(fp, format, *x);
+  
+  if (counter<*n-1)
+    ++counter;
+  else{
+    fprintf(fp, "\n");
+    counter=0;
+  }
+}
+void nwrite2_(FILE *fp, int *n, char *format, double *x){
+  
   fprintf(fp, format, *x);
   
   if (counter<*n-1)
@@ -47,7 +58,18 @@ void nwrite_(FILE *fp, char *linetag, int *n, char *format, double *x){
 
 void iwrite_(FILE *fp, char *linetag, int *n, char *format, int *x){
   
-  if (counter==0) fprintf(fp, "%s", linetag);
+  if (counter==0) fprintf(fp, "%s", "");
+  
+  fprintf(fp, format, *x);
+  
+  if (counter<*n-1)
+    ++counter;
+  else{
+    fprintf(fp, "\n");
+    counter=0;
+  }
+}
+void iwrite2_(FILE *fp, int *n, char *format, int *x){
   
   fprintf(fp, format, *x);
   

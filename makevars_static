@@ -1,0 +1,12 @@
+CC=/share/apps/intel/Compiler/11.1/073/bin/ia32/icc
+CFLAGS=-I../include -I../FlexiLib -I../uniPPlib -g -O2 -DCSYS=\"'Linux 2.6.9-42.ELsmp x86_64'\" -DCHOST=\"pzt.wm.edu\" -DCDATE=\"'Mon Apr 27 12:45:31 EDT 2009'\" 
+CPP=/share/apps/intel/Compiler/11.1/073/bin/ia32/icc -E
+FC=/share/apps/intel/Compiler/11.1/073/bin/ia32/ifort
+FFLAGS=-O2 -save -r8 -mp1
+FPP=/usr/bin/cpp
+FPPFLAGS=
+LD=/share/apps/intel/Compiler/11.1/073/bin/ia32/ifort
+LDFLAGS= -lm -Vaxlib  -nofor_main  -L/share/apps/intel/Compiler/11.1/073/lib -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib -static
+RANLIB=ranlib
+AR=/usr/bin/ar
+NOOPT=-O0 -r8

@@ -110,6 +110,7 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
   for (i=0; i<param->norb - param->nval; i++)
     zeff -= param->wnl[i];
 
+
   /* read in the local potential  */
   sprintf(filename, "%s.loc", param->name);
   fp = fopen(filename, "rb");
@@ -142,14 +143,14 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
     fread(rnl[i], sizeof(double), param->ngrid, fp);
     fclose(fp);
   }
-
+  /* read in pcc */
   if (param->rpcc > 0.){
     sprintf(filename, "%s.rho_pcore", param->name);
     fp = fopen(filename, "rb");
     fread(rscore, sizeof(double), param->ngrid, fp);
     fclose(fp);
   }
-
+  
 
   /* First put in the param file: */
 
@@ -220,6 +221,17 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
 
   fprintf(fp,"  </PP_RAB>\n");
   fprintf(fp,"</PP_MESH>\n");
+
+  if (param->rpcc > 1e-6){
+    
+    fprintf(fp,"\n\n<PP_NLCC>\n");
+    for (i=0;i<param->ngrid;i++){
+      fprintf(fp,"%19.16le ",rscore[i]/rr[i]/rr[i]/4.0/M_PI);
+      if( (i+1)%4 == 0 ) fprintf(fp,"\n");
+    }
+    if(i%4 !=0 ) fprintf(fp,"\n");
+    fprintf(fp,"</PP_NLCC>\n");
+  }
 
   fprintf(fp,"\n\n<PP_LOCAL>\n");
   for (i=0;i<param->ngrid;i++){
