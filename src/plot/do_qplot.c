@@ -59,7 +59,8 @@ int do_qplot(param_t *param, char *logfile){
   char lc = 0;
   double zeff;
 
-  comm= (char *) malloc(180*sizeof(char));
+  #define comm_size 240
+  comm= (char *) malloc(comm_size*sizeof(char));
 
   readPS(param);
 
@@ -285,7 +286,7 @@ int do_qplot(param_t *param, char *logfile){
     
   /*  sprintf(comm, "xmgrace $XMG_OPTS %s.plt_wq -timestamp -autoscale y -p psiq.par  -saveall %s_psiq.agr & ",
       param->name,param->name);*/
-  sprintf(comm, "xmgrace $XMGRACE_OPTS -timestamp -graph 0 -viewport 0.15 0.55 1.15 0.85 -p vq.par %s.vq_plt -graph 1 -viewport 0.15 0.15 1.15 0.45 -p psiq.par %s.wq_plt -saveall %s_qp.agr & ", param->name,param->name,param->name);
+  snprintf(comm, comm_size,"xmgrace $XMGRACE_OPTS -timestamp -graph 0 -viewport 0.15 0.55 1.15 0.85 -p vq.par %s.vq_plt -graph 1 -viewport 0.15 0.15 1.15 0.45 -p psiq.par %s.wq_plt -saveall %s_qp.agr & ", param->name,param->name,param->name);
 
   system(comm);
   free(comm);

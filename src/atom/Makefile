@@ -6,7 +6,7 @@ include ../../makevars
 
 fobjects = atm.o cubint.o difrel.o dsolv2.o etotal.o excorr.o ghostnl.o \
 	hrtree.o interp.o logder.o nllogd.o pbe.o getpcc.o pratt.o radin.o \
-	schsl.o scpot.o splift.o spliq.o velect.o denkcomp.o
+	schsl.o scpot.o splift.o spliq.o velect.o denkcomp.o interp2.o
 
 cobjects = do_ae.o do_nl.o do_tc.o do_fc.o
 

@@ -1,13 +1,8 @@
 
-9/8/2005
+9/8/2006
 
 The script "run" will run tests on the set of param files in "params".
 
-The results obtained using:
-
-version 8.1 Intel C and Fortran compilers 
-Linux 2.6.10-1.770_FC3smp 
-
-are in "results"
+The results obtained using the static PC version are in "results"
 
 EJW

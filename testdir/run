@@ -2,7 +2,7 @@
 cp params/*.param .
 foreach i (`cat LIST`)
         echo $i
-	../opium $i $i.log ae ps nl ke tc pwf fhi ncpp recpot rpt
+	../opium $i $i.log ae ps nl ke tc pwf fhi ncpp rpt recpot cpmd psf 
 	rm *.logd 
         rm *.eng
 	rm *.par

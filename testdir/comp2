@@ -1,0 +1,6 @@
+#!/bin/csh -f
+
+setenv LD_LIBRARY_PATH /usr/lib
+foreach i (`cat LIST`)
+	kdiff3 "$i"."$1" ~/junk/strange/"$i"."$1"
+end

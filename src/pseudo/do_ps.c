@@ -31,9 +31,9 @@
 #include "nlm.h"
 
 /* fortran prototypes Should this be somewher else?????? */
-void optim_(int *);
-void kerker_(int *);
-void tmsub_(int *);
+void optim_(int *, double *);
+void kerker_(int *, double *);
+void tmsub_(int *, double *);
 /* report feature */
 
 static char report[800];
@@ -70,11 +70,11 @@ int do_ps(param_t *param, char *logfile){
     } else { 
       opt_.meth=1;
     }
-    optim_(&param->ixc);
+    optim_(&param->ixc, &param->exccut);
   } else if(param->psmeth == 'k') {
-    kerker_(&param->ixc);
+    kerker_(&param->ixc, &param->exccut);
   } else if(param->psmeth == 't') {
-    tmsub_(&param->ixc);
+    tmsub_(&param->ixc, &param->exccut);
   } else {
     fp_log = fopen(logfile, "a");
     fprintf(fp_log, "   PS constuction method not known (must be optimized, tm, or kerker) \n");
@@ -130,18 +130,11 @@ void readAE(param_t *param) {
 
   for (i=0; i<param->nval; i++) {
     if (i == param->ipot[ic]) {
-      /*      fread(totpot_.rvcore[ic], sizeof(double), param->ngrid, fp);*/
       for (j=0; j<param->ngrid; j++) 
 	totpot_.rvcore[ic][j]=totpot_.rvcore[0][j];
       ic++;
-
-      /*    }else{
-	    fseek(fp,sizeof(double)*param->ngrid,1);
-	    }
-	    fread(totpot_.rvcoul, sizeof(double), param->ngrid, fp);*/
     }
   }
-    
 
   for (i=0; i<param->nll; i++) 
     for (j=0; j<param->ngrid; j++) 

@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:      2.0.1                             
+           OPIUM  Version:      2.0.5                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
  Copyright 2005 : The OPIUM project                         
 
  Compile host     : particle.physics.wm.edu
- Compile OS       : Linux 2.6.10-1.770_FC3smp i686
- Compile date     : Fri Sep  9 11:18:11 EDT 2005
+ Compile OS       : Linux 2.6.17-1.2139_FC5smp i686
+ Compile date     : Mon Sep 18 14:43:32 EDT 2006
 
  Execution host   : particle.physics.wm.edu
- time of execution: Fri Sep  9 11:21:13 2005
+ time of execution: Mon Sep 18 15:25:05 2006
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <h.param> ... 
@@ -107,9 +107,9 @@
  
  # steps:     1
  Resid KE (Ry)     :        0.0000003046
- Norm error        :    -0.333E-15
- Continuity error  :    -0.555E-16
- Curvature error   :    -0.118E-15
+ Norm error        :    -0.222E-15
+ Continuity error  :     0.000E+00
+ Curvature error   :     0.486E-16
  
  Bessel wavevectors and final coefficients
    1        1.0476483425        0.8000513732
@@ -173,10 +173,10 @@
                      Kinetic energy convergence
       ==============================|100>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-         6       0.722097973                72.586164     987.585576
-        14       0.787553719                 7.130418      97.014327
-        22       0.793988512                 0.695625       9.464460
-        29       0.794620643                 0.063494       0.863885
+         6       0.722097970                72.586164     987.585569
+        14       0.787553716                 7.130418      97.014326
+        22       0.793988509                 0.695625       9.464459
+        29       0.794620639                 0.063494       0.863885
 
  ======================================================================== 
  End KE convergence testing
@@ -263,14 +263,22 @@
 <<<do_pwf>>>
 <<calling: writepwf>>
  local potential is s
+
+ The following configuration was used for the wavefunction output:
+  100     0.50000000    -0.90420966 Ry           -12.30249585 eV
    ================================================
+<<end:  do_pwf>>
+<<<do_fhi>>>
    ================================================
+<<<do_ncpp>>>
    ================================================
-<<<do_recpot>>>
+<<<do_rpt>>>
 <<calling: writerecpot>>
  local potential is s
    ================================================
-<<<do_rpt>>>
+<<<do_cpmd>>>
+   ================================================
+<<<do_siesta -- psf>>>
+   ================================================
 ------------- closing opium session ------------
-<<<do_ncpp>>>
-<<<do_fhi>>>
+<<<do_recpot>>>

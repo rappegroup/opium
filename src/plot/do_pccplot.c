@@ -35,7 +35,8 @@ int do_pccplot(param_t *param, char *logfile){
   FILE *parm;
   char *comm;
 
-  comm= (char *) malloc(120*sizeof(char));
+  #define comm_size 240
+  comm= (char *) malloc(comm_size*sizeof(char));
 
   ncore=param->norb-param->nval;
 
@@ -140,7 +141,7 @@ int do_pccplot(param_t *param, char *logfile){
     fclose(parm);
   } 
 
-  sprintf(comm, "xmgrace -timestamp $XMGRACE_OPTS %s.pcc_plt -p pcc.par -saveall %s.pcc_agr & ", param->name,param->name);
+  snprintf(comm, comm_size,"xmgrace -timestamp $XMGRACE_OPTS %s.pcc_plt -p pcc.par -saveall %s.pcc_agr & ", param->name,param->name);
   system(comm);
   free(comm);
   

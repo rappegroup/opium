@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine tmsub(ixc)
+      subroutine tmsub(ixc,exccut)
       
 c     *************************************************************************
 c     generate TM style pseudopotentials
@@ -76,7 +76,7 @@ c     Here, rnl is R_nl(r)
          call flush(7)
       enddo      
 
-      call descreen(ixc)
+      call descreen(ixc,exccut)
       call ghost
 
  9000 format(1x,'--------------------Pseudizing state: ',

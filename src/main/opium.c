@@ -16,10 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/* 
- * $Id: opium.c,v 1.14 2004/10/12 20:22:11 ewalter Exp $
- */
-
 /****************************************************************************
 * This is OPIUM's frontend                                                  *
 *****************************************************************************
@@ -28,7 +24,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#define VERSION "2.0.1"
+#define VERSION "2.0.6"
 #ifndef CHOST
 #define CHOST "unknown"
 #endif
@@ -46,6 +42,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <ctype.h>
 /*const unsigned short int *ctype_b; */
 
 #include "parameter.h"        /* defines structure: 'param_t'   */
@@ -65,6 +62,8 @@
 #include "do_ncpp.h"
 #include "do_logplt.h"
 #include "do_fc.h"
+#include "do_siesta.h"
+#include "do_cpmd.h"
 
 #define streq(a,b) (!strcasecmp(a,b))
 
@@ -91,17 +90,19 @@ int main(int argc, char *argv[]){
   
   time_t t0 = time(&t0);       /* current starting time */
   param_t param;               /* parameters from parameter file */  
-  int i;    
+  int i,c;    
   int off;
   int quit;
   int doplot;
   char interactline[160]; /* line string for interactive mode */
+
   char lastline[160];     /* last line string for interactive mode */
   char command[40];
   FILE *fp_log;           /* log file */
   char *paramfile;
   char hname[120];
-  
+  char lnn[160]; 
+
   /**************************************************************************
   * check command line options given                                        *
   **************************************************************************/
@@ -176,12 +177,31 @@ int main(int argc, char *argv[]){
   * Subroutine call structure                                               *
   **************************************************************************/
 
+  if ((strlen(argv[1])>50)||(strlen(argv[2])>50)) {
+    fprintf(stderr, "The name of the paramfile and logfile can not exceed 50 chars!\n");
+    fprintf(stderr, "execution terminated\n");
+  }
   paramfile = (char *) malloc(50*sizeof(char));  
+
   if (argc>3){  /* command line options */
 
     /* first read in the parameter file */
 
     read_in_param(&param, argv[1], argv[2], paramfile);
+
+    strcpy(param.version,VERSION);
+    strcpy(param.cdate,CDATE);
+    strcpy(param.chost,CHOST);
+    strcpy(param.csys,CSYS);
+    strcpy(param.edate,ctime(&t0));
+    strcpy(param.ehost,hname);
+
+    strcpy(param.execstring,"\0");
+    for (i=0; i<argc; i++){
+      strcat(param.execstring,argv[i]);
+      strcat(param.execstring," ");
+    }
+    strcat(param.execstring,"\n");
 
     /* then process all command line arguments */
 
@@ -207,24 +227,33 @@ int main(int argc, char *argv[]){
     fclose(fp_log);
     /* "endless" loop of interactive input */
     quit=0;
+
     for(;;){
       /* prompt and input */
       printf("opium[param=%s|log=%s|verb=%d]>> ", argv[1], argv[2], verbosity);
       read_stringline(stdin, interactline);
+
       /* read in the parameter file (again) */
       read_in_param(&param, argv[1], argv[2], paramfile);
 
+      strcpy(param.version,VERSION);
+      strcpy(param.cdate,CDATE);
+      strcpy(param.chost,CHOST);
+      strcpy(param.csys,CSYS);
+      strcpy(param.edate,ctime(&t0));
+      strcpy(param.ehost,hname);
+      
       /* check whether '!' was given */
       if (strchr(interactline, '!'))
         strcpy(interactline, lastline);
       /* dissect the input */
       off = 0;
       doplot=0;
-
+      
       while(off<strlen(interactline) && 
             sscanf(interactline+off, "%s", command)==1){
         off += strlen(command)+1;
-	
+
         if (streq(command, "quit") || streq(command, "exit")){
           quit=1;
           break;
@@ -236,6 +265,9 @@ int main(int argc, char *argv[]){
 	  if (do_plot(&param, argv[2], command)==-1) 
 	    do_phelp();
 	}else{
+	  strcat(lnn,command);
+	  strcat(lnn," ");
+	  param.execstring=lnn;
 	  do_command(&param, paramfile, argv[2], command);
 	}
       }
@@ -345,23 +377,31 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     do_pwf(param, fp, logfile); 
     fclose(fp);
   } else if (streq(command, "recpot")){
-    /*fp = fopen(paramfile, "r"); */
+    fp = fopen(paramfile, "r"); 
     do_recpot(param, fp, logfile); 
-    /*fclose(fp);*/
+    fclose(fp);
   } else if (streq(command, "upf")) {
     do_upf(param, logfile);
   } else if (streq(command, "fhi")) {
     fp = fopen(paramfile, "r"); 
     do_fhi(param, fp, logfile);
     fclose(fp);
+  } else if (streq(command, "siesta")||streq(command, "psf")) {
+    fp = fopen(paramfile, "r"); 
+    do_siesta(param, fp, logfile);
+    fclose(fp);
   } else if (streq(command, "ncpp")) {
     fp = fopen(paramfile, "r"); 
     do_ncpp(param, fp,logfile);
     fclose(fp);
+  } else if (streq(command, "cpmd")) {
+    fp = fopen(paramfile, "r"); 
+    do_cpmd(param, fp,logfile);
+    fclose(fp);
   } else if (streq(command, "rpt")) {
     fp = fopen(logfile, "a");
     fprintf(fp,"<<<do_rpt>>>\n");
-    fclose(fp);
+    fclose(fp); 
     sprintf(filename, "%s.rpt", param->name);
     fp = fopen(filename, "w");
     fprintf(fp, "##########################################################\n");
@@ -400,7 +440,7 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
 
   else if (streq(command, "all")){
     do_ae(param, logfile); if (verbosity) do_ae_report(stdout);
-    do_fc(param, logfile); if (verbosity) do_fc_report(stdout);
+    /*    do_fc(param, logfile); if (verbosity) do_fc_report(stdout);*/
     do_ps(param, logfile); if (verbosity) do_ps_report(stdout);
     do_nl(param, logfile); if (verbosity) do_nl_report(stdout);
     do_tc(param, logfile, job, doifc); if (verbosity) do_tc_report(stdout);
@@ -453,8 +493,9 @@ static void do_chelp(){
   /*  printf("\tupf      - generate *.upf  output\n"); */
   printf("\tpwf                 - generate *.pwf  output\n");
   printf("\trecpot              - generate *.recpot  output\n");
-  printf("\tfhi                 - generate *.fhi  output\n");
+  printf("\tfhi                 - generate *.fhi output\n");
   printf("\tncpp                - generate *.ncpp output\n");
+  printf("\tpsf                 - generate *.psf(SIESTA) output [BETA]\n");
   printf("\n\tmiscellaneous options \n");
   printf("\trpt                 - generate report file\n");
   printf("\tplot [plot_type]    - make a plot of type [plot_type]\n" 
@@ -508,9 +549,12 @@ static void do_khelp(){
   printf("\t[Optinfo]                                                        \n");
   printf("\t  cut-off wavevector(float), # bessel fxns(int) for pseudo orb 1 \n");  
   printf("\t  .                            .                                . \n");
-  printf("\t  cut-off wavevector(float), # bessel fxns(int) for pseudo orb n \n\n\n");  
+  printf("\t  cut-off wavevector(float), # bessel fxns(int) for pseudo orb n \n");  
+  printf("\t  (n)ew or (c)onmax - optional toggle to use the older conmax algorithm for  \n");  
+  printf("\t       the optimization procedure.  The default is (n)ew  \n\n\n");  
   printf("\t[XC]                                                                 \n");
-  printf("\t  pzlda or pwlda or gga  --xc funct. (default is pzlda, lda=pzlda) \n\n\n");
+  printf("\t  pzlda or pwlda or gga  --xc funct. (default is pzlda, lda=pzlda) \n");
+  printf("\t  GGA smoothing radius (float) [Optional] \n\n\n");
   printf("\t[Pcc]                                               \n");
   printf("\t partial core radius(float) (default = no pcc)  \n");
   printf("\t partial core method (character) lfc or fs  \n");

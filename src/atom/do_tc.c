@@ -44,7 +44,7 @@ char * write_reportfc(param_t *param, char *rp,int, double temp_eigen[], double 
 void readPS(param_t *param);
 void readAE(param_t *param);
 void interp_(int *, int *, int *);
-void scpot_(double  *, int * ,int *, int *, int *);
+void scpot_(double  *, int * ,double *, int *, int *, int *);
 void atm_(double *, int *, int *);
 
 int do_tc(param_t *param, char *logfile, int job, int doifc){
@@ -136,7 +136,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
 	}
       }
 
-      scpot_(&param->z,&param->ixc,&ipsp,&ifc, &iexit);
+      scpot_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc, &iexit);
       if (iexit) {
 	printf("Terminal error in: scpot <-- config #%d AE <-- do_tc\n EXITING OPIUM \n",config+1);
 	exit(1);
@@ -251,7 +251,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
       }
       fclose(fp);
 
-    scpot_(&zeff,&param->ixc,&ipsp,&ifc, &iexit); 
+      scpot_(&zeff,&param->ixc,&param->exccut,&ipsp,&ifc, &iexit); 
     rp = write_reportfc(param,rp,config,temp_eigen,temp_norm);
     enfc[config+1] = results_.etot;
     }
@@ -287,7 +287,18 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
     nlpot2_.inl = 1;  
     ifc=0;
     ipsp=1;
-    scpot_(&zeff,&param->ixc,&ipsp,&ifc, &iexit); 
+    scpot_(&zeff,&param->ixc,&param->exccut,&ipsp,&ifc, &iexit); 
+
+    sprintf(filename, "%s.psi_last", param->name);
+    fp = fopen(filename, "wb");
+    for (i=0; i<param->nval; i++){
+      fwrite(&atomic_.nlm[i], sizeof(int), 1, fp);
+      fwrite(&atomic_.wnl[i], sizeof(double), 1, fp);
+      fwrite(&atomic_.en[i], sizeof(double), 1, fp);
+      fwrite(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+    }
+    fclose(fp);
+
     if (iexit) {
       printf("Terminal error in: scpot <-- config #%d NL <-- do_tc\n EXITING OPIUM \n",config+1);
       exit(1);
@@ -377,5 +388,4 @@ int do_tc(param_t *param, char *logfile, int job, int doifc){
 void do_tc_report(FILE *fp){
   fprintf(fp, "%s", report);
 }
-
 

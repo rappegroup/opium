@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:      2.0.1                             
+           OPIUM  Version:      2.0.5                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
  Copyright 2005 : The OPIUM project                         
 
  Compile host     : particle.physics.wm.edu
- Compile OS       : Linux 2.6.10-1.770_FC3smp i686
- Compile date     : Fri Sep  9 11:18:11 EDT 2005
+ Compile OS       : Linux 2.6.17-1.2139_FC5smp i686
+ Compile date     : Mon Sep 18 14:43:32 EDT 2006
 
  Execution host   : particle.physics.wm.edu
- time of execution: Fri Sep  9 11:20:48 2005
+ time of execution: Mon Sep 18 15:24:44 2006
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <b.param> ... 
@@ -113,9 +113,9 @@
  
  # steps:     6
  Resid KE (Ry)     :        0.0000231804
- Norm error        :     0.333E-15
+ Norm error        :     0.000E+00
  Continuity error  :     0.000E+00
- Curvature error   :     0.477E-14
+ Curvature error   :    -0.377E-14
  
  Bessel wavevectors and final coefficients
    1        1.0304744786        0.6817798418
@@ -126,8 +126,8 @@
  
  Convergence term (Ry/e) :     0.0000231804
  Occupation              :     2.0000000000
- Convergence error (mRy) :     0.0463607358
- Convergence error (meV) :     0.6307748997
+ Convergence error (mRy) :     0.0463607351
+ Convergence error (meV) :     0.6307748901
  
  
  ==================
@@ -154,9 +154,9 @@
  
  # steps:     8
  Resid KE (Ry)     :        0.0000130812
- Norm error        :     0.555E-16
- Continuity error  :     0.167E-15
- Curvature error   :     0.178E-14
+ Norm error        :     0.167E-15
+ Continuity error  :    -0.167E-15
+ Curvature error   :     0.677E-14
  
  Bessel wavevectors and final coefficients
    1        1.7697183153        1.2144122673
@@ -167,8 +167,8 @@
  
  Convergence term (Ry/e) :     0.0000130812
  Occupation              :     1.0000000000
- Convergence error (mRy) :     0.0130811628
- Convergence error (meV) :     0.1779796852
+ Convergence error (mRy) :     0.0130811631
+ Convergence error (meV) :     0.1779796893
  
  ------------------------------
  Descreening potential
@@ -245,18 +245,18 @@
  ======================================================================== 
  ----------------------------------------------------------------------
                      Kinetic energy convergence
-      ==============================|200>==============================
+      ==============================|100>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-         9       0.521921736                73.223276     996.253923
-        23       0.587943655                 7.201358      97.979510
-        35       0.594415774                 0.729238       9.921794
-        44       0.595075020                 0.069992       0.952297
+         9       0.521921738                73.223276     996.253922
+        23       0.587943656                 7.201358      97.979510
+        35       0.594415776                 0.729238       9.921794
+        44       0.595075021                 0.069992       0.952297
       ==============================|210>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-        13       1.335044057                70.958327     965.437708
-        26       1.399109854                 6.892530      93.777692
-        36       1.405341487                 0.660898       8.991974
-        45       1.405939233                 0.063152       0.859221
+        13       1.335044064                70.958327     965.437715
+        26       1.399109862                 6.892530      93.777693
+        36       1.405341494                 0.660898       8.991974
+        45       1.405939240                 0.063152       0.859221
 
  ======================================================================== 
  End KE convergence testing
@@ -442,17 +442,26 @@
  for l=  0 eta equals  0.00000000D+00
  for l=  1 eta equals -0.62870683D+00
  local potential is s
+
+ The following configuration was used for the wavefunction output:
+  100     1.50000000    -0.71203251 Ry            -9.68777189 eV
+  210     1.50000000    -0.28290068 Ry            -3.84909010 eV
    ================================================
+<<end:  do_pwf>>
+<<<do_fhi>>>
    ================================================
+<<<do_ncpp>>>
    ================================================
-<<<do_recpot>>>
+<<<do_rpt>>>
 <<calling: writerecpot>>
  number of angular momentum states    2
  for l=  0 eta equals  0.00000000D+00
  for l=  1 eta equals -0.62870683D+00
  local potential is s
    ================================================
-<<<do_rpt>>>
+<<<do_cpmd>>>
+   ================================================
+<<<do_siesta -- psf>>>
+   ================================================
 ------------- closing opium session ------------
-<<<do_ncpp>>>
-<<<do_fhi>>>
+<<<do_recpot>>>

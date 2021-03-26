@@ -16,9 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/* 
- * $Id: do_fhi.c,v 1.11 2004/10/02 18:34:49 ewalter Exp $
- */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +29,8 @@
 #include "do_fhi.h"
 #include "nlm.h"
 
+void writeparam(param_t *param, FILE *fp, FILE *fp_param);
+
 int do_fhi(param_t *param, FILE *fp_param, char *logfile){
 
   int i, l, k;
@@ -43,7 +42,7 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   int icount,lixc;
   char datestring[7];
   double rpccmax;     /* where the pcc goes to virtually zero */
-  int ill[4];
+  int ill[N0];
   int ncore,c;
   int kk=0;
   
@@ -53,16 +52,11 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
 
   fp_log = fopen(logfile, "a");
   fprintf(fp_log,"<<<do_fhi>>>\n");
+  fclose(fp_log);
 
   ncore=param->norb - param->nval;
   
   /* read in the local potential from a binary file created by do_nl() */
-  /*  sprintf(filename, "%s.loc", param->name);
-  fp = fopen(filename, "rb");
-  fread(nlcore, sizeof(double), param->ngrid, fp);
-  fclose(fp); */
-  
-  /* read in the non-local potential from a binary file created by do_ps() */
 
   sprintf(filename, "%s.loc", param->name);
   fp = fopen(filename, "rb");
@@ -136,7 +130,7 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
     unipp.n_pc2 = (double *)malloc(unipp.m_mesh*sizeof(double));
   }
 
-  for (i=0;i<4;i++)
+  for (i=0;i<N0;i++)
     ill[i]=0;
   ncore=param->norb - param->nval;
 
@@ -171,7 +165,9 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   /* New section to add DNL to abinit */
   if (param->nboxes > 0) {
     /*    fprintf(fp_log," fhi format does not support the use of augmentation operators\n");*/
+    fp_log = fopen(logfile, "a");
     fprintf(fp_log," Making l+1 the local potential %d\n",icount);
+    fclose(fp_log);
     for (i=0; i<param->ngrid; i++){
       unipp.v_ps[icount][0][i] = rvloc[i]/(2.*unipp.r_m[i]);
       unipp.u_ps[icount][0][i] = 0.0;
@@ -224,17 +220,8 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   
   uniPP_writefhi(&unipp, fp);
 
-  /* append the parameter file to the end of the file */
-  fprintf(fp, "\n");
-  fprintf(fp, "############################################################\n");
-  fprintf(fp, "#    Opium Parameter File                                  #\n");
-  fprintf(fp, "############################################################\n");
-  fprintf(fp, "\n");
-  rewind(fp_param);
-  while((c=fgetc(fp_param)) != EOF) fputc(c, fp);
-  fprintf(fp, "############################################################\n");
-  fclose(fp);
-  
+  writeparam(param, fp, fp_param);
+
   fp_log = fopen(logfile, "a");  
   fprintf(fp_log,"   ================================================\n");
   fclose(fp_log);

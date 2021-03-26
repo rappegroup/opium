@@ -60,7 +60,8 @@ int do_logplot(param_t *param, char *logfile){
   char *comm;
   char lc = 0;
 
-  comm= (char *) malloc(120*sizeof(char));
+  #define comm_size 240
+  comm= (char *) malloc(comm_size*sizeof(char));
 
   ncore=param->norb-param->nval;
   if (param->ilogder == -67) {
@@ -268,7 +269,7 @@ int do_logplot(param_t *param, char *logfile){
   }
   fclose(parm);
   
-  sprintf(comm, "xmgrace $XMGRACE_OPTS %s.logd_plt -p logd.par -autoscale xy -saveall %s.logd_agr & ",
+  snprintf(comm,comm_size,"xmgrace $XMGRACE_OPTS %s.logd_plt -p logd.par -autoscale xy -saveall %s.logd_agr & ",
 		  param->name,param->name);
   system(comm);
   free(comm);

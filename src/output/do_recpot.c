@@ -56,6 +56,7 @@ int do_recpot(param_t *param, FILE *fp_param, char *logfile){
     fclose(fp_log);
     return 1;
   }
+
   /* set the log file */
   sprintf(filenames_.file_log, "%s", logfile);
   
@@ -119,8 +120,10 @@ int do_recpot(param_t *param, FILE *fp_param, char *logfile){
     fclose(fp);
   }
 
+  fp_log = fopen(logfile, "a");
   fprintf(fp_log,"<<calling: writerecpot>>\n");
   fclose(fp_log);
+
   sprintf(filename, "%s.recpot", param->name);
   fp = fopen(filename, "w");
 

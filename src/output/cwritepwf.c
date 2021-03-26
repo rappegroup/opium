@@ -55,11 +55,11 @@ void cwritepwf_(FILE *fp, char *symbol, double *zeff, int *npspt0, int *nflq,
   fprintf(fp, "%1s                       : PCC in file?\n", xrpcc);
   fprintf(fp, "%4d%7.4f%7.4f %1d    : # AO grid points,h,r1,#AOs in file\n",
           *igrid, *spacing, *first, *idi);
-  fprintf(fp, "%2d%4.1f                  : # AOs per atom,AO radius\n",
-          *numa, *aorad);
+  fprintf(fp, "%4.1f                  : AO radius\n",
+          *aorad);
 /*  fprintf(fp, "none                    : AO ordering\n"); */
 
-  fprintf(fp, "%-7s                : AO ordering\n", xao);
+/*  fprintf(fp, "%-7s                : AO ordering\n", xao);*/
   
 }
                 

@@ -97,6 +97,105 @@ compatibility.
 10/12/04 - EJW
 
 
+1.0.3 --> 2.0.1
+
+1) Troullier-Martins potential method added 
+
+2) Cleaned up plotting output
+
+3) Added calculation of the convergence of the kinetic energy error, output is sent to both rpt and log file
+
+4) Can now plot the KE convergence
+
+5) Explicit annoucement of the presnece of ghost states in the rpt file
+
+6) Changed configure script to generate ONE set of makevars such that users can edit them if configure fails
+
+7) Added listing of compile and execution platform in log file
+
+8) Fixed some errors in the element symbol table
+
+9) Increased number of keyblock reads so that keyblocks ending in string reads don't screw things up.
+
+10) Added the ability to set an environmental variable called $XMGRACE_OPTS which is included in the command-line call to xmgrace.
+
+11) Increased the dimensions of all parameters such that 5f elements can be constructed
+
+9/10/05 - EJW
+
+2.0.1 --> 2.0.2
+
+1) Bug fix for ncpp (PWSCF) style output.  Wavefunctions had wrong number of r's in 1.0.2, 1.0.3, and 2.0.1.  See doc/README_solidstatecodes
+for more information.
+
+
+2.0.2 --> 2.0.3
+
+1) Bug fix for f-projectors in .pwf output format
+
+2) Applied patch from Keith Refson to repair .recpot output format
+3) Some (but not all) sprintf statments changed to snprintf
+
+4) BETA level implementation of .psf (siesta) format and .cpmd (CPMD) output format,
+see 'opium -c' for more information
+
+5) GGA functional allows for smoothing near the origin (see 'opium -k' for how to
+invoke).
+
+6) Corrections to KE convergence output when semicore states are involved.  Now the
+KE convergence of all valence orbitals is computed.
+
+2.0.3 --> 2.0.4
+
+1) .pwf output file now contains the wavefunctions from the MOST RECENT configuration 
+at the time of generation.  For example, 
+
+> ./opium al log ae ps nl pwf 
+
+will include the wavefunctions of the reference state but, 
+
+> ./opium al log ae ps nl tc pwf 
+
+will include the wavefunctions of the last test configuration.
+
+This is done since often the reference is not the desired ground state atomic
+configuration.
+
+The log file also reports which configuration was used.
+
+2) (finally) included the rudimentary emacs OPIUM mode file "_emacs_mode". This
+can be appended to ones ~/.emacs init file to included highlighting of the
+acceptable keyblocks.
+
+
+2.0.4 --> 2.0.5
+
+1) Bugfix for new .pwf output (eigenvalues match the configuration used for the
+output wavefunctions).
+
+2) Useful information (compile and execution host, os, date, version, 
+and command line used for psp generation) written at the end of most psp
+output file types.
+
+3) Bugfix in do_ke.c and kcomp.F (dimensioning error)
+
+4) Bugfix for 'all' command -- no longer attempts 'fc' step.
+
+2.0.5 --> 2.0.6
+
+Bugfix: 2.0.5 left the core-correction out of .pwf format.  This is now
+fixed.
+
+
+
+
+
+
+
+
+
+
+
 
 
 

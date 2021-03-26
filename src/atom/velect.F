@@ -57,7 +57,6 @@ c     cdd and cdu  =  2 pi r**2 rho(r)
          enddo
       endif
 
-
 c     fit cd/r by splines
       ex_ilya=0.0
       y(1) = 0.D0

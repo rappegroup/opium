@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine scpot(zeff,ixc,ipsp,ifc,iexit)
+      subroutine scpot(zeff,ixc,exccut,ipsp,ifc,iexit)
      
 c     *************************************************************************
 c     determine the self-consistent solution
@@ -84,6 +84,7 @@ c     *************************************************************************
       iexit=0
 
       open(unit=7,file=file_log,form='formatted',access='append')
+c      open(unit=15,file="psi_last",form='unformatted')
       itermcount=0
 
       if (ipsp.eq.1) then
@@ -295,7 +296,7 @@ c     ***********************************************************************
             do i=1,maxim
                rsatom2(i)=rsatom(i)+rscore(i)
             enddo
-            call excorr(maxim,ixc,r,rsatom2,rvxc,rexc)
+            call excorr(maxim,ixc,exccut,r,rsatom2,rvxc,rexc)
             
             do i = 1,maxim
                f(i) = 0.5 * rvh(i)*rsatom(i)/r(i)
@@ -304,7 +305,7 @@ c     ***********************************************************************
             enddo
          else
             call hrtree(maxim,h,r,rsatom,rvh)
-            call excorr(maxim,ixc,r,rsatom,rvxc,rexc)
+            call excorr(maxim,ixc,exccut,r,rsatom,rvxc,rexc)
             
             do i = 1,maxim
                f(i) = (0.5 * rvh(i) + rexc(i) - (rvxc(i)+rvh(i))) 
@@ -600,7 +601,6 @@ c     special treatment for unbound states (norm from 0 to rc is 1)
  9224 format(4x,'|',i3,'>',5x,f6.3,5x,f14.6,6x,
      $     '---------',5x,'--------')
 
-
       if (ipsp.ne.0.and.rpcc.gt.1e-12) then
          write(7,9009) rpcc
          call radin(r,rscore,0,np,h,rsc)
@@ -611,12 +611,17 @@ c     special treatment for unbound states (norm from 0 to rc is 1)
  9010 format(1x,'core charge         : ', f20.10)
  9011 format(1x,'partial core charge : ', f20.10)
 
-
-
       if (inl.eq.1) then
          call applyaug(rvloc,rvps(1,iloc))
          call ghostnl (inl,iloc,rvloc)
          call applyaug(rvloc,rvcore(1,iloc))
+c         do i=1,nvales
+c            write(15) nlm(i),wnl(i),en(i)
+c            do j=1,np
+c               write(15) rnl(j,i)
+c            enddo
+c         enddo
+c         close(15)
       endif
 
       call flush(7)

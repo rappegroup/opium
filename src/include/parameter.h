@@ -117,7 +117,7 @@ typedef struct param_t{
   /* [XC] */
   char *xcparam;
   int  ixc;     /* xc parametrization */
-  double rxccut; /* origin behavior */
+  double exccut; /* origin behavior */
 
   /* [Misc] */
   int  
@@ -150,7 +150,19 @@ typedef struct param_t{
   int
   *ipot,
     nll;          /* number of different angular momenta */
-    
+
+  /* New section to dump out version and execution information to psp output files */
+
+ char
+ *execstring,
+   *version,
+   *chost,
+   *cdate,
+   *csys,
+   *ehost,
+   *edate,
+   *esys;
+
 }param_t;
 
 

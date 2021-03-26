@@ -44,8 +44,8 @@ c
       character*80 name
       character*80 file_log
 
-      dimension pl(5000),rtemp(npdm),rke(n0,5000),rkstor(n0,4)
-      dimension ikstor(n0,4),ill(n0)
+      dimension pl(5000),rtemp(npdm),rke(n0,5000),rkstor(n0,10)
+      dimension ikstor(n0,10),ill(n0)
 
       open(unit=7,file=file_log,form='formatted',access='append')
 

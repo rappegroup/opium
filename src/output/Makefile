@@ -6,7 +6,7 @@ include ../../makevars
 
 fobjects = klby.o radina.o writepwf.o writerecpot.o
 
-cobjects = cwritepwf.o do_fhi.o do_ncpp.o do_pwf.o do_upf.o nwrite.o do_recpot.o
+cobjects = cwritepwf.o do_fhi.o do_ncpp.o do_pwf.o do_upf.o nwrite.o do_recpot.o do_siesta.o do_cpmd.o
 
 all_objects = $(fobjects) $(cobjects)
 

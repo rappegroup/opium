@@ -1,0 +1,42 @@
+;
+;
+;
+; - emacs OPIUM mode - v1.00 
+; used to highlight keyblocks mispelled keyblocks red 
+; and correctly spelled keyblock purple.
+; 
+; To use, append this file to your ~/.emacs file
+
+(defvar opium-mode-hook nil)
+
+(defvar opium-mode-map
+  (let ((opium-mode-map (make-keymap)))
+    (define-key opium-mode-map "\C-j" 'newline-and-indent)
+    opium-mode-map)
+  "Keymap for OPIUM major mode")
+
+(add-to-list 'auto-mode-alist '("\\.param\\'" . opium-mode))
+(defconst opium-font-lock-keywords-1
+  (list
+   '("\\[\\(atom\\|Atom\\|ATOM\\|pseudo\\|Pseudo\\|PSEUDO\\|optinfo\\|Optinfo\\|OPTINFO\\|xc\\|Xc\\|XC\\|pcc\\|Pcc\\|PCC\\|relat
+ivity\\|Relativity\\|RELATIVITY\\|grid\\|Grid\\|GRID\\|relgrid\\|Relgrid\\|RELGRID\\|tol\\|Tol\\|TOL\\|configs\\|Configs\\|CONFI
+GS\\|kbdesign\\|KBdesign\\|Kbdesign\\|KBDESIGN\\|loginfo\\|Loginfo\\|LOGINFO \\)\\]" . font-lock-keyword-face)
+   '("\\(\\[\\w*\\]\\)" . font-lock-warning-face))
+  "Minimal highlighting expressions for OPIUM mode")
+
+(defvar opium-font-lock-keywords opium-font-lock-keywords-1
+  "Default highlighting expressions for OPIUM mode")
+
+(defun opium-mode ()
+  "Major mode for editing opium param files"
+  (interactive)
+  (kill-all-local-variables)
+  (use-local-map opium-mode-map)
+
+(set (make-local-variable 'font-lock-defaults) '(opium-font-lock-keywords))
+
+(setq major-mode 'opium-mode)
+  (setq mode-name "OPIUM")
+  (run-hooks 'opium-mode-hook))
+
+(provide 'opium-mode)

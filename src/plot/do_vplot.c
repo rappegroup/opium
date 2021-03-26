@@ -53,7 +53,8 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
   char *comm;
   char lc=0;
 
-  comm= (char *) malloc(120*sizeof(char));
+  #define comm_size 240
+  comm= (char *) malloc(comm_size*sizeof(char));
 
   ncore=param->norb-param->nval;
 
@@ -158,7 +159,7 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
 
     fclose(parm);
 
-    sprintf(comm, "xmgrace -timestamp $XMG_OPTS -settype xydx %s.vs_plt -p vs.par -autoscale y -saveall %s_vs.agr & ",
+    snprintf(comm,comm_size,"xmgrace -timestamp $XMG_OPTS -settype xydx %s.vs_plt -p vs.par -autoscale y -saveall %s_vs.agr & ",
 	param->name,param->name);
     system(comm);
 
@@ -268,7 +269,7 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
 
     fclose(parm);
 
-    sprintf(comm, "xmgrace -timestamp $XMGRACE_OPTS -settype xydx %s.vi_plt -p vi.par -autoscale y -saveall %s_vi.agr & ",
+    snprintf(comm,comm_size, "xmgrace -timestamp $XMGRACE_OPTS -settype xydx %s.vi_plt -p vi.par -autoscale y -saveall %s_vi.agr & ",
 	param->name,param->name);
 
     system(comm);

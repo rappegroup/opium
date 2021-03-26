@@ -27,20 +27,20 @@
 #include "common_blocks.h"
 #include "nlm.h"
 
-void kcomp_(char *, double[4][N0] , int[4][N0] );
+void kcomp_(char *, double[10][N0] , int[10][N0] );
 
 static char report[8000];
-
+void nrelorbnl(param_t *param, int); 
 void readAE(param_t *param);
 void readPS(param_t *param);
-char * write_reportke(param_t *param , char *rp, double[4][N0] , int[4][N0] );
-
+char * write_reportke(param_t *param , char *rp, double[10][N0] , int[10][N0] );
 int do_ke(param_t *param, char *logfile){
 
-  int i;  
-  int ikstor[4][N0];
-  double rkstor[4][N0];
-  FILE *fp_log;
+  int i; 
+  int config=-1;
+  int ikstor[10][N0];
+  double rkstor[10][N0];
+  FILE *fp_log,*fp;
   char *rp=report;
   char filename[80];
 
@@ -59,7 +59,14 @@ int do_ke(param_t *param, char *logfile){
 
   readAE(param);
   readPS(param);
+  nrelorbnl(param,config);
 
+  sprintf(filename, "%s.psi_nl", param->name);
+  fp = fopen(filename, "rb");
+  for (i=0; i<param->nval; i++)
+    fread(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+  fclose(fp);
+  
   sprintf(filename, "%s.kedat", param->name);
   kcomp_(filename,rkstor,ikstor);
 
@@ -82,7 +89,7 @@ void do_ke_report(FILE *fp){
   fprintf(fp, "%s", report);
 }
 
-char * write_reportke(param_t *param , char *rp, double rkstor[4][N0], int ikstor[4][N0]) {
+char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikstor[10][N0]) {
   
   int i,j;
   

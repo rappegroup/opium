@@ -49,7 +49,8 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
   char *comm;
   char lc=0,sc=0;
   
-  comm= (char *) malloc(120*sizeof(char));
+  #define comm_size 240
+  comm= (char *) malloc(comm_size*sizeof(char));
 
   ncore=param->norb-param->nval;
   
@@ -291,11 +292,11 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
   } 
 
   if (streq(pltyp,"n")) {    
-    sprintf(comm, "xmgrace -timestamp $XMGRACE_OPTS %s.ae_plt -settype xydx %s.nl_plt -p w.par -autoscale y -saveall %s_nl.agr & ", 
+    snprintf(comm, comm_size,"xmgrace -timestamp $XMGRACE_OPTS %s.ae_plt -settype xydx %s.nl_plt -p w.par -autoscale y -saveall %s_nl.agr & ", 
 	    param->name,param->name,param->name);
   } else {
 
-    sprintf(comm, "xmgrace -timestamp $XMGRACE_OPTS %s.ae_plt -p w.par -autoscale y -saveall %s_ae.agr & ", 
+    snprintf(comm, comm_size,"xmgrace -timestamp $XMGRACE_OPTS %s.ae_plt -p w.par -autoscale y -saveall %s_ae.agr & ", 
 	    param->name,param->name);
   }
 

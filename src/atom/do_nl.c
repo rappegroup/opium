@@ -37,7 +37,7 @@
 static char report[800];
 void nrelorbnl(param_t *param, int); 
 char * write_reportnl(param_t *param, char *rp,int,double temp_eigen[], double temp_norm[]);
-void scpot_(double  *, int * ,int *, int *, int *);
+void scpot_(double  *, int * ,double *, int *, int *, int *);
 void readPS(param_t *param);
 void writeNL(param_t *param);
 
@@ -45,12 +45,14 @@ int do_nl(param_t *param, char *logfile){
 
   int i;  
   FILE *fp_log;
+  FILE *fp;
   double zeff;
   int config=-1;
   int ipsp=1;
   int ifc=0;
   int iexit=0;
   char *rp=report;
+  char filename[160];
   double temp_eigen[10];
   double temp_norm[10];
 
@@ -84,12 +86,22 @@ int do_nl(param_t *param, char *logfile){
     zeff +=atomic_.wnl[i];
   }
 
-  scpot_(&zeff,&param->ixc,&ipsp,&ifc, &iexit); 
+  scpot_(&zeff,&param->ixc,&param->exccut, &ipsp,&ifc, &iexit); 
+
+  sprintf(filename, "%s.psi_last", param->name);
+  fp = fopen(filename, "wb");
+  for (i=0; i<param->nval; i++){
+    fwrite(&atomic_.nlm[i], sizeof(int), 1, fp);
+    fwrite(&atomic_.wnl[i], sizeof(double), 1, fp);
+    fwrite(&atomic_.en[i], sizeof(double), 1, fp);
+    fwrite(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+  }
+  fclose(fp);
+
   if (iexit) {
     printf("Terminal error in: scpot <-- do_nl\n EXITING OPIUM \n");
     exit(1);
   }
-
 
   writeNL(param);
 
@@ -300,6 +312,11 @@ void writeNL(param_t *param) {
   fp = fopen(filename, "wb");
   for (i=0; i<param->nval; i++)
     fwrite(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+  fclose(fp);
+
+  sprintf(filename, "%s.rho_nl", param->name);
+  fp = fopen(filename, "wb");
+  fwrite(valden_.rsval, sizeof(double), param->ngrid, fp);
   fclose(fp);
 
   sprintf(filename, "%s.pcc_plt", param->name);

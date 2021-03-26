@@ -1,0 +1,7 @@
+#!/bin/csh -f
+
+rm OUT
+foreach i (`cat LIST`)
+	echo $i >>OUT	
+	diff -ub "$i"."$1" results/"$i"."$1">>OUT
+end

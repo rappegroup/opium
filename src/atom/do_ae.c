@@ -42,9 +42,9 @@ char * write_reportae(param_t *param, char *rp,int,double temp_eigen[], double t
 void writeAE(param_t *param);
 
 /* fortran prototypes Should this be somewher else?????? */
-void scpot_(double  *, int * ,int * , int *, int *);
+void scpot_(double  *, int * ,double *, int * , int *, int *);
 void atm_(double *, int *, int *);
-void interp_(int *, int *, int *, int *);
+void interp_(int *, int *, int *, double *, int *);
 void getpcc_(int *);
 void denkcomp_(char *, double[3], int[3] );
 
@@ -103,7 +103,7 @@ int do_ae(param_t *param, char *logfile){
     }
 
     /* find the SCF solution */
-    scpot_(&param->z,&param->ixc,&ipsp,&ifc,&iexit);
+    scpot_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit);
     if (iexit) {
       printf("Terminal error in: scpot <-- do_ae\n EXITING OPIUM \n");
       exit(1);
@@ -142,7 +142,7 @@ int do_ae(param_t *param, char *logfile){
     ifrl = (!strcmp(param->reltype,"frl"))?1:0;
     param->aereltransf = 0;
     nrelorbae(param,config);
-    interp_(&ifrl, &param->aereltransf,&param->ixc, &iexit);
+    interp_(&ifrl, &param->aereltransf,&param->ixc,&param->exccut, &iexit);
     if (iexit) {
       printf("Terminal error in: interp <-- do_ae\n EXITING OPIUM \n");
       exit(1);
@@ -505,7 +505,6 @@ void writeAE(param_t *param) {
   sprintf(filename, "%s.eig_ae_core", param->name);
   fp = fopen(filename, "wb");
 
-  /*This probably doesn't work for SRL */
   ncore = param->norb-param->nval;
   for (i=0; i<ncore; i++) {
     fwrite(&atomic_.en[i], sizeof(double),1, fp);

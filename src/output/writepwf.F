@@ -162,7 +162,7 @@ c -- hardcoded settings for now...
       aorad = 5.0
 
 c -- now call the new C routine that writes the header info      
-      call cwritepwf(ifp, symbol, zeff, NPSPT0, NFLQ, iproj, npots,
+      call cwritepwf(ifp, symbol, zeff, NPSPT0, NFLQ, iproj, nvales,
      $       xproj, xrpcc, np, spacing, first, numAOs, aorad, xao)
 
 c -- end of original writepwf comes here ---
@@ -276,18 +276,18 @@ c
 
 c     for kleinman-bylander non-local psp                               
 c     change units
-      do m=1,nvales                                                      
+      do m=1,npots                                                      
          do n=1,nflq                                                    
             flq(n,m)=flq(n,m)*ryd*sqrt((bohrad)**3)                           
          enddo
          eta(m)=eta(m)*ryd                                                 
       enddo
 
-      do m=1,nvales                                                      
+      do m=1,npots                                                      
          do n=2,nflq-1                                                  
             dflq(n,m)=(flq(n+1,m)-flq(n-1,m))*bohrad/(dql*2.0)                
          enddo
-         if (nvales.eq.1) then                                                  
+         if (npots.eq.1) then                                                  
             dflq(1,m)=2.0*dflq(2,m)-dflq(3,m)                          
          else                                                         
             dflq(1,m)=0.0                                              
@@ -336,25 +336,40 @@ c -- New lines that omit the 0's but still produce the BH format
  200  format(1x,'local potential is p')                                 
  210  format(1x,'local potential is d')                                 
 
+
+
+      goto 911
 c -- append the atomic pseudo wave functions to the *.pwf file
+c -- new section to write out the LAST configuration's psi's 
+c -- EJW - please clean me up!
+
+
+
+      do i=1,nvales
+         read(15) nlm(i),wnl(i),en(i)
+         do j=1,np
+            read(15) rnl(j,i)
+         enddo
+      enddo
+      close(15)
 
       do i=1,np
-         call nwrite(ifp,"\0", 6, "%20.15f", r(i))
+         call nwrite(ifp,"\0", 10, "%20.15f", r(i))
          do ik=1,4
             ill(ik)=0
          enddo
          
-         do k=1,npots
+c         do k=1,npots
             do j=1,nvales
-               nnj=nlm(j)/100
-               ljp=(nlm(j) - nnj * 100)/10 + 1
+c               nnj=nlm(j)/100
+c               ljp=(nlm(j) - nnj * 100)/10 + 1
                
-               if ((ill(ljp).eq.0).and.(ljp.eq.k)) then
-                  ill(ljp)=ill(ljp)+1
-                  call nwrite(ifp, "\0", 6, "%20.15f", rnl(i,j)/r(i))
-               endif
+c               if ((ill(ljp).eq.0).and.(ljp.eq.k)) then
+c                  ill(ljp)=ill(ljp)+1
+                  call nwrite(ifp, "\0", 10, "%20.15f", rnl(i,j)/r(i))
+c               endif
             enddo
-         enddo
+c         enddo
          call nclear(ifp)
       enddo
       call nclear(ifp)
@@ -368,6 +383,21 @@ c     -- append the partial core charge to the *.pwf file if required
         enddo
       endif
 
+      call nclear(ifp)
+
+c      write(7,*) "The following configuration was used for",
+c     $     " the wavefunction output:"
+c      
+c      do j=1,nvales
+c         write(7,9686) nlm(j),wnl(j),en(j),en(j)*ryd
+c         call iwrite(ifp,"\0",2,"%5d",nlm(j))
+c         call nwrite(ifp,"\0",2,"%20.15F",en(j)*ryd)
+c      enddo
+c      call nclear(ifp)
+
+c 9686 format(1x,'|',i3,'>',3x,f6.4,f15.5,' Ry    /',f15.5,' eV')
+
+ 911  continue
 
       close(unit=7)
 

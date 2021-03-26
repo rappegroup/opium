@@ -49,7 +49,8 @@ int do_keplot(param_t *param, char *logfile){
   char *comm;
   char lc=0;
 
-  comm= (char *) malloc(120*sizeof(char));
+  #define comm_size 240
+  comm= (char *) malloc(comm_size*sizeof(char));
 
   ncore=param->norb-param->nval;
 
@@ -102,24 +103,24 @@ int do_keplot(param_t *param, char *logfile){
   fprintf(parm,"legend loctype view\n");
   fprintf(parm,"legend 0.85, 0.8\n");
   
-  for (i=0; i<param->nll;i++){
+  for (i=0; i<param->nval;i++){
     
-    if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 0) {
+    if (nlm_label(param->nlm[i+ncore]).l == 0) {
       scount++;
       lcolor=1;
       lsty=scount;
       lc='s';
-    }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 1) {
+    }else if (nlm_label(param->nlm[i+ncore]).l == 1) {
       pcount++;
       lcolor=2;
       lsty=pcount;
       lc='p';
-    }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 2) {
+    }else if (nlm_label(param->nlm[i+ncore]).l == 2) {
       dcount++;
       lcolor=3;
       lsty=dcount;
 	lc='d';
-    }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 3) {
+    }else if (nlm_label(param->nlm[i+ncore]).l == 3) {
       fcount++;
       lcolor=4;
       lsty=fcount;
@@ -133,9 +134,9 @@ int do_keplot(param_t *param, char *logfile){
     fprintf(parm," s%d line linewidth 2.0 \n",i);
     fprintf(parm," s%d line color %d \n",i,lcolor);
     fprintf(parm," s%d legend \"%d%c\" \n",i,
-	    nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
+	    nlm_label(param->nlm[i+ncore]).n,lc);
   }
-  i=param->nll;
+  /*i=param->nll;
   fprintf(parm," s%d hidden false \n",i);
   fprintf(parm," s%d type xy \n",i);
   fprintf(parm," s%d symbol 0 \n",i);
@@ -143,11 +144,11 @@ int do_keplot(param_t *param, char *logfile){
   fprintf(parm," s%d line linestyle %d \n",i,3);
   fprintf(parm," s%d line linewidth 3.0 \n",i);
   fprintf(parm," s%d line color %d \n",i,14);
-  fprintf(parm," s%d legend \"V_loc\"\n" ,i);
+  fprintf(parm," s%d legend \"V_loc\"\n" ,i);*/
   
   fclose(parm);
   
-  sprintf(comm, "xmgrace -timestamp $XMGRACE_OPTS %s.kedat -p ke.par -autoscale y -saveall %s_ke.agr & ",
+  snprintf(comm, comm_size,"xmgrace -timestamp $XMGRACE_OPTS %s.kedat -p ke.par -autoscale y -saveall %s_ke.agr & ",
 	  param->name,param->name);
   system(comm);
   

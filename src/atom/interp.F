@@ -527,7 +527,7 @@ c       calculate total atomic charge density and potentials
           rexct(i) = 0.0
           rvh(i) = 0.0
         enddo
-        call excorr (np,ixc,r,rsatom,rvxct,rexct)
+        call excorr (np,ixc,exccut,r,rsatom,rvxct,rexct)
         call hrtree (np,h,r,rsatom,rvh)
         do i=1,np
           rvscr(i)=rvh(i)+rvxct(i)
@@ -707,7 +707,7 @@ c         rnl has 1 power of r, i.e. rnl proportional to psi*r
       call radin(r,rsatom,0,maxim,h,pow)
       pow = 2.0
       call radin(r,rscore,0,maxim,h,pow)
-      call excorr (maxim,ixc,r,rsatom,rvxct,rexct)
+      call excorr (maxim,ixc,exccut,r,rsatom,rvxct,rexct)
       call hrtree (maxim,h,r,rsatom,rvh)
       do  i = maxim+1,np
         rvh(i)  = z + z - xion - xion

@@ -16,9 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/*
- * $Id: do_ncpp.c,v 1.8 2004/10/02 18:34:49 ewalter Exp $
- */
 
 /****************************************************************************
  * generate *.ncpp output (PWSCF Norm-Conserving compatible)                *
@@ -39,6 +36,8 @@
 #include "cdim.h"        /* fortran code parameters */
 #include "do_ncpp.h"          /* the module's own header */
 #include "nlm.h"
+
+void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 
 int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
 
@@ -66,12 +65,15 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
 
   fp_log = fopen(logfile, "a");
   fprintf(fp_log,"<<<do_ncpp>>>\n");  
+  fclose(fp_log);
 
   /* section 0 : check if this potential format is supported */
   /* ncpp doesn't support DNL potentials */
 
   if (param->nboxes > 0) {
+    fp_log = fopen(logfile, "a");
     fprintf(fp_log," ncpp format does not support the use of augmentation operators\n");
+    fclose(fp_log);
     return 1;
   }
 
@@ -204,7 +206,7 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
 	fprintf(fp," Wavefunction %d\n",kk+1);
 	fprintf(fp," %d  %f \n",lchi,locc);
 	for (i=0; i<param->ngrid ; i++) {
-	  fprintf(fp, "%1.15e  ", rnl[k][i]/r[i]);
+	  fprintf(fp, "%1.15e  ", rnl[k][i]);
 	  if (!((i+1)%4)) fprintf(fp, "\n");
 	}
 	if (i%4) fprintf(fp, "\n");
@@ -212,18 +214,8 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
       }
     }
   
-  
-  fprintf(fp, "\n");
-  fprintf(fp, "############################################################\n");
-  fprintf(fp, "#    Opium Parameter File                                  #\n");
-  fprintf(fp, "############################################################\n");
-  fprintf(fp, "\n");
-  rewind(fp_param);
-  while((c=fgetc(fp_param)) != EOF) fputc(c, fp);
-  fprintf(fp, "############################################################\n");
-  fclose(fp);
+  writeparam(param, fp, fp_param);  
 
-  
   fp_log = fopen(logfile, "a");
   fprintf(fp_log, "   ================================================\n");
   

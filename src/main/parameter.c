@@ -16,10 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/* 
- * $Id: parameter.c,v 1.14 2004/10/02 19:43:17 ewalter Exp $
- */
-
 /****************************************************************************
  * Read the parameter settings from 'fp' using 'FlexiLib' and set default    *
  * values.                                                                   *
@@ -129,10 +125,10 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   /* [XC] */
   param->xcparam = (char *) malloc(160*sizeof(char));
   flexi_request_key("XC",0,"%s",param->xcparam);
-  /*  flexi_request_key("XC",0,"%lg",&param->rxccut);*/
+  flexi_request_key("XC",0,"%lg",&param->exccut);
   /* default */
   strcpy(param->xcparam, "lda");
-  /*param->rxccut=0.01;*/
+  param->exccut=0.0;
   
   /* [Conmax] */
   flexi_request_key("Conmax",0,"%d %lg %d", &param->switch1, &param->encsm,
@@ -320,7 +316,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   /* set up semicore info */
   
-  param->ipot = (int *)malloc(20*sizeof(int));
+  param->ipot = (int *)malloc(80*sizeof(int));
 
   for (i=0; i<4; i++){
     npot[i]=0;
@@ -565,6 +561,15 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     }
   }
 
+  /* malloc the strings for psp output info, the execstring, compile info, and execution info: */
+  param->execstring = (char *) malloc(160*sizeof(char));
+  param->version = (char *) malloc(160*sizeof(char));
+  param->chost = (char *) malloc(160*sizeof(char));
+  param->cdate = (char *) malloc(160*sizeof(char));
+  param->csys = (char *) malloc(160*sizeof(char));
+  param->ehost = (char *) malloc(160*sizeof(char));
+  param->edate = (char *) malloc(160*sizeof(char));
+
 /* Finally! Write the log file header */
   
   fprintf(fp_log, " File prefix             : %s \n",param->name);
@@ -589,6 +594,9 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     fprintf(fp_log, " Exchage-correlation functional is : Perdew-Wang LDA \n");
   }else if (streq(param->xcparam,"gga")){
     fprintf(fp_log, " Exchage-correlation functional is : Perdew, Burke, Ernzerhof GGA \n");
+    if (param->exccut > 0.0) {
+      fprintf(fp_log, " GGA smoothed from 0 to %f bohr \n",param->exccut);
+    }
   }
 
   ncore=param->norb - param->nval;

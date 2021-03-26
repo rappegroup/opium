@@ -204,7 +204,7 @@ c     Now, change untis and write to .recpot
 
 c      close(unit=7)
 
-c      call writeparam(ifp,ifp_param,ecutev)
+      call writeparam(ifp,ifp_param,ecutev)
 c      open(unit=7,file=file_log,form='formatted',access='append')      
 
       call nwrite(ifp, " ", 1, "%18.8f", gcut/bohrad)
@@ -223,7 +223,7 @@ c -- use the C I/O call to output the local potential coefficients
 
 c     for kleinman-bylander non-local psp                               
 c     change units
-      do m=1,nvales                                                      
+      do m=1,npots                                                      
          do n=1,nflq                                                    
             flq(n,m)=flq(n,m)*ryd*sqrt((bohrad)**3)                           
          enddo

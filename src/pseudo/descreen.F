@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine descreen(ixc)
+      subroutine descreen(ixc,exccut)
       
       implicit double precision(a-h,o-z)
       
@@ -92,10 +92,10 @@ c     *************************************************************************
       do i=1,maxim
         rsatom(i)=rsvale(i)+rscore(i)
       enddo
-      
-      call excorr (maxim,ixc,r,rsvale,rvxcv,rexcv)        
+
+      call excorr (maxim,ixc,exccut,r,rsvale,rvxcv,rexcv)        
       call hrtree (maxim,h,r,rsvale,rvhv)
-      call excorr (maxim,ixc,r,rsatom,rvxct,rexct)        
+      call excorr (maxim,ixc,exccut,r,rsatom,rvxct,rexct)        
       call hrtree (maxim,h,r,rscore,rvhc)
       
 c     compute ionic pseudopotential by subtracting off screening terms.     

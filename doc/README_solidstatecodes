@@ -33,7 +33,22 @@ bh        -766.067291
 
 
 
+------------------------------------------------------------------------
+update for release 2.0.2
+------------------------------------------------------------------------
 
+Here is an additional set of tests showing that the pwscf format bug
+that was introduced in version 1.0.2 is now removed in version 2.0.2
+
+
+                                ABINIT (eV)     PWSCF (eV)      BH (eV)
+				v4.5.3          v2.1            v061202
+
+C(diamond) 12^3 kpts LDA-PZ    -309.566910     -309.566888    -309.569687
+C(diamond) 12^3 kpts GGA-PBE   -310.777074     -310.777182    -310.779924
+C(diamond) k=gamma LDA-PZ      -281.189020     -281.188978    -281.191416
+fcc-Cu 6^3 kpts GGA-PBE	      -1147.462524    -1147.474876   -1147.470277
+fcc-Fe 6^3 kpts GGA-PBE w/PCC  -781.892992     -781.896944    -781.940362
 
 
 

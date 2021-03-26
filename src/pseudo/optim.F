@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine optim(ixc)
+      subroutine optim(ixc,exccut)
       
 c*************************************************************************
 c generates optimized pseudopotentials [Rappe, et al. PRB 41, 1227 (1990)]
@@ -108,7 +108,7 @@ c      write(7,*)
 c      write(7,*) '======Potentials created======'
 c      write(7,9011) transumry*1000.0,transumry*13.6058*1000.0
       
-      call descreen(ixc)
+      call descreen(ixc,exccut)
       call ghost
 
  9000 format(1x,'Pseudizing state : |',i3,'>')

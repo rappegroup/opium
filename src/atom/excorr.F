@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine excorr(maxim,ixc,r,rsatom,rvxc,rexc)
+      subroutine excorr(maxim,ixc,exccut,r,rsatom,rvxc,rexc)
       implicit double precision (a-h,o-z)
       
 #include "fortdim.h"
@@ -75,7 +75,15 @@ c     rvxc(i) is the pure exchange potential * r
       if (ixc.eq.2) call grad(dens,agde,
      $     ggagde,rlape,agdc,ggagdc,rlapc,inxc)
 
+c     prepare the exponent for the GGA weight factor rwgt
+      rexp=-20.d0/exccut**2
+
       do 510 i=1,inxc
+
+c     new code to smooth GGA near origin
+         rwgt=1.d0
+         if (r(i).lt.exccut.and.exccut.gt.1e-10)
+     $        rwgt=exp(rexp*(exccut-r(i))**2)
          
          if (ixc.eq.2) then
             ex=0.75*rvxc(i)
@@ -85,10 +93,11 @@ c     rvxc(i) is the pure exchange potential * r
             vxcon=(third4*fxpbe
      $           -(ggagde(i)-third4*agde(i)**3)
      $           *fss-rlape(i)*fs)
-            vxpbe=ex*vxcon
+            vxpbe=ex*(1.d0+rwgt*vxcon-rwgt)
          else
             fxpbe=1.0
             vxpbe=rvxc(i)
+
          endif
          rr = r(i)
          rs = -xl*rr/rvxc(i)
@@ -180,14 +189,17 @@ c     which is used with the PBE GGA enhancement factores
             ucu=uc
             uc=hc+hrs+hrst+t2*ht/6.0+7.0*t2*t*htt/6.0
             uc=uc-uu*htt-vv*ht
+
+            uc=uc*rwgt
+
             uc=(uc+ucu)*2.0
          endif
 
          rexc(i) = fxpbe*rvxc(i) * 0.75 + ec * rr
          rvxc(i) = (vxpbe+uc*rr)
-
+         
  510  continue
-
+ 9050 format(7f20.10)
       return
       end
       
@@ -223,7 +235,7 @@ c     prepare the various gradient terms
          rlapc(i)=0.0
       enddo
 
-      do i=inxc,npdm
+      do i=inxc+1,npdm
          dens(i)=0.0
       enddo
       

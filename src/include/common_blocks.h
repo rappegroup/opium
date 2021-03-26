@@ -224,8 +224,8 @@ extern struct{
 
 /* 1  */
 /*extern struct{
-  double rxccut;
-  }rxccut_;  */
+ double rxccut;
+ }rxccut_;  */
 
 /* 1  */
 extern struct{
