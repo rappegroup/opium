@@ -1,0 +1,7 @@
+#!/bin/csh -f
+
+foreach i (`cat LIST`)
+	mv $i.param temp
+	rm $i.*
+	mv temp $i.param
+end

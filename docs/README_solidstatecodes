@@ -1,0 +1,42 @@
+------------------------------------------------------------
+Opium release 1.0.1.
+------------------------------------------------------------
+
+Here are the results for some solid state tests using the pwf (for the
+'bh' code), fhi (for 'abinit') and ncpp (for 'pwscf' ; converted to
+their UPF format using the ncpp2upf utility)
+
+All calculations were for the primitive fcc unit cell and used 2
+Monkhorst-Pack special k-points.  Other details of the calculations
+can be determined from the file: $OPIUM/tests/SSTESTS.tgz This file
+contains all input and output files for all runs.
+
+3 pseudopotentials were tested (all results in eV), all potentials
+were the "optimized style" (RRKJ).
+
+Total energies:
+
+Al (LDA-PZ) 
+abinit   -57.935217
+pwscf    -57.934777
+bh       -57.934650
+
+Cu (GGA-PBE)
+abinit   -1146.941458
+pwscf    -1146.953800
+bh       -1146.948708 
+
+Fe (LDA-PZ w/ LFC core correction)
+abinit    -766.122236
+pwscf     -766.084198
+bh        -766.067291
+
+
+
+
+
+
+
+
+
+

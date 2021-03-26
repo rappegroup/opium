@@ -1,0 +1,4 @@
+      parameter(numfn0 = 100, nquad0 = 50, nang0 =100,
+     $ npdm = 5733, tol2 = 1.0e-9, nvale0 = 16, ncpv0 = 16,
+     $ nfam0 = 10, nintm0 = 2**(nfam0-1), numen0 = 10, nr0 = 5000,
+     $ norb0 = 30, lmax0 = 4, n0 = 16,npl0=501)

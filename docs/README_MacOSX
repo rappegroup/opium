@@ -1,0 +1,19 @@
+
+------------------------------------------------------------
+Opium release 1.0.1.
+------------------------------------------------------------
+
+For some older versions of the gcc compiler, the some of the
+C routines cannot be compiled using -O2 level of optimization.
+If this occurs for you, simply re-"configure" using:
+
+./configure "CFLAGS=-O1" 
+
+and then
+
+make
+
+If this doesn't work, consider moving down to -O0 (for the CFLAGS
+only!)  or upgrading your gcc compiler.
+
+

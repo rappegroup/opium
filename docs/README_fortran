@@ -1,0 +1,21 @@
+
+Acceptable Fortran compilers:
+
+
+Opium is known to compile with the following fortran compilers:
+
+Sun's f77
+SGI's f77
+Compaq (HP)'s fort
+Portland Group's pgf77
+Intel ifc (v7.x) 
+Intel ifort (v8.x)
+and by using fort77 in conjunction with f2c.
+
+
+NOTE: g77 is NOT an acceptable fortran compiler for this product.  If
+you need a free compiler, then try the Intel compilers (www.intel.com).
+Also, fort77 and f2c work quite well.
+
+
+
