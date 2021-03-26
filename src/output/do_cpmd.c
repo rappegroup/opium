@@ -30,7 +30,7 @@
 #include "nlm.h"
 
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
-
+void readPS(param_t *param);
 int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
 
   int i, l, k, j;
@@ -48,7 +48,7 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
   int kk=0;
   
   static double rscore[NPDM],rdd[NPDM],rddd[NPDM];
-  static double rvcore[NVALE0+1][NPDM],rvloc[NPDM];
+  static double rvcore[N0][NPDM],rvloc[NPDM];
   static double rnl[N0][NPDM];
 
   fp_log = fopen(logfile, "a");
@@ -56,22 +56,27 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
   fclose(fp_log);
 
   ncore=param->norb - param->nval;
-  
-  sprintf(filename, "%s.pot_ps", param->name);
-  fp = fopen(filename, "rb");
-  for (i=0; i<param->nval; i++)
-    fread(rvcore[i], sizeof(double), param->ngrid, fp);
-  fclose(fp);
 
+  readPS(param);
+
+  for (i=0; i<param->nll; i++) {
+    sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    fp = fopen(filename, "rb");
+    fread(rvcore[i], sizeof(double), param->ngrid, fp);
+    fseek(fp,sizeof(double) ,param->ngrid);
+    fclose(fp);
+  }
+
+  for (i=0; i<param->nll; i++) {
+    sprintf(filename, "%s.psi.ps.l=%d", param->name,i);
+    fp = fopen(filename, "rb");
+    fread(rnl[i], sizeof(double), param->ngrid, fp);
+    fclose(fp);
+  }
+  
   sprintf(filename, "%s.loc", param->name);
   fp = fopen(filename, "rb");
   fread(rvloc, sizeof(double), param->ngrid, fp);
-  fclose(fp);
-
-  sprintf(filename, "%s.psi_nl", param->name);
-  fp = fopen(filename, "rb");
-  for (i=0; i<param->nval; i++)
-    fread(rnl[i], sizeof(double), param->ngrid, fp);
   fclose(fp);
 
   if (param->rpcc > 0.){
@@ -146,28 +151,24 @@ int do_cpmd(param_t *param, FILE *fp_param, char *logfile){
      correct means:  the first instance of each l (for single projector semicore) 
      and, of these, arrange them in increasing l-order */
 
-  icount=0; 
-  for (kk=0; kk<param->nll;kk++)
-    for (k=0; k<param->nval; k++){
-      if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
-	ill[nlm_label(param->nlm[k+ncore]).l]++;
-	for (i=0; i<param->ngrid; i++){
-	  if (unipp.rel && k){
-	    /* set different j-components */
-	  }else{
-	    unipp.v_ps[icount][0][i] = rvcore[k][i]/(2.*unipp.r_m[i]);
-	    unipp.u_ps[icount][0][i] = rnl[k][i];
-	    
-	  }
-	}
-	icount++;
-      }
-    }
 
+  icount=0; 
+  for (kk=0; kk<param->nll;kk++){
+    /*    for (k=0; k<param->nval; k++){
+	  if ((ill[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
+	  ill[nlm_label(param->nlm[k+ncore]).l]++;
+
+	  if (unipp.rel && k){
+	  }else{*/
+    for (i=0; i<param->ngrid; i++){
+      unipp.v_ps[kk][0][i] = rvcore[kk][i]/(2.*unipp.r_m[i]);
+      unipp.u_ps[kk][0][i] = rnl[kk][i];
+    }
+  }
   /* New section to add DNL to cpmd */
   if (param->nboxes > 0) {
       fp_log = fopen(logfile, "a");
-      fprintf(fp_log," Making l+1 the local potential %d\n",icount);
+      fprintf(fp_log," Making l+1 the local potential %d\n",kk);
       fclose(fp_log);
       for (i=0; i<param->ngrid; i++){
 	  unipp.v_ps[icount][0][i] = rvloc[i]/(2.*unipp.r_m[i]);

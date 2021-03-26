@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:      2.0.5                             
+           OPIUM  Version:        3.0                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
- Copyright 2005 : The OPIUM project                         
+ Copyright 2007 : The OPIUM project                         
 
- Compile host     : particle.physics.wm.edu
- Compile OS       : Linux 2.6.17-1.2139_FC5smp i686
- Compile date     : Mon Sep 18 14:43:32 EDT 2006
+ Compile host     : strange.physics.wm.edu
+ Compile OS       : Linux 2.4.20-20.9smp i686
+ Compile date     : Wed Aug 22 12:15:40 EDT 2007
 
- Execution host   : particle.physics.wm.edu
- time of execution: Mon Sep 18 15:24:51 2006
+ Execution host   : strange.physics.wm.edu
+ time of execution: Wed Aug 22 12:16:47 2007
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <ca.param> ... 
@@ -36,8 +36,8 @@
  1s2  2s2  2p6  <-/-> 3s2  3p6  3d0  4s0 
 
  Grid definitions: 
- a_grid=1.00e-04    b_grid=1.30e-02    # points=1122 
- r(1)=3.68e-05      r(np)=7.96e+01    
+ a_grid=1.00e-04    b_grid=1.30e-02    # points=1153 
+ r(1)=3.68e-05      r(np)=1.19e+02    
 
  dEmax tolerance:  1.00e-08      dVmax tolerance:  1.00e-06     
 
@@ -77,8 +77,9 @@
   25    -1350.1179078    -822.8200838    -527.2978239 0.23E-07 0.55E-07
   26    -1350.1179078    -822.8200839    -527.2978239 0.65E-08 0.29E-07
  
- After    26 iterations...
+   26 iterations: (units are Ry and bohr)
  Energy:   -1350.11790779  Ebs:    -822.82008387  Ehxc:    -527.29782392
+ Eh    :     549.13756895  Exc:     -67.61174290
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      2.000        -289.016277
@@ -96,9 +97,10 @@
  ======================================================================== 
  Begin PS construction
  ======================================================================== 
- Optimized Pseudopotential Generation
+ Optimized Pseudopotential Generation ...
  
  ==================
+ zeff=   10.0000000000000     
  Pseudizing state : |300>
  eigenvalue       : -4.527724
  qc               :  7.070000
@@ -128,9 +130,9 @@
  
  # steps:    65
  Resid KE (Ry)     :        0.0004468154
- Norm error        :     0.666E-15
- Continuity error  :     0.555E-15
- Curvature error   :     0.453E-13
+ Norm error        :     0.000E+00
+ Continuity error  :    -0.111E-15
+ Curvature error   :    -0.799E-14
  
  Bessel wavevectors and final coefficients
    1        1.5873194497        1.4508592158
@@ -144,13 +146,17 @@
    9       20.7014982990       -0.0089036249
   10       23.1300989152        0.0093408950
  
+ Total KE           (Ry) :     1.7338473282
+ 0  -> qc contribution   :     1.7334005129
+ qc -> oo contribution   :     0.0004468154   (=Convergence term)
+ Occupancy of this state :     2.0000000000
  Convergence term (Ry/e) :     0.0004468154
- Occupation              :     2.0000000000
- Convergence error (mRy) :     0.8936307734
- Convergence error (meV) :    12.1585615761
+ Convergence error (mRy) :     0.8936307737
+ Convergence error (meV) :    12.1585615811
  
  
  ==================
+ zeff=   10.0000000000000     
  Pseudizing state : |310>
  eigenvalue       : -3.168835
  qc               :  7.070000
@@ -168,15 +174,15 @@
  Starting KE minimization...
   step #    theta       slope       curv       KEresid    coeffsum
      1    0.001726   -0.794320  230.065139    0.000051    2.830347
-     2   -0.000397    0.048246   60.814204    0.000041    2.833033
+     2   -0.000397    0.048246   60.814205    0.000041    2.833033
      3   -0.000240    0.028627   59.543215    0.000038    2.829639
      4   -0.000317    0.021560   34.008332    0.000034    2.827592
  
  # steps:     8
  Resid KE (Ry)     :        0.0000092470
- Norm error        :     0.333E-15
- Continuity error  :    -0.389E-15
- Curvature error   :    -0.370E-13
+ Norm error        :    -0.111E-15
+ Continuity error  :     0.167E-15
+ Curvature error   :     0.766E-14
  
  Bessel wavevectors and final coefficients
    1        2.0524803228        1.9449276198
@@ -190,13 +196,17 @@
    9       17.7857251700       -0.0029142654
   10       19.7599519620        0.0019330257
  
+ Total KE           (Ry) :     3.5964558594
+ 0  -> qc contribution   :     3.5964466124
+ qc -> oo contribution   :     0.0000092470   (=Convergence term)
+ Occupancy of this state :     6.0000000000
  Convergence term (Ry/e) :     0.0000092470
- Occupation              :     6.0000000000
- Convergence error (mRy) :     0.0554819534
- Convergence error (meV) :     0.7548763609
+ Convergence error (mRy) :     0.0554819543
+ Convergence error (meV) :     0.7548763736
  
  
  ==================
+ zeff=   10.0000000000000     
  Pseudizing state : |320>
  eigenvalue       : -1.193267
  qc               :  7.070000
@@ -224,9 +234,9 @@
  
  # steps:    48
  Resid KE (Ry)     :        0.0169536575
- Norm error        :     0.333E-15
- Continuity error  :     0.333E-15
- Curvature error   :    -0.244E-13
+ Norm error        :     0.555E-15
+ Continuity error  :    -0.444E-15
+ Curvature error   :    -0.231E-13
  
  Bessel wavevectors and final coefficients
    1        3.0638044573        2.5669277244
@@ -240,8 +250,11 @@
    9       23.3278689998        0.0303798425
   10       25.7989064929       -0.0387067482
  
+ Total KE           (Ry) :     5.0536517185
+ 0  -> qc contribution   :     5.0366980610
+ qc -> oo contribution   :     0.0169536575   (=Convergence term)
+ Occupancy of this state :     0.0000000000
  Convergence term (Ry/e) :     0.0169536575
- Occupation              :     0.0000000000
  Convergence error (mRy) :     0.0000000000
  Convergence error (meV) :     0.0000000000
  
@@ -309,6 +322,7 @@
  ======================================================================== 
  Begin NL calculation
  ======================================================================== 
+ Performing non-local pseudopotential calculation
  Using the s potential as the local potential
  
  --Augmentation operator info--
@@ -320,8 +334,9 @@
    1      -71.9016420     -28.0684575     -43.8331846 0.69E-04 0.10E-08
    2      -71.9016420     -28.0684575     -43.8331846 0.18E-09 0.28E-09
  
- After     2 iterations...
+    2 iterations: (units are Ry and bohr)
  Energy:     -71.90164203  Ebs:     -28.06845746  Ehxc:     -43.83318457
+ Eh    :      46.62631816  Exc:      -8.98746501
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      2.000          -4.527724      0.350336      1.035705
@@ -362,28 +377,28 @@
                      Kinetic energy convergence
       ==============================|100>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-        25       1.661072822                72.708252     989.246671
-        38       1.727096994                 6.684080      90.941590
+        25       1.661072822                72.708253     989.246672
+        38       1.727096994                 6.684080      90.941591
         47       1.733069319                 0.711755       9.683931
-       159       1.733708487                 0.072588       0.987609
+       159       1.733708486                 0.072588       0.987609
       ==============================|210>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-        18       3.527790727                68.662769     934.205031
+        18       3.527790726                68.662769     934.205030
         25       3.589105380                 7.348115      99.976248
-        33       3.595776858                 0.676638       9.206130
-        39       3.596387310                 0.066186       0.900500
+        33       3.595776857                 0.676638       9.206130
+        39       3.596387309                 0.066186       0.900500
       ==============================|320>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-        39       4.980039631                72.103500     981.018583
-        58       5.044941984                 7.201146      97.976634
-       282       5.051408409                 0.734721       9.996398
-       392       5.052073169                 0.069961       0.951869
+        39       4.980039608                72.103498     981.018562
+        58       5.044941960                 7.201146      97.976635
+       282       5.051408385                 0.734721       9.996398
+       392       5.052073145                 0.069961       0.951869
       ==============================|200>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-         7       0.779227106                71.943500     978.841673
-        31       0.843991772                 7.178833      97.673044
-        43       0.850484530                 0.686075       9.334528
-        80       0.851098216                 0.072389       0.984899
+        25       1.661072822                72.708253     989.246672
+        38       1.727096994                 6.684080      90.941591
+        47       1.733069319                 0.711755       9.683931
+       159       1.733708486                 0.072588       0.987609
 
  ======================================================================== 
  End KE convergence testing
@@ -425,8 +440,9 @@
   29    -1351.4657137    -803.1050294    -548.3606843 0.28E-07 0.64E-07
   30    -1351.4657137    -803.1050294    -548.3606843 0.86E-08 0.38E-07
  
- After    30 iterations...
+   30 iterations: (units are Ry and bohr)
  Energy:   -1351.46571370  Ebs:    -803.10502937  Ehxc:    -548.36068433
+ Eh    :     570.39779623  Exc:     -68.26527102
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      2.000        -287.871738
@@ -439,6 +455,7 @@
 
 
  ===============Configuration 1 NL: Calc ===============
+ Performing non-local pseudopotential calculation
  Using the s potential as the local potential
  
  --Augmentation operator info--
@@ -448,10 +465,10 @@
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
    1      -86.2256791     -30.1756995     -56.0499795 0.69E-04 0.40E+01
-   2      -78.9089387     -24.3088272     -54.6001115 0.48E+00 0.40E+01
-   3      -73.6074528     -20.0087178     -53.5987351 0.69E+00 0.40E+01
-   4      -73.2011798     -19.6671290     -53.5340507 0.17E+00 0.40E+01
-   5      -73.1968352     -19.6960711     -53.5007642 0.17E-01 0.20E+01
+   2      -78.9089387     -24.3088272     -54.6001115 0.48E+00 0.20E+01
+   3      -73.6074528     -20.0087178     -53.5987351 0.69E+00 0.20E+02
+   4      -73.2011798     -19.6671290     -53.5340507 0.17E+00 0.20E+02
+   5      -73.1968352     -19.6960711     -53.5007642 0.17E-01 0.10E+02
    6      -73.2319441     -19.7366787     -53.4952654 0.19E-01 0.44E-02
    7      -73.2509123     -19.7523783     -53.4985340 0.66E-02 0.83E-03
    8      -73.2516099     -19.7519942     -53.4996157 0.38E-03 0.55E-03
@@ -475,8 +492,9 @@
   26      -73.2493874     -19.7508594     -53.4985280 0.11E-07 0.25E-07
   27      -73.2493874     -19.7508594     -53.4985280 0.46E-08 0.15E-07
  
- After    27 iterations...
+   27 iterations: (units are Ry and bohr)
  Energy:     -73.24938742  Ebs:     -19.75085941  Ehxc:     -53.49852801
+ Eh    :      56.48408269  Exc:      -9.62596041
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      2.000          -3.411577      0.353948      1.035705
@@ -489,11 +507,11 @@
  
  Test  state: 2p
  KB energy : -10.668194  KB strength:   6.265641  KB cosine:  -0.587320
- el0       :  -0.667592  el1        :  -0.026689  eig      :  -2.060198
+ el0       :  -0.667592  el1        :  -0.026669  eig      :  -2.060198
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 3d
- WARNING! : schsl found a positive eigenvalue. n,l=:   3   2
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   2
  !WARNING! No solution for ground state of local potential.  Setting e=0.0
  !WARNING! : schsl found too few nodes   n,l=   4   2  e= -.7517E-08
  !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
@@ -502,7 +520,7 @@
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 2s
- WARNING! : schsl found a positive eigenvalue. n,l=:   3   0
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   0
  !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
  KB energy :  -6.760000  KB strength:   4.705900  KB cosine:  -0.696139
  el0       :  -0.130937  el1        :   0.000000  eig      :  -0.283258
@@ -543,8 +561,9 @@
   25    -1350.9925515    -812.4657917    -538.5267598 0.11E-07 0.64E-07
   26    -1350.9925515    -812.4657918    -538.5267596 0.77E-08 0.36E-07
  
- After    26 iterations...
+   26 iterations: (units are Ry and bohr)
  Energy:   -1350.99255149  Ebs:    -812.46579185  Ehxc:    -538.52675964
+ Eh    :     560.46664720  Exc:     -67.94283343
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      2.000        -288.392092
@@ -557,6 +576,7 @@
 
 
  ===============Configuration 2 NL: Calc ===============
+ Performing non-local pseudopotential calculation
  Using the s potential as the local potential
  
  --Augmentation operator info--
@@ -567,10 +587,10 @@
  iter       Etot             Ebs             Ehxc       de_max   dv_max
    1      -78.7945211     -29.1220785     -49.6724426 0.69E-04 0.20E+01
    2      -75.6004403     -26.4089324     -49.1915078 0.24E+00 0.10E+01
-   3      -73.0816706     -24.1712116     -48.9104590 0.27E+00 0.60E+01
-   4      -72.7795318     -23.9029917     -48.8765401 0.41E-01 0.30E+01
-   5      -72.7489713     -23.8905677     -48.8584036 0.22E-02 0.60E+01
-   6      -72.7535637     -23.9023145     -48.8512493 0.16E-02 0.30E+01
+   3      -73.0816706     -24.1712116     -48.9104590 0.27E+00 0.18E-01
+   4      -72.7795318     -23.9029917     -48.8765401 0.41E-01 0.75E-02
+   5      -72.7489713     -23.8905677     -48.8584036 0.22E-02 0.49E-02
+   6      -72.7535637     -23.9023145     -48.8512493 0.16E-02 0.36E-02
    7      -72.7742431     -23.9227253     -48.8515178 0.28E-02 0.55E-03
    8      -72.7762445     -23.9245426     -48.8517019 0.29E-03 0.26E-03
    9      -72.7763401     -23.9246329     -48.8517072 0.31E-04 0.27E-03
@@ -593,8 +613,9 @@
   26      -72.7762428     -23.9248503     -48.8513925 0.11E-07 0.63E-07
   27      -72.7762429     -23.9248503     -48.8513925 0.70E-08 0.37E-07
  
- After    27 iterations...
+   27 iterations: (units are Ry and bohr)
  Energy:     -72.77624286  Ebs:     -23.92485034  Ehxc:     -48.85139252
+ Eh    :      51.74142441  Exc:      -9.30869453
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      2.000          -3.922023      0.352769      1.035705
@@ -612,12 +633,12 @@
  
  Test  state: 3d
  KB energy : -17.783254  KB strength:   7.642679  KB cosine:  -0.429768
- el0       :  -0.306502  el1        :  -0.106003  eig      :  -0.640182
+ el0       :  -0.306502  el1        :  -0.105911  eig      :  -0.640182
  No ghosts!  Ekb<0  and eig < el0
  
  Test  state: 2s
  KB energy :  -6.760000  KB strength:   4.705900  KB cosine:  -0.696139
- el0       :  -0.450557  el1        :  -0.151173  eig      :  -0.671592
+ el0       :  -0.450557  el1        :  -0.151162  eig      :  -0.671592
  No ghosts!  Ekb<0  and eig < el0
  ------------------------------
  
@@ -630,14 +651,14 @@
  number of angular momentum states    3
  for l=  0 eta equals -0.32575061D+01
  for l=  1 eta equals -0.36638052D+01
- for l=  2 eta equals -0.32740868D+01
+ for l=  2 eta equals -0.32740867D+01
  local potential has been designed according to njr
 
  The following configuration was used for the wavefunction output:
-  100     2.00000000    -3.92202259 Ry           -53.36225497 eV
-  210     6.00000000    -2.56820222 Ry           -34.94244580 eV
-  320     0.00000000    -0.64018194 Ry            -8.71018740 eV
-  200     1.00000000    -0.67159182 Ry            -9.13754397 eV
+  100     2.00000000    -3.92202259 Ry           -53.36186277 eV
+  210     6.00000000    -2.56820222 Ry           -34.94218898 eV
+  320     0.00000000    -0.64018194 Ry            -8.71012338 eV
+  200     1.00000000    -0.67159182 Ry            -9.13747681 eV
    ================================================
 <<end:  do_pwf>>
 <<<do_fhi>>>
@@ -650,7 +671,7 @@
  number of angular momentum states    3
  for l=  0 eta equals -0.32575061D+01
  for l=  1 eta equals -0.36638052D+01
- for l=  2 eta equals -0.32740868D+01
+ for l=  2 eta equals -0.32740867D+01
  local potential has been designed according to njr
    ================================================
 <<<do_cpmd>>>

@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine nllogd(istate,nqn,lang,ei,imax)
+      subroutine nllogd(istate,lang)
       
       implicit double precision (a-h,o-z)
       
@@ -26,15 +26,14 @@ c     -------------------------------------------------------------------------
 c     External (shared between C and Fortran) common blocks
 c     -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
-      common /box/ iboxstart(10),iboxend(10),boxheight(10),numbox
+      common /box/ iboxstart(n0),iboxend(n0),boxheight(n0),numbox
       common /ilogder/ ilogder
-      common /local/ iloc,idesign
+      common /local/ nlghost(n0),iloc,idesign
       common /logarith/ rphas,elogmax,elogmin,dlwf(npl0,n0)
       common /nlpot2/ inl,indrc(n0),IB,ID,IG
-      common /rcall/ rcall(n0)
       common /nlcore/ rvcorew(npdm)
-      common /npm/ ncores,nvales,iskip,maxip
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
 c     -------------------------------------------------------------------------
  
 c     -------------------------------------------------------------------------
@@ -50,7 +49,7 @@ c     *************************************************************************
       dimension rvloc(npdm),g(npdm)
       dimension ader(npdm),phomder(npdm),pinhomdr(npdm),Flphider(npdm)
       dimension Flwder(npdm),Flxder(npdm),pder(npdm)
-      dimension dl(npl0,4,3,2)
+      dimension dl(n0)
       
       call applyaug(rvloc,rvps(1,iloc))
 
@@ -125,7 +124,7 @@ c -------------------------------------------------------------------------
 c     External (shared between C and Fortran) common blocks
 c -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
-      common /box/ iboxstart(10),iboxend(10),boxheight(10),numbox
+      common /box/ iboxstart(n0),iboxend(n0),boxheight(n0),numbox
       common /nlpot2/ inl,indrc(n0),IB,ID,IG
 
       dimension rvl(npdm),rvs(npdm)
@@ -159,6 +158,6 @@ c -------------------------------------------------------------------------
       do i = IH,IJ
          rvl(i) = rvl(i) + DDEPTH * r(i)
       enddo
-      
+
       return
       end

@@ -1,7 +1,7 @@
 ;
 ;
 ;
-; - emacs OPIUM mode - v1.00 
+; - emacs OPIUM mode - v3.0
 ; used to highlight keyblocks mispelled keyblocks red 
 ; and correctly spelled keyblock purple.
 ; 
@@ -18,9 +18,7 @@
 (add-to-list 'auto-mode-alist '("\\.param\\'" . opium-mode))
 (defconst opium-font-lock-keywords-1
   (list
-   '("\\[\\(atom\\|Atom\\|ATOM\\|pseudo\\|Pseudo\\|PSEUDO\\|optinfo\\|Optinfo\\|OPTINFO\\|xc\\|Xc\\|XC\\|pcc\\|Pcc\\|PCC\\|relat
-ivity\\|Relativity\\|RELATIVITY\\|grid\\|Grid\\|GRID\\|relgrid\\|Relgrid\\|RELGRID\\|tol\\|Tol\\|TOL\\|configs\\|Configs\\|CONFI
-GS\\|kbdesign\\|KBdesign\\|Kbdesign\\|KBDESIGN\\|loginfo\\|Loginfo\\|LOGINFO \\)\\]" . font-lock-keyword-face)
+   '("\\[\\(atom\\|Atom\\|ATOM\\|pseudo\\|Pseudo\\|PSEUDO\\|optinfo\\|Optinfo\\|OPTINFO\\|xc\\|Xc\\|XC\\|pcc\\|Pcc\\|PCC\\|relativity\\|Relativity\\|RELATIVITY\\|grid\\|Grid\\|GRID\\|relgrid\\|Relgrid\\|RELGRID\\|tol\\|Tol\\|TOL\\|configs\\|Configs\\|CONFIGS\\|kbdesign\\|KBdesign\\|Kbdesign\\|KBDESIGN\\|hfsmooth\\Hfsmooth\\|HFsmooth\\|HFSMOOTH\\|loginfo\\|Loginfo\\|LOGINFO \\)\\]" . font-lock-keyword-face)
    '("\\(\\[\\w*\\]\\)" . font-lock-warning-face))
   "Minimal highlighting expressions for OPIUM mode")
 

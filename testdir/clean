@@ -6,5 +6,7 @@ foreach i (`cat LIST`)
 	rm "$i"_*
 	rm *.par
         rm *.agr
+	rm fort.*
+	rm vcore
 	mv temp $i.param
 end

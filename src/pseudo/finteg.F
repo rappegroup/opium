@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -27,18 +27,20 @@ c -------------------------------------------------------------------------
 c     External (shared between C and Fortran) common blocks
 c -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
-      common /np/ ncores,nvales
-      common /nmax/ nmax(nvale0),maxim
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /wfn/ rnl(npdm,n0)
 c -------------------------------------------------------------------------
 
 c -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks
 c -------------------------------------------------------------------------
-      common/gauss/ xquad(nquad0),wquad(nquad0)
+      common /gauss/ xquad(nquad0),wquad(nquad0)
       common /nnn/ nnn
-      common/cuts/ qc,rc
-      common/angm/ ll
+      common /cuts/ qc,rc
+      common /angm/ ll
       common /f/ fint
 c -------------------------------------------------------------------------
       dimension xf(nquad0),f(npdm)

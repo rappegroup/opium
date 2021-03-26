@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
       subroutine optinvert(psi,r,h,ll,en0,indrc,np,maxim,
-     $     g,coef,numfn,xion,v)
+     $     g,coef,numfn,xion,v,ixc)
       implicit double precision(a-h,o-z)
       
 #include "fortdim.h"
@@ -40,10 +40,10 @@ c     good compromise
       ioff=100
 
 c     This is for NO analytic section, 0 -> indrc is done numerically
-c      ioff=indrc
+c      if (ixc.lt.0) ioff=indrc
 
 c     This is for NO numerical section,0 -> indrc is done anlytically 
-c     ioff=0
+c      ioff=0
 
 cEJW Therefore, there are three regions:  analytic | numerical | AE
 cEJW the boundary between the analytic and numerical section is indrc - ioff
@@ -66,7 +66,9 @@ c     Section I - Numerical procedure
       enddo
 
       hsq12 = h * h/12.0
+
       sqlp = (float(ll) + 0.5)**2
+      
       xmult = exp(h)
 
 c We assume that by the far end of the interval, the potential
@@ -106,31 +108,44 @@ c give the proper eigenvalue out of scheq.
 
       do i = 1,np
          if (psi(i).gt.0.0) then
-            v(i) = (pv(i)/p(i)/hsq12-sqlp)/r(i)/r(i) + en0 
+            v(i) = (pv(i)/p(i)/hsq12-sqlp)/r(i)/r(i) + en0             
          endif
       enddo
 
 c     section II - analytical procedure
-
       do i=1,indrc-ioff
          v(i)=0.0
          do j=1,numfn
             gr=g(j)*r(i)
             v(i)=v(i) + coef(j)*g(j)*abs(g(j))*besfn(gr,ll)  
          enddo
-         v(i)=en0-v(i)/psi(i)
+         v(i)=en0-v(i)/psi(i)       
       enddo
-      
+
 c     section III - AE -> oo
 
-      do i=indrc+ioff,np
-         v(i)=(rvcore(i,nnn)+rvcoul(i))/r(i)
-      enddo
-      
-      do i = 1,np
-        rvps(i,nnn) = v(i) * r(i)
-        if (i.gt.maxim) rvps(i,nnn) = -xion-xion
-      enddo
+      if (ixc.ge.0) then
+
+         do i=indrc+ioff,np
+            v(i)=(rvcore(i,nnn)+rvcoul(i))/r(i)
+         enddo
+         
+         do i = 1,np
+            rvps(i,nnn) = v(i) * r(i)
+            if (i.gt.maxim) rvps(i,nnn) = -xion-xion
+         enddo
+         
+      else
+
+         do i=indrc+ioff,np
+            v(i)=rvps(i,nnn)/r(i)
+         enddo
+         
+         do i = 1,np
+            rvps(i,nnn) = v(i) * r(i)
+         enddo
+
+      endif
 
       return
       end                                                               

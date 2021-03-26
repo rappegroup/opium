@@ -4,11 +4,16 @@ SHELL=/bin/sh
 
 include ../../makevars
 
-fobjects = atm.o cubint.o difrel.o dsolv2.o etotal.o excorr.o ghostnl.o \
-	hrtree.o interp.o logder.o nllogd.o pbe.o getpcc.o pratt.o radin.o \
-	schsl.o scpot.o splift.o spliq.o velect.o denkcomp.o interp2.o
+fobjects = cubint.o excorr.o pbe.o ghostnl.o schslrel.o \
+	hrtree.o average.o logder.o nllogd.o getpcc.o pratt.o radin.o \
+	schsl.o dftsolve.o denkcomp.o interp2.o corpz.o corvwn.o hfcoef.o \
+	potl.o xch.o ykf.o zkf.o dfsolve.o soldir.o \
+        setuphf.o intdir.o norm.o dentfa.o \
+	cwig3j.o potrdf.o ortdat.o cofcon.o dsordf.o akeato.o aprdev.o \
+	yzkrdf.o yzkteg.o lagdat.o fdrirk.o etotal.o hfmethd.o hfde.o \
+	hfsolve.o hfenergy.o potrdf2.o hfcoef_rel.o hfint.o hfuncs.o
 
-cobjects = do_ae.o do_nl.o do_tc.o do_fc.o
+cobjects = do_ae.o do_nl.o do_tc.o do_fc.o writeae.o startae.o relorbae.o nrelorbae.o
 
 all_objects = $(fobjects) $(cobjects)
 

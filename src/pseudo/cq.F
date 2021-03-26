@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -31,12 +31,16 @@ c     *************************************************************************
 #include "fortdim.h"
 
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /wfn/ rnl(npdm,n0)
+
       common /gauss/ xquad(nquad0),wquad(nquad0)
       common /nnn/ nnn
       common /cuts/ qc,rc
       common /angm/ ll
-      common /nmax/ nmax(nvale0),maxim
+
       common /quads/ qq(nquad0)
       common /c/ c(nquad0)
       
@@ -67,7 +71,7 @@ c     internal common block
  2          continue
  1       continue
          zsum = zsum * width/2.0
-         if (abs(zsum - zsumo).gt.tol2) then
+          if (abs(zsum - zsumo).gt.tol2) then
             zsumo = zsum
             nfam = nfam + 1
             if (nfam.gt.nfammx) then
@@ -115,13 +119,17 @@ c     #########################################################################
 #include "fortdim.h"
 
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /wfn/ rnl(npdm,n0)
       common/gauss/ xquad(nquad0),wquad(nquad0)
       common /nnn/ nnn
       common/cuts/ qc,rc
-      common /nmax/ nmax(nvale0),maxim
+
       common /vv/xf(nquad0,nintm0,nfam0),f(npdm),vv(nquad0,nintm0,nfam0)
-      nord = 10
+
+      nord=10
       if (nfammx.gt.nfam0) then
          write (7,*) 'xf and vv not dimensioned large enough'
          write (7,*) 'nfam0 nfammx',nfam0,nfammx
@@ -137,5 +145,6 @@ c     #########################################################################
             vv(j,i,nfammx) = val(f,r,np,xf0,nord)
  11      continue
  10   continue
+      
       return
       end

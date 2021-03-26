@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -33,18 +33,24 @@ c -------------------------------------------------------------------------
 c     External (shared between C and Fortran) common blocks
 c -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /np/ ncores,nvales
-      common /ibound/ ibd(n0)
-      common /nmax/ nmax(nvale0),maxim
-      common /convrpt/ wsumt(nvale0), sumc(nvale0), lghost(nvale0)
+
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
+
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+
+      common /wfn/ rnl(npdm,n0)
+      common /psout/ wsumt(n0), sumc(n0), npsghost(n0)
 c -------------------------------------------------------------------------
 
 c -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks
 c -------------------------------------------------------------------------
-      common /el/ el0(nvale0),el1(nvale0)
+      common /el/ el0(n0),el1(n0)
       common /nloc/ nloc
       common /iterm/ iterm
 c -------------------------------------------------------------------------
@@ -68,16 +74,16 @@ c -------------------------------------------------------------------------
       write(7,*) 
       write(7,*) '---Semilocal ghost testing---'
       
-      do nloc = 1,nvales
-c         if (ibd(nloc).eq.0) goto 200
-         lghost(nloc) = 0
+      do nloc = 1,nval
+         if (ibd(nloc).eq.0) goto 200
+         npsghost(nloc) = 0
 
          nnn = nlm(nloc)/100
          lll = (nlm(nloc) - nnn * 100)/10
 
          write(7,9101) nnn,xc(lll)
 
-         do i = 1,nvales
+         do i = 1,nval
 
             if (i.eq.nloc) goto 100
 
@@ -115,7 +121,7 @@ c         if (ibd(nloc).eq.0) goto 200
 
             ee = en(i)                                                 
             n = ll + 1            
-            call schsl(i,n,ll,ee,im,rvps(1,nloc),p,ig)
+            call schsl(i,n,ll,ee,im,rvps(1,nloc),p,ig,ibd(nloc))
             el0(i) = ee
             iterm0=iterm
             if (iterm0.eq.1) then
@@ -124,7 +130,7 @@ c         if (ibd(nloc).eq.0) goto 200
             endif
 
             n = ll + 2
-            call schsl(i,n,ll,ee,im,rvps(1,nloc),p,ig)
+            call schsl(i,n,ll,ee,im,rvps(1,nloc),p,ig,ibd(nloc))
             el1(i) = ee
             iterm1=iterm
             if (iterm1.eq.1) then
@@ -145,11 +151,11 @@ c     if (iterm0.eq.0) then
                   write(7,9200) 
                else
                   write(7,9020) nn,xc(ll),en(i),el1(i)
-                  lghost(nloc) = 1
+                  npsghost(nloc) = 1
                endif
 c     else
 c     write(7,9300) 
-c     if (lghost(nloc).eq.0) lghost(nloc) = -1
+c     if (npsghost(nloc).eq.0) npsghost(nloc) = -1
 c     endif
                
             else
@@ -158,19 +164,19 @@ c     if (iterm0.eq.0) then
                   write(7,9210) 
                else
                   write(7,9020) nn,xc(ll),en(i),el0(i)
-                  lghost(nloc) = 1
+                  npsghost(nloc) = 1
                endif
 c     else
 c     write(7,9310) 
-c     if (lghost(nloc).eq.0) lghost(nloc) = -1
+c     if (npsghost(nloc).eq.0) npsghost(nloc) = -1
             endif
 c     endif
  100        continue
          enddo
          write(7,*)
-         if (lghost(nloc).eq.0) write(7,9400) nnn,xc(lll)
-         if (lghost(nloc).eq.1) write(7,9410) nnn,xc(lll)
-         if (lghost(nloc).eq.-1) write(7,9420) nnn,xc(lll)
+         if (npsghost(nloc).eq.0) write(7,9400) nnn,xc(lll)
+         if (npsghost(nloc).eq.1) write(7,9410) nnn,xc(lll)
+         if (npsghost(nloc).eq.-1) write(7,9420) nnn,xc(lll)
 
          write(7,*) '------------------------------'
          write(7,*)

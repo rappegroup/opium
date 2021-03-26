@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,10 +16,9 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine ghostnl (inl,iloc,rvloc)
+      subroutine ghostnl (iloc,rvloc)
            
 c     *************************************************************************
-c     inl     unused
 c     nloc    in
 c     rvloc   in      array
 c     *************************************************************************
@@ -43,12 +42,15 @@ c     *************************************************************************
 c     -------------------------------------------------------------------------
 c     External (shared between C and Fortran) common blocks
 c     -------------------------------------------------------------------------
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+
       common /grid/ h,r1,z,r(npdm),np
-      common /box/ iboxstart(10),iboxend(10),boxheight(10),numbox
-      common /npm/ ncores,nvales,iskip,maxip
-      common /results/ rnorm(30), etot, lghost(30)
-      common /ibound/ ibd(n0)
+      common /box/ iboxstart(n0),iboxend(n0),boxheight(n0),numbox
+
 c     -------------------------------------------------------------------------
  
 c     -------------------------------------------------------------------------
@@ -57,10 +59,9 @@ c     -------------------------------------------------------------------------
       common /iterm/ iterm
       common /nlpot1/ Flstar(npdm),phipsref(npdm,n0),phiguess(npdm,n0)
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /nmax/ nmax(nvale0),maxim
 c     -------------------------------------------------------------------------
       
-      dimension rvloc(npdm)
+      dimension rvloc(npdm),nlghost(n0)
       
 c     *************************************************************************
 c     local variables
@@ -98,11 +99,11 @@ c      endif
       
       write(7,9101) nnn,xc(lll)
       
-      do k=1,nvales
+      do k=1,nval
         isemi(k)=0
       enddo
-      do k=1,nvales
-        do j=k+1,nvales
+      do k=1,nval
+        do j=k+1,nval
           n = nlm(k)/100
           l = nlm(k)/10 - 10 * n
           n2 = nlm(j)/100
@@ -114,8 +115,8 @@ c      endif
         enddo
       enddo
 
-      do k = 1,nvales
-        lghost(k) = 0
+      do k = 1,nval
+        nlghost(k) = 0
 
         n = nlm(k)/100
         l = nlm(k)/10 - 10 * n
@@ -135,7 +136,7 @@ c        if (k.eq.iloc.or.ibd(k).eq.0) goto 911
         n = l + 1
         if (isemi(k).eq.1) n=n+1
         ee = en(k)
-        call schsl(k,n,l,ee,maxim,rvloc,p,ig)
+        call schsl(k,n,l,ee,maxim,rvloc,p,ig,ibd(k))
         el0(k) = ee
         iterm0=iterm
         if (iterm0.eq.1) then
@@ -145,7 +146,7 @@ c        if (k.eq.iloc.or.ibd(k).eq.0) goto 911
 
         n = l + 2
         if (isemi(k).eq.1) n=n+1
-        call schsl(k,n,l,ee,maxim,rvloc,p,ig)
+        call schsl(k,n,l,ee,maxim,rvloc,p,ig,ibd(k))
         el1(k) = ee
         iterm1=iterm
         if (iterm1.eq.1) then
@@ -182,13 +183,13 @@ c     if (iterm1.eq.0.and.iterm0.eq.0) then
                  write(7,9200) 
               else
                  write(7,9020) n,xc(l),en(k),el1(k)
-                 lghost(k) = 1
+                 nlghost(k) = 1
                  ighost=1
               endif
 
 c     else
 c     write(7,9300) 
-c     if (lghost(k).eq.0) lghost(k) = -1
+c     if (nlghost(k).eq.0) nlghost(k) = -1
 c     if (ighost.eq.0) ighost=-1
 c     endif
            else
@@ -199,13 +200,13 @@ c     if (iterm0.eq.0) then
                  write(7,9210) 
               else
                  write(7,9020) n,xc(l),en(k),el0(k)
-                 lghost(k) = 1
+                 nlghost(k) = 1
                  ighost=1
               endif
 
 c     else
 c     write(7,9310) 
-c     if (lghost(k).eq.0) lghost(k) = -1
+c     if (nlghost(k).eq.0) nlghost(k) = -1
 c     if (ighost.eq.0) ighost=-1
 
            endif

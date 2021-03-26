@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/*
- * $Id: do_vplot.c,v 1.9 2004/10/02 18:34:49 ewalter Exp $
- */
 
-/* screened pseudo potential plotting with xmgrace */
+/* screened or ionic pseudo potential plotting with xmgrace */
 
 #include <stdio.h>
 #include <math.h>
@@ -37,7 +34,7 @@
 #include "nlm.h"
 
 #define streq(a,b) (!strcasecmp(a,b))
-
+void nrelsproj(param_t *param, char *);
 int do_vplot(param_t *param, char *logfile, char *pltyp){
 
   int i;
@@ -51,13 +48,20 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
 
   FILE *parm;
   char *comm;
+  char *xc;
+  char *met;
   char lc=0;
 
   #define comm_size 240
+  #define met_size 45
+  #define xc_size 45
   comm= (char *) malloc(comm_size*sizeof(char));
+  met= (char *) malloc(met_size*sizeof(char));
+  xc= (char *) malloc(xc_size*sizeof(char));
 
   ncore=param->norb-param->nval;
 
+  nrelsproj(param,logfile);
   readAE(param);
 
   /* check for semicore */
@@ -84,13 +88,32 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm,"title size 1.500000\n");
     fprintf(parm,"title color 1\n");
 
+
     if (param->psmeth=='o') {
-      fprintf(parm,"subtitle \"Optimized Pseudopotential Method\"\n");
+      snprintf(met,met_size,"Optimized Pseudopotential Method");
     }else if (param->psmeth=='k') {
-      fprintf(parm,"subtitle \"Kerker Pseudopotential Method\"\n");
+      snprintf(met,met_size,"Kerker Pseudopotential Method");
     }else if (param->psmeth=='t') {
-      fprintf(parm,"subtitle \"Troullier-Martins Pseudopotential Method\"\n");
+      snprintf(met,met_size,"Troullier-Martins Pseudopotential Method");
     }
+    
+    if (param->ixc == 0) {
+      snprintf(xc,xc_size,"XC=Perdew-Zunger LDA");
+    }else if (param->ixc == 1) {
+      snprintf(xc,xc_size,"XC=Perdew-Wang LDA");
+    }else if (param->ixc == 2) {
+      snprintf(xc,xc_size,"XC=Perdew-Burke-Ernzerhof GGA");
+    }else if (param->ixc == 3) {
+      snprintf(xc,xc_size,"XC=Perdew-Wang GGA");
+    }else if (param->ixc == 4) {    
+      snprintf(xc,xc_size,"XC=Wu-Cohen GGA");
+    }else if (param->ixc == 5) {    
+      snprintf(xc,xc_size,"XC=VWN5 LDA");
+    }else if (param->ixc == -1) {
+      snprintf(xc,xc_size,"Hartree-Fock Exchange");
+    }
+
+    fprintf(parm,"subtitle \"%s   %s   %s\"\n",xc,met,param->reltype);
 
     fprintf(parm,"subtitle font 0\n");
     fprintf(parm,"subtitle size 1.000000\n");
@@ -107,24 +130,24 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm,"legend loctype view\n");
     fprintf(parm,"legend 0.85, 0.8\n");
 
-    for (i=0; i<param->nll;i++){
+    for (i=0; i<param->nval;i++){
 
-      if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 0) {
+      if ((param->lpot[i]) == 0) {
 	scount++;
 	lcolor=1;
 	lsty=scount;
 	lc='s';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 1) {
+      }else if ((param->lpot[i]) == 1) {
 	pcount++;
 	lcolor=2;
 	lsty=pcount;
 	lc='p';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 2) {
+      }else if ((param->lpot[i]) == 2) {
 	dcount++;
 	lcolor=3;
 	lsty=dcount;
 	lc='d';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 3) {
+      }else if ((param->lpot[i]) == 3) {
 	fcount++;
 	lcolor=4;
 	lsty=fcount;
@@ -137,8 +160,7 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
       fprintf(parm," s%d line linestyle %d \n",i,lsty);
       fprintf(parm," s%d line linewidth 2.0 \n",i);
       fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"V\\s%d%c\\N\" \n",i,
-	  nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
+      fprintf(parm," s%d legend \"V\\s%c\\N\" \n",i,lc);
       fprintf(parm," s%d errorbar on\n",i);
       fprintf(parm," s%d errorbar place both\n",i);
       fprintf(parm," s%d errorbar color %d\n",i,lcolor);
@@ -185,13 +207,33 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm,"title size 1.500000\n");
     fprintf(parm,"title color 1\n");
 
+
     if (param->psmeth=='o') {
-      fprintf(parm,"subtitle \"Optimized Pseudopotential Method\"\n");
+      snprintf(met,met_size,"Optimized Pseudopotential Method");
     }else if (param->psmeth=='k') {
-      fprintf(parm,"subtitle \"Kerker Pseudopotential Method\"\n");
+      snprintf(met,met_size,"Kerker Pseudopotential Method");
     }else if (param->psmeth=='t') {
-      fprintf(parm,"subtitle \"Troullier-Martins Pseudopotential Method\"\n");
+      snprintf(met,met_size,"Troullier-Martins Pseudopotential Method");
     }
+    
+    if (param->ixc == 0) {
+      snprintf(xc,xc_size,"XC=Perdew-Zunger LDA");
+    }else if (param->ixc == 1) {
+      snprintf(xc,xc_size,"XC=Perdew-Wang LDA");
+    }else if (param->ixc == 2) {
+      snprintf(xc,xc_size,"XC=Perdew-Burke-Ernzerhof GGA");
+    }else if (param->ixc == 3) {
+      snprintf(xc,xc_size,"XC=Perdew-Wang GGA");
+    }else if (param->ixc == 4) {    
+      snprintf(xc,xc_size,"XC=Wu-Cohen GGA");
+    }else if (param->ixc == 5) {    
+      snprintf(xc,xc_size,"XC=VWN5 LDA");
+    }else if (param->ixc == -1) {
+      snprintf(xc,xc_size,"Hartree-Fock Exchange");
+    }
+
+    fprintf(parm,"subtitle \"%s   %s   %s\"\n",xc,met,param->reltype);
+
     fprintf(parm,"subtitle font 0\n");
     fprintf(parm,"subtitle size 1.000000\n");
     fprintf(parm,"subtitle color 1\n");
@@ -207,24 +249,24 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm,"legend loctype view\n");
     fprintf(parm,"legend 0.85, 0.8\n");
 
-    for (i=0; i<param->nll;i++){
+    for (i=0; i<param->nval;i++){
 
-      if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 0) {
+      if (param->lpot[i] == 0) {
 	scount++;
 	lcolor=1;
 	lsty=scount;
 	lc='s';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 1) {
+      }else if (param->lpot[i] == 1) {
 	pcount++;
 	lcolor=2;
 	lsty=pcount;
 	lc='p';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 2) {
+      }else if (param->lpot[i] == 2) {
 	dcount++;
 	lcolor=3;
 	lsty=dcount;
 	lc='d';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 3) {
+      }else if (param->lpot[i] == 3) {
 	fcount++;
 	lcolor=4;
 	lsty=fcount;
@@ -237,8 +279,7 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
       fprintf(parm," s%d line linestyle %d \n",i,lsty);
       fprintf(parm," s%d line linewidth 2.0 \n",i);
       fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"V\\s%d%c\\N\" \n",i,
-	  nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
+      fprintf(parm," s%d legend \"V\\s%c\\N\" \n",i,lc);
       fprintf(parm," s%d errorbar on\n",i);
       fprintf(parm," s%d errorbar place both\n",i);
       fprintf(parm," s%d errorbar color %d\n",i,lcolor);
@@ -258,15 +299,16 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm," s%d line color %d \n",i,15);
     fprintf(parm," s%d legend \"2Z\\seff\\N /r\"\n" ,i);
 
-    fprintf(parm," s%d hidden false \n",i+1);
-    fprintf(parm," s%d type xydx \n",i+1);
-    fprintf(parm," s%d symbol 0 \n",i+1);
-    fprintf(parm," s%d line type 1 \n",i+1);
-    fprintf(parm," s%d line linestyle %d \n",i+1,3);
-    fprintf(parm," s%d line linewidth 3.0 \n",i+1);
-    fprintf(parm," s%d line color %d \n",i+1,14);
-    fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,i+1);
-
+    if (param->ixc >= 0) {
+      fprintf(parm," s%d hidden false \n",i+1);
+      fprintf(parm," s%d type xydx \n",i+1);
+      fprintf(parm," s%d symbol 0 \n",i+1);
+      fprintf(parm," s%d line type 1 \n",i+1);
+      fprintf(parm," s%d line linestyle %d \n",i+1,3);
+      fprintf(parm," s%d line linewidth 3.0 \n",i+1);
+      fprintf(parm," s%d line color %d \n",i+1,14);
+      fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,i+1);
+    }
     fclose(parm);
 
     snprintf(comm,comm_size, "xmgrace -timestamp $XMGRACE_OPTS -settype xydx %s.vi_plt -p vi.par -autoscale y -saveall %s_vi.agr & ",

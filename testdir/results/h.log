@@ -1,16 +1,16 @@
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-           OPIUM  Version:      2.0.5                             
+           OPIUM  Version:        3.0                             
            =====================================            
  See http://opium.sourceforge.net for help and information                 
- Copyright 2005 : The OPIUM project                         
+ Copyright 2007 : The OPIUM project                         
 
- Compile host     : particle.physics.wm.edu
- Compile OS       : Linux 2.6.17-1.2139_FC5smp i686
- Compile date     : Mon Sep 18 14:43:32 EDT 2006
+ Compile host     : strange.physics.wm.edu
+ Compile OS       : Linux 2.4.20-20.9smp i686
+ Compile date     : Wed Aug 22 12:15:40 EDT 2007
 
- Execution host   : particle.physics.wm.edu
- time of execution: Mon Sep 18 15:25:05 2006
+ Execution host   : strange.physics.wm.edu
+ time of execution: Wed Aug 22 12:17:11 2007
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Reading parameter file:  <h.param> ... 
@@ -33,8 +33,8 @@
  <-/-> 1s1 
 
  Grid definitions: 
- a_grid=1.00e-04    b_grid=1.30e-02    # points=1045 
- r(1)=1.00e-04      r(np)=7.94e+01    
+ a_grid=1.00e-04    b_grid=1.30e-02    # points=1076 
+ r(1)=1.00e-04      r(np)=1.19e+02    
 
  dEmax tolerance:  1.00e-08      dVmax tolerance:  1.00e-06     
 
@@ -71,8 +71,9 @@
   23       -0.8917869      -0.4673245      -0.4244624 0.12E-07 0.14E-06
   24       -0.8917869      -0.4673245      -0.4244624 0.85E-08 0.82E-07
  
- After    24 iterations...
+   24 iterations: (units are Ry and bohr)
  Energy:      -0.89178694  Ebs:      -0.46732451  Ehxc:      -0.42446243
+ Eh    :       0.56556215  Exc:      -0.46542379
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      1.000          -0.467325      0.376017      1.060414
@@ -84,9 +85,10 @@
  ======================================================================== 
  Begin PS construction
  ======================================================================== 
- Optimized Pseudopotential Generation
+ Optimized Pseudopotential Generation ...
  
  ==================
+ zeff=   1.00000000000000     
  Pseudizing state : |100>
  eigenvalue       : -0.467325
  qc               :  7.070000
@@ -107,9 +109,9 @@
  
  # steps:     1
  Resid KE (Ry)     :        0.0000003046
- Norm error        :    -0.222E-15
+ Norm error        :     0.000E+00
  Continuity error  :     0.000E+00
- Curvature error   :     0.486E-16
+ Curvature error   :     0.125E-15
  
  Bessel wavevectors and final coefficients
    1        1.0476483425        0.8000513732
@@ -117,8 +119,11 @@
    3        4.3904607085        0.0923967251
    4        6.1166572839        0.0060105985
  
+ Total KE           (Ry) :     0.7946841352
+ 0  -> qc contribution   :     0.7946838306
+ qc -> oo contribution   :     0.0000003046   (=Convergence term)
+ Occupancy of this state :     1.0000000000
  Convergence term (Ry/e) :     0.0000003046
- Occupation              :     1.0000000000
  Convergence error (mRy) :     0.0003046419
  Convergence error (meV) :     0.0041448961
  
@@ -144,6 +149,7 @@
  ======================================================================== 
  Begin NL calculation
  ======================================================================== 
+ Performing non-local pseudopotential calculation
  Using the s potential as the local potential
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
@@ -151,6 +157,7 @@
  
  Converged in 1 iteration (probably reference state)
  Energy:      -0.88880171  Ebs:      -0.46732451  Ehxc:      -0.42147720
+ Eh    :       0.56123710  Exc:      -0.46120098
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      1.000          -0.467325      0.376017      1.019854
@@ -173,10 +180,10 @@
                      Kinetic energy convergence
       ==============================|100>==============================
       Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
-         6       0.722097970                72.586164     987.585569
-        14       0.787553716                 7.130418      97.014326
-        22       0.793988509                 0.695625       9.464459
-        29       0.794620639                 0.063494       0.863885
+         6       0.722097973                72.586164     987.585576
+        14       0.787553719                 7.130418      97.014327
+        22       0.793988512                 0.695625       9.464460
+        29       0.794620643                 0.063494       0.863885
 
  ======================================================================== 
  End KE convergence testing
@@ -210,14 +217,16 @@
   21       -0.5504053      -0.4533418      -0.0970636 0.24E-07 0.40E-07
   22       -0.5504053      -0.4533418      -0.0970636 0.64E-08 0.26E-07
  
- After    22 iterations...
+   22 iterations: (units are Ry and bohr)
  Energy:      -0.55040533  Ebs:      -0.45334176  Ehxc:      -0.09706357
+ Eh    :       0.16120578  Exc:      -0.21207868
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      0.500          -0.906684      0.288340      0.968177
 
 
  ===============Configuration 1 NL: Calc ===============
+ Performing non-local pseudopotential calculation
  Using the s potential as the local potential
  
  iter       Etot             Ebs             Ehxc       de_max   dv_max
@@ -246,8 +255,9 @@
   23       -0.5478591      -0.4521048      -0.0957543 0.26E-07 0.94E-07
   24       -0.5478591      -0.4521048      -0.0957543 0.82E-08 0.52E-07
  
- After    24 iterations...
+   24 iterations: (units are Ry and bohr)
  Energy:      -0.54785912  Ebs:      -0.45210483  Ehxc:      -0.09575429
+ Eh    :       0.15891350  Exc:      -0.20894591
  
    Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
     |100>      0.500          -0.904210      0.290798      0.955672
@@ -265,7 +275,7 @@
  local potential is s
 
  The following configuration was used for the wavefunction output:
-  100     0.50000000    -0.90420966 Ry           -12.30249585 eV
+  100     0.50000000    -0.90420966 Ry           -12.30240543 eV
    ================================================
 <<end:  do_pwf>>
 <<<do_fhi>>>

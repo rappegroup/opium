@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ c     -------------------------------------------------------------------------
       common /pofy/ pofy
 c     -------------------------------------------------------------------------
       
-      dimension rv(npdm),r(npdm),dl(nnt1,npdm),p(npdm),dld(npdm),g(npdm)
+      dimension rv(npdm),r(npdm),dl(n0),p(npdm),dld(npdm),g(npdm)
       
 c     *************************************************************************
 c     local variables
@@ -162,7 +162,7 @@ c     outward integration by noumerov method
         i = imin + j
         ip = i + 1
         d3 = ((rv(ip)-e*r(ip))*r(ip)+x2)*h2*p(ip)+h2*g(ip)
-        dl(1,j) = (0.5*(p(ip)-p(i-1))-(d3-d1))/h
+        dl(j) = (0.5*(p(ip)-p(i-1))-(d3-d1))/h
         d1 = d2
         d2 = d3
       enddo
@@ -179,7 +179,7 @@ c     **********************************************************************
       do i=i1,i4
         j = j + 1
         pofy  = pofy + w(j)*p(i)
-        dpdy  = dpdy + w(j)*dl(1,nrh+j-2)
+        dpdy  = dpdy + w(j)*dl(nrh+j-2)
       enddo
       if(abs(pofy).lt.1.d-15) pofy = sign(1.d-15,pofy)
       dlp  = dpdy/pofy
@@ -187,7 +187,7 @@ c     **********************************************************************
       if(ie.eq.3) then
         do j=1,nr
           i = imin + j
-          dl(1,j) = (0.5 + dl(1,j)/p(i))/r(i)
+          dl(j) = (0.5 + dl(j)/p(i))/r(i)
         enddo
       endif
       if(ider.eq.0) return

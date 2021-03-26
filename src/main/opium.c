@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#define VERSION "2.0.6"
+#define VERSION "3.0"
 #ifndef CHOST
 #define CHOST "unknown"
 #endif
@@ -60,10 +60,12 @@
 #include "do_fhi.h"
 #include "do_plot.h"
 #include "do_ncpp.h"
+#include "do_casino.h"
 #include "do_logplt.h"
 #include "do_fc.h"
 #include "do_siesta.h"
 #include "do_cpmd.h"
+#include "do_champ.h"
 
 #define streq(a,b) (!strcasecmp(a,b))
 
@@ -160,7 +162,7 @@ int main(int argc, char *argv[]){
   fprintf(fp_log,
       " See http://opium.sourceforge.net for help and information                 \n");  
   fprintf(fp_log,
-      " Copyright 2005 : The OPIUM project                         \n");
+      " Copyright 2007 : The OPIUM project                         \n");
 
   fprintf(fp_log,"\n Compile host     : %s\n",CHOST);
   fprintf(fp_log," Compile OS       : %s\n",CSYS);
@@ -181,7 +183,7 @@ int main(int argc, char *argv[]){
     fprintf(stderr, "The name of the paramfile and logfile can not exceed 50 chars!\n");
     fprintf(stderr, "execution terminated\n");
   }
-  paramfile = (char *) malloc(50*sizeof(char));  
+  paramfile = (char *) malloc(150*sizeof(char));  
 
   if (argc>3){  /* command line options */
 
@@ -358,12 +360,15 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
   } else if (streq(command, "ke")){
     do_ke(param, logfile);
     if (verbosity) do_ke_report(stdout);
-  } else if (streq(command, "nl")){
-    do_nl(param, logfile);
+  } else if (streq(command, "nl")||streq(command, "sl")){
+    if (streq(command, "nl")) 
+      do_nl(param, logfile,1);
+    if (streq(command, "sl"))
+      do_nl(param, logfile,0);
     if (verbosity) do_nl_report(stdout);
     /*  } else if (streq(command, "fc")){
-    do_fc(param, logfile);
-    if (verbosity) do_fc_report(stdout);*/
+	do_fc(param, logfile);
+	if (verbosity) do_fc_report(stdout);*/
   } else if (streq(command, "tc")){
     doifc=0;
     do_tc(param, logfile, job, doifc);
@@ -386,6 +391,10 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     fp = fopen(paramfile, "r"); 
     do_fhi(param, fp, logfile);
     fclose(fp);
+  } else if (streq(command, "champ")) {
+    fp = fopen(paramfile, "r"); 
+    do_champ(param, fp, logfile);
+    fclose(fp);
   } else if (streq(command, "siesta")||streq(command, "psf")) {
     fp = fopen(paramfile, "r"); 
     do_siesta(param, fp, logfile);
@@ -393,6 +402,10 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
   } else if (streq(command, "ncpp")) {
     fp = fopen(paramfile, "r"); 
     do_ncpp(param, fp,logfile);
+    fclose(fp);
+  } else if (streq(command, "casino")) {
+    fp = fopen(paramfile, "r"); 
+    do_casino(param, fp,logfile);
     fclose(fp);
   } else if (streq(command, "cpmd")) {
     fp = fopen(paramfile, "r"); 
@@ -420,7 +433,7 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     fprintf(fp, "\n### PS report ########################################\n\n");    
     do_ps_report(fp);
 
-    fprintf(fp, "\n### NL report ########################################\n\n");    
+    fprintf(fp, "\n### NL/SL report #####################################\n\n");    
     do_nl_report(fp);
 
     fprintf(fp, "\n### KE report ########################################\n\n");   
@@ -442,7 +455,11 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     do_ae(param, logfile); if (verbosity) do_ae_report(stdout);
     /*    do_fc(param, logfile); if (verbosity) do_fc_report(stdout);*/
     do_ps(param, logfile); if (verbosity) do_ps_report(stdout);
-    do_nl(param, logfile); if (verbosity) do_nl_report(stdout);
+    if (param->ixc < 0) {
+      do_nl(param, logfile,0); if (verbosity) do_nl_report(stdout);
+    } else {
+      do_nl(param, logfile,1); if (verbosity) do_nl_report(stdout);
+    }
     do_tc(param, logfile, job, doifc); if (verbosity) do_tc_report(stdout);
   }else{
     fp = fopen(logfile, "a");
@@ -484,18 +501,22 @@ static void do_chelp(){
   printf("\n\tatomic solves and pseudopotential construction \n");
   printf("\tae                  - all electron solve of the atom\n");
   printf("\tps                  - generate optimized pseudopotential\n");
-  printf("\tnl                  - pseudopotential solve of the \n"
+  printf("\tnl                  - non-local pseudopotential solve of the \n"
+         "\t                        atomic ref. configuration\n");
+  printf("\tsl                  - semi-local pseudopotential solve of the \n"
          "\t                        atomic ref. configuration\n");
   printf("\tke                  - compute kinetic energy error information \n");
   printf("\ttc                  - test additional configurations\n");
   printf("\tall                 - run through the complete cycle (ae ps nl tc)\n");
   printf("\n\tpseudo file output style \n");
   /*  printf("\tupf      - generate *.upf  output\n"); */
-  printf("\tpwf                 - generate *.pwf  output\n");
-  printf("\trecpot              - generate *.recpot  output\n");
-  printf("\tfhi                 - generate *.fhi output\n");
-  printf("\tncpp                - generate *.ncpp output\n");
-  printf("\tpsf                 - generate *.psf(SIESTA) output [BETA]\n");
+  printf("\tpwf                 - generate *.pwf output\n");
+  printf("\trecpot              - generate *.recpot (CASTEP) output\n");
+  printf("\tfhi                 - generate *.fhi (ABINIT) output\n");
+  printf("\tncpp                - generate *.ncpp (PWSCF) output\n");
+  printf("\tpsf                 - generate *.psf(SIESTA) output \n");
+  printf("\tcasino              - generate *.casino (CASINO) output \n");
+  printf("\tchamp               - generate *.champ(CHAMP) output \n");
   printf("\n\tmiscellaneous options \n");
   printf("\trpt                 - generate report file\n");
   printf("\tplot [plot_type]    - make a plot of type [plot_type]\n" 
@@ -550,11 +571,11 @@ static void do_khelp(){
   printf("\t  cut-off wavevector(float), # bessel fxns(int) for pseudo orb 1 \n");  
   printf("\t  .                            .                                . \n");
   printf("\t  cut-off wavevector(float), # bessel fxns(int) for pseudo orb n \n");  
-  printf("\t  (n)ew or (c)onmax - optional toggle to use the older conmax algorithm for  \n");  
+  printf("\t  (n)ew or (c)onmax - [optional] toggle to use the older conmax algorithm for  \n");  
   printf("\t       the optimization procedure.  The default is (n)ew  \n\n\n");  
   printf("\t[XC]                                                                 \n");
-  printf("\t  pzlda or pwlda or gga  --xc funct. (default is pzlda, lda=pzlda) \n");
-  printf("\t  GGA smoothing radius (float) [Optional] \n\n\n");
+  printf("\t  pzlda,pwlda,pbegga,pw91gga,wcgga, or hf                            \n"); 
+  printf("\t  GGA smoothing radius (float) [optional] \n\t\t for Z<=36 and gga, default: not used, \n\t\t for Z>36 and gga, default=0.001 au  \n\n\n");
   printf("\t[Pcc]                                               \n");
   printf("\t partial core radius(float) (default = no pcc)  \n");
   printf("\t partial core method (character) lfc or fs  \n");
@@ -563,13 +584,12 @@ static void do_khelp(){
   printf("\t  nrl or srl -- non-rel or scalar-rel solve (default = nrl) \n\n\n");
   printf("\t[Grid]                                                 \n");
   printf("\t  max grid points(int), a(float)(see documentation), b log. spacing (float) \n");
-  printf("\t  default = 1201 0.0001 0.013 \n");
-  printf("\t    note: this grid is used for all non-rel solves and psp construction \n\n\n");
-  printf("\t[Relgrid]                                                         \n");
+  printf("\t  default = 1201 0.0001 0.013 \n\n");
+  /*  printf("\t[Relgrid]                                                         \n");
   printf("\t  same as [Grid] but for the non-relativisitc solve\n");
-  printf("\t  default = 2201 0.0001 0.0143 \n\n\n");
+  printf("\t  default = 2201 0.0001 0.0143 \n\n\n");*/
   printf("\t[Tol]                                                             \n");
-  printf("\t  tol. for eig.(float), tol for V(r) \n");
+  printf("\t  tol. for eig.(float), tol for V(r) (float)\n");
   printf("\t  default 1e-8 and 1e-6 \n");
   printf("\t  used for AE and NL solve stopping conditions \n\n\n");
   printf("\t[Configs]                                                         \n");
@@ -601,8 +621,21 @@ static void do_khelp(){
   printf("\t  configuration number used in log. deriv. plot(int) (reference=0) \n");
   printf("\t  radius for log. deriv.(float), min and max energy for log deriv.(2 floats) \n\n");
 
-  printf("\t  See $OPIUM/docs/keyblocks or http://opium.sourceforge.net for more help \n\n");
+
+
+  printf("\t[HFsmooth]                                            \n");
+  printf("\t  method for smoothing/localization method for Hartree-Fock PSPs (int)\n");
+  printf("\t  0 - turn off smoothing (default) \n");
+  printf("\t  1 - Trail & Needs form for Troullier-Martins PSPs \n");
+  printf("\t  2 - AWR form #1 for Optimized PSPs \n");
+  printf("\t  3 - AWR form #2 for Optimized PSPs \n");
+  printf("\t  4 - AWR form #3 for Optimized PSPs \n");
+
+  printf("\t  See http://opium.sourceforge.net for more help \n\n\n");
   printf("\t=================================================================\n\n\n");
+
+
+
 }
 
 

@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -28,7 +28,8 @@ c     External (shared between C and Fortran) common blocks
 c -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
       common /rpcc/ rpcc,rpccz
-      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm)
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
       common /filenames/ file_log
       common /ipccmeth/ ipccmeth
 c -------------------------------------------------------------------------
@@ -222,9 +223,8 @@ c     External (shared between C and Fortran) common blocks
 c -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
       common /rpcc/ rpcc,rpccz
-      common /filenames/ file_log
 c -------------------------------------------------------------------------
-      dimension rd1(npdm),rd2(npdm),rd3(npdm)
+      dimension rd1(npdm),rd2(npdm)
       dimension rcore(npdm),rpcore(npdm)
       dimension b(4),a(4,4)
       dimension ipvt(4)

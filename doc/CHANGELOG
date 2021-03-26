@@ -186,6 +186,100 @@ output file types.
 Bugfix: 2.0.5 left the core-correction out of .pwf format.  This is now
 fixed.
 
+2.0.6 --> 3.0
+
+1) Change in versioning scheme (3 numbers is too many).
+
+2) Removal of relativisitc grid, now srl potentials use the 
+same grid as the nrl grid.  This means that the following routines
+have been removed:
+
+atm.F
+difrel.F
+etotal.F
+dsolv2.F
+velect.F
+
+Now excorr.F handles both srl and nrl exc functionals, the srl and nrl
+solves are now done in a routine called dftsolve.F (used to be
+scpot.F).  hrtree.F takes care of the srl and nrl hartree term.  
+pbe.F is now only the XC routines that are needed from the original
+K. Burke PBE.f code.  The routine interp.F is named average.F since
+it no longer interpolates anything.
+
+3) Ability to perform unbound states in a srl potential has been added
+
+4) A modified version of the Hartree-Fock code by C. Froese-Fischer and
+G. Gaigalas has been incorporated into OPIUM to construct HF psps.
+
+5) A modified version of the Dirac-Fock code by A.L. Ankudinov,
+S.I. Zabinsky, J.J. Rehr has been incorporated into OPIUM to construct
+srl HF psps.
+
+6) Two new routines, hfindesc.F and hfsmooth.F have been added to
+pseudo/ 
+
+hfindesc.F - takes care of descreening the HF effective potential for
+both the nrl and srl types of psps.  It also does the averaging of the
+dirac-fock psps to construct the srl hartree-fock psp.
+
+hfsmooth.F - takes care of smoothing the HF ionic potential.  This
+routine is activated by the [HFsmooth] keyblock.
+
+7) Each psp and ps-wavefunction is written to its own file (labeled by
+.l=<nnn>).  This allows for one to (for now by hand) use a different
+reference state for each psp.
+
+8) Most plots have been changed to show more construction info
+in the title and subtitle.
+
+9) Submissions from K. Refson have been incorporated (adds a partial
+core correction to the .recpot format).
+
+10) W. A. Al-saidi added the .champ format for the QMC CHAMP code.
+
+11) .casino format added for the QMC CASINO code (not thoroughly tested)
+
+12) Internal changes to redundant fortran common blocks.  Now much
+fortran info is in the aorb, adat, and aval common blocks.
+
+13) Default grid now extends to 120 au. 
+
+14) Ability to do semi-local tests in DFT resurrected.  For now, 
+HF tests can only be done via "sl", trying "nl" throws an warning
+and reverts to sl.  The "tc" command performs "nl" tests for DFT
+psps and "sl" tests for HF psps.
+
+15) The Wu-Cohen GGA and Perdew-Wang 91 GGA functionals were added to
+excorr.
+
+16) GGA XC functionals are changed to LDA smoothly starting at 0.001
+bohr and ending at 0.0 bohr.  This is due to heavier atoms resulting
+in "spikes" occuring near r=0.0 (this comes from the GGA enchancement
+terms behaving badly where the density gets very small).  This is only
+done automatically for Z>36, for Z<=36 no smoothing is done.
+The smoothing can be turned off like so:
+
+[XC]
+pbegga
+0.0
+
+17) The behavior of unbound states has changed.  Now a occupation
+number < 0 signals that the state should be treated as unbound.  If
+the state is NOT marked as unbound and the solver can't find a bound
+state, the run fails (it used to mark such a state as unbound and keep
+going).  If the state is constructed as unbound and a test case DOES
+NOT indicate and unbound state, it will use the psp to try and find a
+bound state.
+
+18) Insted of having each part of the code figure out the correct
+states for a semicore calculation, the parameter.c routine now
+REORDERS the param file on the fly to put all states in
+s,p,d,f,s,p,d,f etc.  order, i.e. the first instance of each 'l' is
+put in increasing 'l' order, then the next instance of each 'l' is put
+in increasing 'l' order, etc. until there are no more valence states.
+The Atom, Configs, Pseudo, and Optinfo keyblocks are all reordered the
+same way. 
 
 
 

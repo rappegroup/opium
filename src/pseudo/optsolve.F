@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine optsolve
+      subroutine optsolve(ixc)
 
 c     *************************************************************************
 c     This code finds an optimized pseudowavefunction following the paper
@@ -32,16 +32,27 @@ c     which was coded by EJW and HK.     10/25/03 EJW
       parameter(maxitn=1000)
 
       logical lbes
+      common /a/ a(numfn0)
+      common /d/ d(numfn0,numfn0)
+      common /e/ e(numfn0)
+      common /f/ fint
+      common /g/ gint
       common /roots/ xroot(numfn0)
       common /angm/ ll
-      common /nmax/ nmax(n0),maxim
       common /numfn/ numfn
       common /wavrc/ wavrc, slope, curvrc, indrc
       common /nnn/ nnn
-      common /opt/ meth
+      common /psdat/ nll,meth,npots
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
-      common /atom3/ rsvale(npdm)
+
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /wfn/ rnl(npdm,n0)
+
       common /bir/ bir(numfn0,npdm)
       common /frrv/ fr(npdm), rv(npdm)
       common /transum/ transumry
@@ -50,7 +61,7 @@ c     which was coded by EJW and HK.     10/25/03 EJW
       
       common /scrconmax/ enc,tolc,lim,nstp,isw1,isw2,isw3
       
-      common /convrpt/ wsumt(nvale0),sumc(nvale0),lghost(nvale0)
+      common /psout/ wsumt(n0),sumc(n0),npsghost(n0)
       
 c     internal common block 
       common /xlog/ ffunc,sumo,sumt,sumn
@@ -67,7 +78,7 @@ c     *************************************************************************
       do i = 1,np
         rv(i) = -z-z+rvcoul(i)
         if (i.gt.maxim) rv(i) = -xion-xion
-        if (nnn.eq.1) rsvale(i)=0.0
+        if (nnn.eq.1) rsval(i)=0.0
       enddo
 
       do j = 1,numfn
@@ -80,7 +91,7 @@ c     *************************************************************************
       do i = 1,numfn0
         xguess(i) = 0.0
       enddo
-      
+
       call guess(xguess)
 
 cEJW added this for internal debugging (lets you load bessel functions)
@@ -104,7 +115,6 @@ cEJW added this for internal debugging (lets you load bessel functions)
         call newmin(numfn,xguess,sumt)
         call fnset(numfn,numgr,pttbl,iptb,indm,xguess,7,1,icntyp,confun)
       endif
-
  912  continue
       
       write(7,*) 'Bessel wavevectors and final coefficients'
@@ -112,29 +122,46 @@ cEJW added this for internal debugging (lets you load bessel functions)
         write(7,9012) i,xroot(i),xguess(i)
       enddo
  9012 format(1x,i3,2f20.10)
-
-      
-      write(7,*)
-      write(7,9102) sumt
-      write(7,9202) wnl(nnn)
+      sum2=0.0
+      sum3=0.0
+      do i = 1,numfn
+         sum = 0.0
+         do j = 1,numfn
+            sum = sum + xguess(j) * d(i,j)
+         enddo
+         sum2 = sum2 + xguess(i)**2 * xroot(i)*abs(xroot(i)) * a(i)
+         sum3 = sum3 + (sum + 2.0*e(i)) * xguess(i)
+      enddo
+      sum3=sum3+gint
+      sum2=sum2-fint
       wsumt(nnn) = sumt*wnl(nnn)
       sumc(nnn) = sumt
+      transumry=transumry+wsumt(nnn)
+
+      write(7,*)
+      write(7,9135) sum2
+      write(7,9136) sum3
+      write(7,9137) sum2-sum3
+      write(7,9202) wnl(nnn)
+      write(7,9102) sumt      
       write(7,9133) wsumt(nnn)*1000.0
       write(7,9134) wsumt(nnn)*13.6058*1000.0
-      transumry=transumry+wsumt(nnn)
 
 c     *************************************************************************
 c     Invert the wavefunction 
 c     *************************************************************************
-      
-      call optinvert(fr,r,h,ll,en(nnn),indrc,np,maxim,xroot,xguess,
-     $     numfn,xion,v0)
+
+      call optinvert(fr,r,h,lo(nnn),en(nnn),indrc,np,maxim,xroot,xguess,
+     $     numfn,xion,v0,ixc)
 
 c     *************************************************************************
-c     Step 5: Now put the potential into rvps and rnl and rsvale.
+c     Step 5: Now put the potential into rvps and rnl and rsval.
 c     *************************************************************************
 
       inode = 0
+      maxim=min(maxim,np)
+      if (maxim.lt.10) maxim=np
+
       do i = 1,np
         if (fr(i).lt.0.0.and.i.le.indrc) then
           inode = i
@@ -145,7 +172,7 @@ c     *************************************************************************
         write (7,*) 'Ang momemtum',ll,' has a node at r=',r(inode)
         stop
       endif
-      
+
       tch = float(ll+ll+2)
       call radin(r,fr2,0,maxim,h,tch)
  
@@ -159,28 +186,32 @@ c     *************************************************************************
       enddo
       tch = float(ll+ll+2)
       call radin(r,fr2,0,maxim,h,tch)
- 
+
       do i = 1,np
         rnl(i,nnn) = fr(i) * r(i)
-        rsvale(i) = rsvale(i) + wnl(nnn) * rnl(i,nnn)**2
-c        rsvale(i) =  wnl(nnn) * rnl(i,nnn)**2
-        if (i.gt.indrc+50) rvps(i,nnn) = -z-z+rvcoul(i)
-        if (i.gt.maxim) rvps(i,nnn) = -xion-xion
+        rsval(i) = rsval(i) + wnl(nnn) * rnl(i,nnn)**2
+
+        if (ixc.ge.0) then
+           if (i.gt.indrc+50) rvps(i,nnn) = -z-z+rvcoul(i)
+           if (i.gt.maxim) rvps(i,nnn) = -xion-xion
+        endif
       enddo
             
       tch = float(ll+ll+2)
-      call radin(r,rsvale,0,maxim,h,tch)
+      call radin(r,rsval,0,maxim,h,tch)
       
       write(7,*)
 c      write(7,9200) tch
 c      write(7,9202) wnl(nnn)
 
+ 9135 format(1x,'Total KE           (Ry) : ',3f16.10)
+ 9136 format(1x,'0  -> qc contribution   : ',3f16.10)
+ 9137 format(1x,'qc -> oo contribution   : ',f16.10,3x,
+     $     '(=Convergence term)')
+ 9202 format(1x,'Occupancy of this state : ',f16.10)            
  9102 format(1x,'Convergence term (Ry/e) : ',f16.10)
  9133 format(1x,'Convergence error (mRy) : ',f16.10)
  9134 format(1x,'Convergence error (meV) : ',f16.10)
-
- 9200 format(1x,'Pseudocharge            : ',f16.10)
- 9202 format(1x,'Occupation              : ',f16.10)
 
       return
       end

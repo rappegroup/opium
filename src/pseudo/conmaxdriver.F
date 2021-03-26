@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -35,19 +35,23 @@ c     *************************************************************************
 
       common /roots/ xroot(numfn0)
       common /angm/ ll
-      common /nmax/ nmax(n0),maxim
       common /numfn/ numfn
       common /wavrc/ wavrc, slope, curvrc, indrc
       common /nnn/ nnn
       common /opt/ meth
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
-      common /atom3/ rsvale(npdm)
       common /bir/ bir(numfn0,npdm)
       common /frrv/ fr(npdm), rv(npdm)
       common /transum/ transumry
 
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+
+      common /wfn/ rnl(npdm,n0)
       
       common /scrconmax/ enc,tolc,lim,nstp,isw1,isw2,isw3
       
@@ -138,7 +142,7 @@ c     *************************************************************************
       common /wavrc/ wavrc, slope, curvrc, indrc
       common /nnn/ nnn
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+      common /wfn/ rnl(npdm,n0)
       common /angm/ ll
       common /frrv/ fr(npdm), rv(npdm)
       common /roots/ xroot(numfn0)
@@ -147,6 +151,10 @@ c     *************************************************************************
       common /e/ e(numfn0)
       common /f/ fint
       common /g/ gint
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
 
 c     internal common block      
       common /xlog/ ffunc,sumo,sumt,sumn
@@ -156,7 +164,7 @@ c     local variables
 c     *************************************************************************
 
       dimension x(nparm), pttbl(iptb,indm)
-      dimension icntyp(numgr), confun(numgr,nparm+1)
+      dimension icntyp(7), confun(7,numfn0+1)
       dimension fr2(npdm)
       
 c     *************************************************************************
@@ -287,12 +295,30 @@ c       Here xroot*abs(xroot) again corrects for xroot(1)<0 exception.
       sumt = sumt - fint - gint
       sumo = f
       f = f + sumt 
-      
+
       if (f.lt.0.0) then
         write (7,*) 'less than zero',f
-        write (7,*) fint,gint,(x(i),i=1,numfn),(xroot(i),i=1,numfn),
-     $              (e(i),i=1,numfn)
+c        write (7,*) fint,gint,(x(i),i=1,numfn),(xroot(i),i=1,numfn),
+c     $              (e(i),i=1,numfn)
+c        write(7,*) (a(i),i=1,numfn),((d(i,j),i=1,numfn),j=1,numfn)
+
+
+        write(7,9595)
+        write(7,9596) sum2,sum2-f,f
+        write(7,9597) 
+        write(7,*)
+        write(6,9595)
+        write(6,9596) sum2,sum2-f,f
+        write(6,9597) 
+        write(6,*)
         stop
+ 9595   format(1x,
+     $   '!!WARNING!! Resid became negative (Total,lowq,highq)')
+ 9596   format(1x,3f20.10)
+ 9597   format(1x,
+     $       'Consider reducing qc or changing the # bess fxns',
+     $       ' for this state...')
+
       endif
       
       ffunc = f

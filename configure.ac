@@ -27,6 +27,7 @@ fi
 
 dnl Checks for programs.
 AC_PROG_F77(pgf77 fort ifort ifc efc fort77)
+AC_F77_LIBRARY_LDFLAGS
 
 if test x"$F77" = x; then
   AC_MSG_ERROR([
@@ -200,9 +201,9 @@ dnl PC running linux and Portland Group's C and Portand compilers
       LD=$F77
       LDFLAGS="$LDFLAGS -Vaxlib"
       test x"$FFLAGS" = x-g && FFLAGS="-O3 -WB -cm -w95 -save -r8 -mp"
-      if test $F77 = ifort; then
-	 FFLAGS="$FFLAGS -assume bscc"
-      fi
+dnl      if test $F77 = ifort; then
+dnl	 FFLAGS="$FFLAGS -assume bscc"
+dnl      fi
 
 dnl      G2Cjunk=`gcc -print-search-dirs | grep '^libraries:' | sed -r 's,libraries: *=? *,,'`
 dnl      ac_save_IFS=$IFS; IFS=:
@@ -334,7 +335,7 @@ echo "Fortran preprocessor :       $FPP"
 echo "C compiler           :       $CC"
 echo "C flags              :       $CFLAGS"
 echo "Linker               :       $LD"
-echo "Linker flags         :       $LDFLAGS"
+echo "Linker flags         :       $LDFLAGS $FLIBS"
 echo ""
 echo ""
 

@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,20 +16,25 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine tmpot
+      subroutine tmpot(ixc)
       implicit double precision (a-h,o-z)
       
 #include "fortdim.h"
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+
       common /angm/ ll
       common /nnn/ nnn
-      common /ibound/ ibd(n0)
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /wfn/ rnl(npdm,n0)
+
       common /numfn/ numfn
       common /wavrc/ wavrc, slope, curvrc, indrc
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /atom3/ rsvale(npdm)
-      common /nmax/ nmax(nvale0),maxim
       
       dimension rpsi(npdm),rtemp(npdm),vtemp(npdm)
 
@@ -45,7 +50,6 @@ c
 c     Save R_nl in rpsi
       do i = 1,np
          rpsi(i) = rnl(i,nnn)*r(i)
-c         write(80+nnn,*) r(i), rpsi(i)
       enddo
 
 c     Save core_charge (headnorm)
@@ -90,7 +94,7 @@ c     factor of 0.5 => Ha units
       do i = 1,np
          vtemp(i) = 0.5*rvps(i,nnn)/r(i)
       enddo
-      
+
       rvps0=vtemp(indrc)
       rvps2=(16*(vtemp(indrc-1)+vtemp(indrc+1))-(30*rvps0+
      $     vtemp(indrc-2)+vtemp(indrc+2)))/12.0d0
@@ -294,9 +298,11 @@ c     rvps is V_scr^PS(r)
 c     put r * R_nl into rnl
       do i = 1,np
          rnl(i,nnn) = rpsi(i) 
-         rsvale(i)=rsvale(i) + wnl(nnn)*rpsi(i)**2
-         if (i.gt.indrc+50) rvps(i,nnn) = -z-z+rvcoul(i)
-         if (i.gt.maxim) rvps(i,nnn) = -xion-xion
+         rsval(i)=rsval(i) + wnl(nnn)*rpsi(i)**2
+         if (ixc.ge.0) then
+            if (i.gt.indrc+50) rvps(i,nnn) = -z-z+rvcoul(i)
+            if (i.gt.maxim) rvps(i,nnn) = -xion-xion
+         endif
       enddo
 
       return

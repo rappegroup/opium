@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,20 +16,25 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine kpot
+      subroutine kpot(ixc)
       implicit double precision (a-h,o-z)
       
 #include "fortdim.h"
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+
+      common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /wfn/ rnl(npdm,n0)
+
+      common /wavrc/ wavrc, slope, curvrc, indrc
       common /angm/ ll
       common /nnn/ nnn
-      common /ibound/ ibd(n0)
       common /numfn/ numfn
-      common /wavrc/ wavrc, slope, curvrc, indrc
-      common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /atom3/ rsvale(npdm)
-      common /nmax/ nmax(nvale0),maxim
       
       dimension rpsi(npdm),rtemp(npdm)
 
@@ -71,6 +76,7 @@ c     Section I : Fit rpsi to Kerker form
       slope=(wavrc+rc*slope)/(wavrc*rc)
       wavrc=wavrc*rc
 
+      wavrc=abs(wavrc)
       fkr=log(wavrc/rr)
       fkdr=slope/wavrc - ll/rc
       c1=wavrc*ll*(ll-1)/rc2
@@ -133,14 +139,15 @@ c     Section I : Fit rpsi to Kerker form
          xlamda=(4*alpha*r(i)+3*beta)*r(i)+2*gamma
          rvps(i,nnn) = (ei + xlamda * (2 * lp + xlamda * r(i)**2)
      $        + (12 * alpha * r(i) + 6 * beta) * r(i) + 2 * gamma)*r(i)
-
-      enddo
+       enddo
 
       do i = 1,np
-        rnl(i,nnn) = rpsi(i) 
-        rsvale(i)=rsvale(i) + wnl(nnn)*rpsi(i)**2
-        if (i.gt.indrc+50) rvps(i,nnn) = -z-z+rvcoul(i)
-        if (i.gt.maxim) rvps(i,nnn) = -xion-xion
+         rnl(i,nnn) = rpsi(i) 
+         if (ibd(nnn).ne.0) rsval(i)=rsval(i) + wnl(nnn)*rpsi(i)**2
+         if (ixc.ge.0) then
+            if (i.gt.indrc+50) rvps(i,nnn) = -z-z+rvcoul(i)
+            if (i.gt.maxim) rvps(i,nnn) = -xion-xion
+         endif
       enddo
 
       return

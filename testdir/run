@@ -3,14 +3,14 @@ cp params/*.param .
 foreach i (`cat LIST`)
         echo $i
 	../opium $i $i.log ae ps nl ke tc pwf fhi ncpp rpt recpot cpmd psf 
-	rm *.logd 
-        rm *.eng
-	rm *.par
-	rm *.eig*
-	rm *.pot*
-	rm *.psi*
-	rm *.plt*
-	rm *.loc
-	rm *.rho_core
-	rm *.logd*
+	rm  *.logd 
+        rm  *.eng
+	rm  *.par
+	rm  *.eig*
+	rm  *.pot*
+	rm  *.psi*
+	rm  *.plt*
+	rm  *.loc
+	rm  *.rho_core
+	rm  *.logd*
 end

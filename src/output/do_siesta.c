@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -40,7 +41,7 @@
 
 void interp2_(double *,double *);
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
-
+void readPS(param_t *param);
 int do_siesta(param_t *param, FILE *fp_param, char *logfile){
 
   int i,j,k,ic,icount,ncore,ii;
@@ -55,6 +56,7 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   int lmax;                     /* max l value */   
   int lloc;
   int ngg=nrgrid_.nr-10;
+/* fix */
   int kk;
   int c;
   char xao[5];
@@ -71,8 +73,8 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   static double rscore[NPDM];
   static double rscore2[NPDM];
 
-  static double rvv[NVALE0+1][NPDM];
-  static double rvv2[NVALE0+1][NPDM];
+  static double rvv[N0][NPDM];
+  static double rvv2[N0][NPDM];
 
   static double rvloc[NPDM]; 
   static double rvloc2[NPDM];  
@@ -85,7 +87,7 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
 
   for (i=0;i<10;i++)
     ilk[i]=0;
-  
+
   ncore=param->norb-param->nval;
 
   fp_log = fopen(logfile, "a");
@@ -102,32 +104,29 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   fclose(fp_file);
   interp2_(rvloc,rvloc2);
 
-  sprintf(filename, "%s.pot_ps", param->name);
-  fp_file = fopen(filename, "rb");
-  for (i=0; i<param->nval; i++) {
-      fread(dumm, sizeof(double), param->ngrid, fp_file);
-      interp2_(dumm,dumm2);
-      for (j=0; j<ngg; j++){
-	  rvv[i][j]=dumm2[j];
-      }
-  }	
-  fclose(fp_file);
+  for (i=0; i<param->nll; i++) {
+    sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    fp_file = fopen(filename, "rb");
+    fread(dumm, sizeof(double), param->ngrid, fp_file);
+    interp2_(dumm,dumm2);
+    for (j=0; j<ngg; j++){
+      rvv[i][j]=dumm2[j];
+    }
+    fclose(fp_file);
+  }
 
   icount=0; 
-  for (kk=0; kk<param->nll;kk++)
-    for (k=0; k<param->nval; k++){
-      if ((ilk[nlm_label(param->nlm[k+ncore]).l]==0) && (nlm_label(param->nlm[k+ncore]).l == kk)) {
-	ilk[nlm_label(param->nlm[k+ncore]).l]++;
-	for (i=0; i<ngg; i++){
-	  rvv2[icount][i] = rvv[k][i];
-	}
-	icount++;
-      }
+  for (k=0; k<param->nll;k++){
+    for (i=0; i<ngg; i++){
+      rvv2[k][i] = rvv[k][i];
     }
+    icount++;
+  }
+
 
   lmax=param->nll-1;
   lloc=nlm_label(param->nlm[param->localind+ncore]).l;
-
+  
   if (param->nboxes > 0) {
       lmax++;
       lloc=lmax;
@@ -171,8 +170,8 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   case 2 : sprintf(xstr,"%s","pb"); break;
 
   default :
-    fprintf(stderr,"Can not determine XC string for Siesta format\n");
-    exit(1);
+    fprintf(stderr,"Can not determine XC string for Siesta format, using ca \n");
+    sprintf(xstr,"%s","ca");
   }
 
   sprintf(relstr,"%s","nrl");
@@ -191,8 +190,10 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   /* 3rd line of siesta format: text : 70 chars */
   fprintf(fp_out," ");
   for (i=0; i<param->nval;i++){
-    ii=i+ncore;
-    fprintf(fp_out,"%d%c%5.2f  r=%5.2f/",nlm_label(param->nlm[ii]).n,xao[nlm_label(param->nlm[ii]).l],param->wnl[ii],param->rc[i]);
+    if (param->npot[i]==0) {
+      ii=i+ncore;
+      fprintf(fp_out,"%d%c%5.2f  r=%5.2f/",nlm_label(param->nlm[ii]).n,xao[nlm_label(param->nlm[ii]).l],param->wnl[ii],param->rc[i]);
+    }
   }
   fprintf(fp_out,"\n");
 

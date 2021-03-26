@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/*
- * $Id: fortparam.h,v 1.3 2004/10/02 18:34:49 ewalter Exp $
- */
 
-
-#define NPDM (10000)  /* out of PARAMHFS */  /* also matches PARAMKB */
-#define NPL0 (3001)   /* out of PARAMHFS */
-#define N0 (100)    /* out of PARAMHFS */
-#define NVALE0 (100)    /* out of PARAMHFS */
+#define NPDM (10000)
+#define NPL0 (3001) 
+#define N0 (100)    
+#define NVALE0 (100)
 
 

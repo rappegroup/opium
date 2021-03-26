@@ -1,0 +1,196 @@
+/*
+ * Copyright (c) 1998-2008 The OPIUM Group
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+/****************************************************************************
+ * generate *.casino output (Casino semi-local potential)                *
+ *****************************************************************************
+ * INPUT:  param_t structure, *.ps, *.loc
+ * OUTPUT: *.casino
+ ****************************************************************************/
+
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "parameter.h"        /* defines structure: 'param_t' */
+#include "cdim.h"        /* fortran code parameters */
+#include "do_casino.h"          /* the module's own header */
+#include "nlm.h"
+
+void writeparam(param_t *param, FILE *fp, FILE *fp_param);
+void nrelsproj(param_t *param, char *);
+int do_casino(param_t *param, FILE *fp_param, char *logfile){
+
+  int i,j,k,ic,icount,ncore;
+  char filename[180];
+  FILE *fp;
+  FILE *fp_log;
+  double zeff;	                
+  char xctype[10];              
+  double r_1;
+  double zz=0;
+  
+  static double rvcore[N0][NPDM];
+  static double r[NPDM];
+
+  fp_log = fopen(logfile, "a");
+  fprintf(fp_log,"<<<do_casino>>>\n");  
+  fclose(fp_log);
+
+  /* section 0 : check if this potential format is supported */
+  /* casino doesn't support DNL potentials */
+
+
+  nrelsproj(param,logfile);
+  /* new routine to set the arrays for semicore states */
+
+  if (param->nboxes > 0) {
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log," casino format does not support the use of augmentation operators\n");
+    fclose(fp_log);
+    return 1;
+  }
+
+  if (param->rpcc > 1e-12) {
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log," casino format does not support the use of a partical core correction\n");
+    fclose(fp_log);
+    return 1;
+  }
+
+  for (i=0; i<param->nll; i++) {
+    sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    fp = fopen(filename, "rb");
+    fread(rvcore[i], sizeof(double), param->ngrid, fp);
+    fseek(fp,sizeof(double) ,param->ngrid);
+    fclose(fp);
+  }
+
+  /* compute zeff */
+  zeff = param->z;
+  for (i=0; i<param->norb - param->nval; i++)
+    zeff -= param->wnl[i];
+
+  /* section 1 : header */
+
+  sprintf(filename, "%s.casino", param->name);
+  fp = fopen(filename, "w");
+
+  /* Casino header */
+
+  switch (param->ixc) {
+  case -1 : 
+    switch ((!strcmp(param->reltype, "nrl")) ? 0:1){
+    case 0 : sprintf(xctype,"%s","HF"); break;
+    case 1 : sprintf(xctype,"%s","DF"); break;
+    default :
+      printf(" Problem with Casino header \n");
+      exit(1);
+    };break;
+  
+  case 0 :     
+    switch ((!strcmp(param->reltype, "nrl")) ? 0:1){
+    case 0 : sprintf(xctype,"%s","PZLDA-NREL"); break;
+    case 1 : sprintf(xctype,"%s","PZLDA-REL"); break;
+    default :
+      printf(" Problem with Casino header \n");
+      exit(1);
+    };break;
+
+  case 1 :     
+    switch ((!strcmp(param->reltype, "nrl")) ? 0:1){
+    case 0 : sprintf(xctype,"%s","PWLDA-NREL"); break;
+    case 1 : sprintf(xctype,"%s","PWLDA-REL"); break;
+    default :
+      printf(" Problem with Casino header \n");
+      exit(1);
+    };break;
+
+  case 2 :     
+    switch ((!strcmp(param->reltype, "nrl")) ? 0:1){
+    case 0 : sprintf(xctype,"%s","PBEGGA-NREL"); break;
+    case 1 : sprintf(xctype,"%s","PBEGGA-REL"); break;
+    default :
+      printf(" Problem with Casino header \n");
+      exit(1);
+    };break;
+
+  case 3 :     
+    switch ((!strcmp(param->reltype, "nrl")) ? 0:1){
+    case 0 : sprintf(xctype,"%s","PW91GGA-NREL"); break;
+    case 1 : sprintf(xctype,"%s","PW91GGA-REL"); break;
+    default :
+      printf(" Problem with Casino header \n");
+      exit(1);
+    };break;
+
+  case 4 :     
+    switch ((!strcmp(param->reltype, "nrl")) ? 0:1){
+    case 0 : sprintf(xctype,"%s","WCGGA-NREL"); break;
+    case 1 : sprintf(xctype,"%s","WCGGA-REL"); break;
+    default :
+      printf(" Problem with Casino header \n");
+      exit(1);
+    };break;
+
+  default :
+    printf(" Problem with Casino header \n");
+    exit(1);
+  }
+  
+  fprintf(fp,"%s Opium generated real space pseudopotential for %s \n",xctype,param->name);  
+  fprintf(fp,"Atomic number and pseudo-charge \n");  
+  fprintf(fp,"%-1.0f %-2.2f \n",param->z,zeff);
+  fprintf(fp,"Energy units (rydberg/hartree/ev): \n");  
+  fprintf(fp,"rydberg \n");  
+  fprintf(fp,"Angular momentum of local component (0=s,1=p,2=d..)\n");  
+  fprintf(fp,"%d \n",param->localind);    
+  fprintf(fp,"NLRULE override (1) VMC/DMC (2) config gen (0 ==> input/default value) \n");
+  fprintf(fp,"0 0 \n");  
+  fprintf(fp,"Number of grid points \n");
+  fprintf(fp,"%d \n",param->ngrid);  
+  fprintf(fp,"R(i) in atomic units\n");
+
+  r_1 = param->a * pow(param->z,-1./3.);
+  for (k=0; k<param->ngrid ; k++) {
+    r[k] = r_1 * exp(param->b * k);
+  }
+    fprintf(fp,"    % 2.15E \n",zz);
+  for (i=0; i<param->ngrid ; i++) {    
+    fprintf(fp,"    % 2.15E \n",r[i]);
+  }
+  
+  for (j=0;j<param->nll ; j++) {
+    fprintf(fp,"r*potential (L=%d) in Ry \n",j);
+    fprintf(fp,  "    % 2.15E \n",zz);
+    for (i=0; i<param->ngrid ; i++) {    
+      fprintf(fp,"    % 2.15E \n",rvcore[j][i]);
+    }
+  }
+  
+  writeparam(param, fp, fp_param);  
+
+  fp_log = fopen(logfile, "a");
+  fprintf(fp_log, "   ================================================\n");
+  
+  fclose(fp_log);
+  return 0;
+}
+

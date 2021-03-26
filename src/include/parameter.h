@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ typedef struct param_t{
     z,            /* atomic number Z */  
     *wnl,         /* orbital occupation */
     *en,
-    *ensave;          /* orbital energy guess */
+    *etrial;          /* orbital energy guess */
 
   /* [Configs] */
   int  
@@ -85,7 +85,7 @@ typedef struct param_t{
     rpcc;         /* rppc [A] */
   char psmeth;
   char optmeth;
-
+  int nvalrel,ncorerel;
   /* [LogOpt] */
   int  
     *numen;       /* number of points */
@@ -148,8 +148,15 @@ typedef struct param_t{
   
   /* auxiliary information NOT directly read from parameter file */
   int
-  *ipot,
-    nll;          /* number of different angular momenta */
+  *lpot,*npot,*ipot,
+    nll,
+    isemi;          /* number of different angular momenta */
+
+  /* HF options */
+ double
+ *rlocalr;
+ int
+ qpopt;
 
   /* New section to dump out version and execution information to psp output files */
 

@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -24,20 +24,27 @@ c     value, slope and del^2 of the wavefunction at that grid point
 c     by fitting to polynomials of increasing order
 c     *************************************************************************
 
-      implicit double precision (a-h,o-z)                                         
-      
+      implicit double precision (a-h,o-z)    
+                                     
 #include "fortdim.h"
 
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+
+      common /wfn/ rnl(npdm,n0)
+
       common /cuts/ qc,rc
       common /angm/ ll
-      common /np/ ncores,nvales
+
       common /wavrc/ wavrc, slope, curvrc, indrc
       common /nnn/ nnn
 
       dimension psitem(npdm)                                            
-      
+
 c     *************************************************************************
 c     find where rc falls in the r array                                  
 c     *************************************************************************
@@ -45,9 +52,9 @@ c     *************************************************************************
       two = 2.0
       indrc = 1                                                         
       do i = 1,np                                                    
-        rnl(i,nnn)=rnl(i,nnn)/r(i)
-        psitem(i) = rnl(i,nnn)                                           
-        if (rc.gt.r(i)) indrc = i
+         rnl(i,nnn)=rnl(i,nnn)/r(i)
+         psitem(i) = rnl(i,nnn)                                           
+         if (rc.gt.r(i)) indrc = i
       enddo
 
       if (two*rc.gt.r(indrc)+r(indrc+1)) indrc = indrc + 1              
@@ -124,8 +131,10 @@ c     interpolate by the lagrange formula up to order m.  the function
 c     f is defined at the points f(x(i)), and f and x are dimensioned       
 c     for n.  the function's derivative at abscissa z is returned.      
 c     *************************************************************************
-      
+
       implicit double precision(a-h,o-z)                                          
+
+c#include "fortdim.h"      
       
 c step 1:  find where z is located in the x array.                      
       dimension f(1), x(1)                                              
@@ -172,6 +181,8 @@ c     for n.  the function's second derivative at abscissa z is returned.
 c     *************************************************************************
 
       implicit double precision(a-h,o-z)                                          
+
+c#include "fortdim.h"
       
 c step 1:  find where z is located in the x array.                      
       dimension f(1), x(1)                                              
@@ -220,7 +231,9 @@ c     f is defined at the points f(x(i)), and f and x are have n values
 c     tabulated.  the function's value at abscissa z is returned.  
 c     *************************************************************************
 
-      implicit double precision(a-h,o-z)                                          
+      implicit double precision(a-h,o-z)  
+
+c#include "fortdim.h"
       
 c step 1:  find where z is located in the x array.                      
       dimension f(1), x(1)                                              

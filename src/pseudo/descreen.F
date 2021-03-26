@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -26,14 +26,17 @@ c -------------------------------------------------------------------------
 c     External (shared between C and Fortran) common blocks
 c -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
       common /rpcc/ rpcc,rpccz
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /np/ ncores,nvales
-      common /nmax/ nmax(nvale0),maxim
-      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm)
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
+      common /wfn/ rnl(npdm,n0)
       common /wavrc/ wavrc, slope, curvrc, indrc
       common /consts/ etol,vtol,maxit,isoft
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
 c -------------------------------------------------------------------------
 
 c -------------------------------------------------------------------------
@@ -41,7 +44,6 @@ c     Internal (Fortran only) common blocks
 c -------------------------------------------------------------------------
       common /atom4/ v(npdm),rv(npdm),p(npdm),rsatom(npdm),
      $     c1(npdm),rvh(npdm),rvxc(npdm),rexc(npdm)
-      common /atom3/ rsvale(npdm)
       common /iterm/ iterm
 c -------------------------------------------------------------------------
 
@@ -70,7 +72,7 @@ c -------------------------------------------------------------------------
       write(7,*) '------------------------------'
       write(7,*) 'Descreening potential'
 
-      call radin(r,rsvale,0,maxim,h,charge)
+      call radin(r,rsval,0,maxim,h,charge)
       write (7,9010) charge
 
       rsc=0.0
@@ -90,18 +92,19 @@ c     section 1:  input/output from hfs files
 c     *************************************************************************
 
       do i=1,maxim
-        rsatom(i)=rsvale(i)+rscore(i)
+        rsatom(i)=rsval(i)+rscore(i)
       enddo
 
-      call excorr (maxim,ixc,exccut,r,rsvale,rvxcv,rexcv)        
-      call hrtree (maxim,h,r,rsvale,rvhv)
-      call excorr (maxim,ixc,exccut,r,rsatom,rvxct,rexct)        
+      irel=0
+      call excorr (maxim,ixc,exccut,r,rsval,rvxcv,rexcv,irel)        
+      call hrtree (maxim,h,r,rsval,rvhv)
+      call excorr (maxim,ixc,exccut,r,rsatom,rvxct,rexct,irel)        
       call hrtree (maxim,h,r,rscore,rvhc)
       
 c     compute ionic pseudopotential by subtracting off screening terms.     
 
       wv = 0.         
-      do i=1,nvales
+      do i=1,nval
         wv = wv + wnl(i)
       enddo
       wc = z - xion - wv  
@@ -117,7 +120,7 @@ c     compute ionic pseudopotential by subtracting off screening terms.
           rvcoul(i) = rvhv(i)+rvxcv(i)      
         endif
                        
-        do lp=1,nvales      
+        do lp=1,nval      
           rvcore(i,lp) = rvps(i,lp)-rvcoul(i)    
         enddo
 c       amr         rvcore(i,4) = -zv2      
@@ -128,7 +131,7 @@ c     treat tail region separately (where wavefunctions are zero).
 c     *************************************************************************
 
       do i = maxp1,np       
-        do lp = 1,nvales
+        do lp = 1,nval
           rvcore(i,lp) = -zv2   
           rvps(i,lp) = -xion-xion         
         enddo
@@ -143,7 +146,7 @@ c     *************************************************************************
       write(7,*) '----Solving the Schrodinger equation',
      $           ' for all states----'
       ig=0
-      do m=1,nvales
+      do m=1,nval
 
         ee = en(m)         
         inl = 1  
@@ -154,7 +157,7 @@ c     *************************************************************************
         nn = l + 1
         im = maxim
 
-        call schsl(m,nn,l,ee,im,rvps(1,m),p,ig)
+        call schsl(m,nn,l,ee,im,rvps(1,m),p,ig,ibd(m))
         
         if (iterm.eq.0) then
           write(7,9111) n,xc(l),en(m),ee

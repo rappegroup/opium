@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ c -- KR Aug 2004.  Adapted from writepwf.f
       
 #include "fortdim.h"
 
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+c      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
       common /grid/ h,r1,z,r(npdm),np
       common /en/ ien(10),inv                                           
       common /dql/ dql
@@ -34,18 +34,26 @@ c -- KR Aug 2004.  Adapted from writepwf.f
       common /flqeta/ eta(5),flq(maxflq,5),nflq
       common /nlcore/ rvloc(npdm)
       common /pwf/ zeff, rpcc, spacing, first,
-     &             nval, igrid, inl, ist1, ncut, ilocal,ilocalind
-      common /nmax/ nmax(n0),maxim
+     &             nval2, igrid, inl, ist1, ncut, ilocal,ilocalind
+c      common /nmax/ nmax(n0),maxim
 
       common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm)
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /np/ ncores,nvales
-      common /npp/ npots
 
-      common /lparam/ qcl(10),nbl(10)
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /wfn/ rnl(npdm,n0)
+      common /psdat/ nll
+
+c      common /np/ ncores,nvales
+c      common /npp/ npots
+
+      common /optparam/ qcl(10),nbl(10)
 
       dimension vl(npspt0),bb(npdm)
-      dimension xr(npdm),bb3(npdm)
+      dimension xr(npdm),bb3(npdm),qcore(npdm)
       dimension ill(4)
       dimension psp(npspt0)
       dimension rrvloc(npdm)
@@ -92,7 +100,7 @@ c     Get non-local projectors
 c     Take care of long range tail of potential
 
       do i = maxim+1,np
-         do j = 1,nvales
+         do j = 1,nval
             rvcore(i,j) = -zeff-zeff
          enddo
       enddo
@@ -102,7 +110,7 @@ c     Write real space potentials to output file
          rrvloc(k) = rvloc(k)/r(k)
 c     NOTE: redefinition of rvloc no factors of r  
          
-         do i=1,nvales 
+         do i=1,nval 
             rvcore(k,i)=rvcore(k,i)/r(k)                                    
 c     NOTE: redefinition of rvcore no factors of r 
          enddo
@@ -146,7 +154,7 @@ c 211  continue
 c Compute a likely cutoff
       if( psmeth .eq. 'o' ) then
         qcmax = 0.0
-        do j=1,nvales
+        do j=1,nval
           qcmax = max(qcl(j),qcmax)
         end do   
       else
@@ -223,7 +231,7 @@ c -- use the C I/O call to output the local potential coefficients
 
 c     for kleinman-bylander non-local psp                               
 c     change units
-      do m=1,npots                                                      
+      do m=1,nll                                                      
          do n=1,nflq                                                    
             flq(n,m)=flq(n,m)*ryd*sqrt((bohrad)**3)                           
          enddo
@@ -236,8 +244,8 @@ c -- New lines that omit the 0's but still produce the BH format
          ill(i)=0
       enddo
 
-      do k=1,npots
-c         do j=1,nvales
+      do k=1,nll
+c         do j=1,nval
 c            nnj=nlm(j)/100
 c            ljp=(nlm(j) - nnj * 100)/10 + 1
 
@@ -259,7 +267,37 @@ c         enddo
       enddo
 
       call iwrite(ifp, " ", 1, "%d", 1000)
+
+c
+c NLCC
+c
+      if (rpcc.gt.1e-12) then
+
+c     Convert to recip space
+
+        do j=1,mq                                                    
+          ql=dql*dble(j-1)                                             
+          pow=2.0d0                                                      
+          if( j <= 1 ) then
+            do k=1,np                                                
+              bb3(k) = rscore(k)
+            enddo
+          else
+            do k=1,np                                                
+              dot=xr(k)*ql                                             
+              bb3(k) = rscore(k) * sin(dot)/dot                               
+            enddo
+          end if
+          call radina(xr,bb3,0,np,h,pow,inv,ien) 
+          qcore(j)=pow
+          
+        enddo
+        do i=1,npspts
+          call nwrite(ifp, space, 3, "%20.10f"//char(0), qcore(i))
+        enddo
+      end if
       call nclear(ifp)
+
       
  100  format(//,' npoint=',i5,2x,'atomic number=',i3,2x,                
      $     'valence charge=',i3,/)                                           

@@ -8,7 +8,7 @@ fobjects = ai.o besfn.o biq.o conmax.o cq.o descreen.o \
 	dij.o ei.o finteg.o fitwv.o gaussq.o ghost.o ginteg.o \
 	guess.o optinvert.o optim.o optsolve.o conmaxdriver.o\
 	xroots.o kpot.o kerker.o lambda.o newmin.o fnset2.o tmsub.o tmpot.o \
-        kcomp.o
+        kcomp.o hfinvdesc.o hfsmooth.o
 
 cobjects = do_ps.o do_ke.o
 

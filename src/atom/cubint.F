@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ c     -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
       common /nlpot2/ inl,indrc(n0),IB,ID,IG
       common /logarith/ rphas,elogmax,elogmin,dlwf(npl0,n0)
-      common /rcall/ rcall(n0)
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
 c     -------------------------------------------------------------------------
 
       dimension rv(npdm),dl(6),pder(npdm),w(5),g(npdm)

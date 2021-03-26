@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 #include "nlm.h"
 
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
-
+void nrelsproj(param_t *param, char *);
 int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
 
   int i,j,k,ic,icount,ncore;
@@ -59,7 +59,7 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
   
   static double rscore[NPDM];
   static double nlcore[NPDM];
-  static double rvcore[NVALE0+1][NPDM];
+  static double rvcore[N0][NPDM];
   static double rnl[N0][NPDM];
   static double r[NPDM];
 
@@ -83,18 +83,20 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
   fread(nlcore, sizeof(double), param->ngrid, fp);
   fclose(fp);
   
-  sprintf(filename, "%s.psi_nl", param->name);
-  fp = fopen(filename, "rb");
-  for (i=0; i<param->nval; i++)
-    fread(rnl[i], sizeof(double), param->ngrid, fp);
-  fclose(fp);
-
-  sprintf(filename, "%s.pot_ps", param->name);
-  fp = fopen(filename, "rb");
-  for (i=0; i<param->nval; i++) {
+  for (i=0; i<param->nll; i++) {
+    sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    fp = fopen(filename, "rb");
     fread(rvcore[i], sizeof(double), param->ngrid, fp);
-  }	
-  fclose(fp);
+    fseek(fp,sizeof(double) ,param->ngrid);
+    fclose(fp);
+  }
+
+  for (i=0; i<param->nll; i++) {
+    sprintf(filename, "%s.psi.ps.l=%d", param->name,i);
+    fp = fopen(filename, "rb");
+    fread(rnl[i], sizeof(double), param->ngrid, fp);
+    fclose(fp);
+  }
 
   if (param->rpcc > 0.){
     sprintf(filename, "%s.rho_pcore", param->name);
@@ -166,7 +168,7 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
      r[k] = r_1 * exp(param->b * k);
    }
 
-  for (i=0;i<4;i++)
+   /*  for (i=0;i<4;i++)
     ill[i]=0;
    icount=0;
    for (kk=0; kk<param->nll;kk++)
@@ -181,7 +183,16 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
 	 if (i%4) fprintf(fp, "\n");
 	 icount++;
        }
+       }*/
+
+   for (k=0; k<param->nll; k++) {
+     fprintf(fp," Pseudo l=%d\n",k);
+     for (i=0; i<param->ngrid ; i++) {
+       fprintf(fp, "%1.15e  ", rvcore[k][i]/r[i]);
+       if (!((i+1)%4)) fprintf(fp, "\n");
      }
+     if (i%4) fprintf(fp, "\n");
+   }
 
    /* section 3: partial core */
    if (param->rpcc > 1e-12) {
@@ -190,10 +201,10 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
       if (!((k+1)%4)) fprintf(fp, "\n");
     }
      if (k%4) fprintf(fp, "\n");
-  }
+  } 
 
    /* section 4: wavefunctiobns */
-  for (i=0;i<4;i++)
+   /*  for (i=0;i<4;i++)
     ill[i]=0;
 
   icount=0;
@@ -212,8 +223,27 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
 	if (i%4) fprintf(fp, "\n");
 	icount++;
       }
-    }
-  
+      }*/
+
+   ic=0;
+   for (k=0; k<param->nval;k++) {
+     if (param->npot[k]==0) {
+       
+       lchi = nlm_label(param->nlm[k+ncore]).l;
+       locc = param->wnl[k+ncore]; 
+       ill[nlm_label(param->nlm[k+ncore]).l]++;
+       fprintf(fp," Wavefunction %d\n",ic+1);
+       fprintf(fp," %d  %f \n",lchi,locc);
+       for (i=0; i<param->ngrid ; i++) {
+	 fprintf(fp, "%1.15e  ", rnl[ic][i]);
+	 if (!((i+1)%4)) fprintf(fp, "\n");
+       }
+       if (i%4) fprintf(fp, "\n");
+       ic++;
+     }
+
+   }
+   
   writeparam(param, fp, fp_param);  
 
   fp_log = fopen(logfile, "a");

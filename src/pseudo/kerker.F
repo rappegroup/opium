@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine kerker(ixc,exccut)
+      subroutine kerker(ixc,irel,exccut)
       
 c     *************************************************************************
 c     generate kerker style pseudopotentials
@@ -27,34 +27,36 @@ c     *************************************************************************
 #include "fortdim.h"
 
       common /grid/ h,r1,z,r(npdm),np      
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
-      common /lall/ lall(nvale0)
-      common /rcall/ rcall(nvale0)
+      common /lall/ lall(n0)
       common /angm/ ll
       common /cuts/ qc,rc
       common /nnn/ nnn
       common /numfn/ numfn
-      common /atom3/ rsvale(npdm)
-      common /np/ ncores,nvales
-      common /nmax/ nmax(nvale0),maxim
-      common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-c      common /scat/ escat(numen0),xscat(numen0),rscat(numen0),numen
-c      common /scatw/ wscat(numen0),wnorm,wke,wghost
+
       common /nonloc/ nonloc,ifnl,numloc
-      common /nlall/ nlall(nvale0)
+      common /nlall/ nlall(n0)
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
+      common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+
+      common /wfn/ rnl(npdm,n0)
       
       common /filenames/ file_log      
       character*80 file_log
       
       open(unit=7,file=file_log,form='formatted',access='append')
       
-      write (7,*) 'Kerker pseudopotential',nvales
+      write (7,*) 'Kerker pseudopotential',nval
       
       do i=1,np
-         rsvale(i)=0.0
+         rsval(i)=0.0
       enddo
 
-      do nnn = 1,nvales
+      do nnn = 1,nval
          
          ic1=nlm(nnn)/100
          lall(nnn)=(nlm(nnn)-ic1*100)/10
@@ -67,7 +69,7 @@ c      common /scatw/ wscat(numen0),wnorm,wke,wghost
             write (7,*) "Execution terminates."
             stop
          endif
-         
+
          write(7,9000) nlm(nnn) 
 c         write(7,9002) rc
          
@@ -76,12 +78,16 @@ c         write(7,9002) rc
 c     fitwv removes r from rnl 
 
          call flush(7)
-         call kpot
+         call kpot(ixc)
          call flush(7)
       enddo      
 
-      call descreen(ixc,exccut)
-      call ghost
+      if (ixc.ge.0) then
+         call descreen(ixc,exccut)
+         call ghost
+      else          
+         call hfinvdesc(ixc,irel,zeff)
+      endif
 
  9000 format(1x,'--------------------Pseudizing state: ',
      $       '|',i3,'>',3x,'--------------------')

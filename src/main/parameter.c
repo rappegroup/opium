@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,10 +42,11 @@
 double symtoz(char *sym , char *longname);
 int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
-  int i, j, k;
-  int n;        
-  char **ens;                /* temp string array for eigenvalue guesses */
-  char ***ensc; /* temp string array for eigenvalue guesses of test configs */
+  int i, j, k,kk;
+  int n,ii,jj,mm;        
+  int lc[7];
+  char **ens,**etemp;                /* temp string array for eigenvalue guesses */
+  char ***ensc,***etemp2; /* temp string array for eigenvalue guesses of test configs */
   double *b_start, *b_end;  /* temp arrays for box start and end values */
   char **b_unit;            /* temp string array to read the box unit */
   double r_l, r_r;          /* temp radius variables [a.u.] */
@@ -55,6 +56,10 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   char pccmeth='l';
   int loctemp=0;
   int npot[10];
+  int ntemp,nbtemp,nt1,nt2;
+  double wtemp,rtemp,qtemp;
+  int *ntemp2;
+  double *wtemp2;
 
   /* Prepare for 1st flexi_gather_keys() */  
   
@@ -127,8 +132,8 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   flexi_request_key("XC",0,"%s",param->xcparam);
   flexi_request_key("XC",0,"%lg",&param->exccut);
   /* default */
+  param->exccut=-1;
   strcpy(param->xcparam, "lda");
-  param->exccut=0.0;
   
   /* [Conmax] */
   flexi_request_key("Conmax",0,"%d %lg %d", &param->switch1, &param->encsm,
@@ -166,11 +171,29 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   param->z = symtoz(param->symbol,param->longname);
   /*rxccut_.rxccut=param->rxccut;*/
   
-  param->ixc = 0;
+  param->ixc = -100;
+  if (streq(param->xcparam, "wcgga")) param->ixc = 4;
+  if (streq(param->xcparam, "pw91gga")) param->ixc = 3;
   if (streq(param->xcparam, "gga")) param->ixc = 2;
+  if (streq(param->xcparam, "pbegga")) param->ixc = 2;
+  if (streq(param->xcparam, "pbe")) param->ixc = 2;
   if (streq(param->xcparam, "pwlda")) param->ixc = 1;
   if (streq(param->xcparam, "pzlda")) param->ixc = 0;
   if (streq(param->xcparam, "lda")) param->ixc = 0;
+  /*  if (streq(param->xcparam, "vwn5lda")) param->ixc = 5;
+      if (streq(param->xcparam, "vwn5")) param->ixc = 5;*/
+  if (streq(param->xcparam, "hf")) param->ixc = -1;
+
+  if (param->ixc == -100) {
+    printf(" \nXC functional not understood \n ");
+    printf("Please set the [XC] keyblock in your param file\n ");
+    printf("like this: \n\n ");
+    printf("  [XC] \n ");
+    printf("  pzlda \n\n\n ");
+    printf("acceptable values are:  pzlda, pwlda, pw91gga, pbegga, wcgga, and hf \n"); 
+
+    exit(1);
+  }    
 
   logarith_.rphas = param->rphas;
   logarith_.elogmin = param->emin;
@@ -194,13 +217,15 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   /* [Atom] */
   flexi_request_key("Atom",1,"%s %d", param->symbol, &param->norb);
   param->ibound = (int *)malloc(param->norb*sizeof(int));
-  param->ensave = (double *)malloc(param->norb*sizeof(double));
+  param->etrial = (double *)malloc(param->norb*sizeof(double));
   param->nlm = (int *)malloc(param->norb*sizeof(int));
   param->wnl = (double *)malloc(param->norb*sizeof(double));
   param->en = (double *)malloc(param->norb*sizeof(double));
   ens = (char **)malloc(param->norb*sizeof(char*));
+  etemp = (char **)malloc(param->norb*sizeof(char*));
   for (i=0; i<param->norb; i++){
     ens[i] = (char *)malloc(20*sizeof(char));
+    etemp[i] = (char *)malloc(20*sizeof(char));
     flexi_request_key("Atom",1,"%d %lg %s", &param->nlm[i],
 		      &param->wnl[i], ens[i]);
   }
@@ -218,13 +243,18 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   param->wnl_conf = (double **)malloc(param->nconfigs*sizeof(double *));
   param->en_conf = (double **)malloc(param->nconfigs*sizeof(double *)); 
   ensc = (char ***)malloc(param->nconfigs*sizeof(char **));
+  etemp2 = (char ***)malloc(param->nconfigs*sizeof(char **));
+  ntemp2 = (int *)malloc(param->nconfigs*sizeof(int));
+  wtemp2 = (double *)malloc(param->nconfigs*sizeof(double));
   for (i=0; i<param->nconfigs; i++){
     param->nlm_conf[i] = (int *)malloc(param->nval*sizeof(int));
     param->wnl_conf[i] = (double *)malloc(param->nval*sizeof(double));
     param->en_conf[i] = (double *)malloc(param->nval*sizeof(double));
     ensc[i] = (char **)malloc(param->nval*sizeof(char *));
+    etemp2[i] = (char **)malloc(param->nval*sizeof(char *));
     for (j=0; j<param->nval; j++){
       ensc[i][j] = (char *)malloc(20*sizeof(char));
+      etemp2[i][j] = (char *)malloc(20*sizeof(char));
       k=flexi_request_key("Configs",1,"%d %lg %s", &param->nlm_conf[i][j],
 			&param->wnl_conf[i][j], ensc[i][j]);
     }
@@ -232,10 +262,9 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   if (flexi_gather_keys(fp)) return 1;
 
-  /* Prepare for 3rd flexi_gather_keys() */
+  /* Prepare for 4th flexi_gather_keys() */
   flexi_clear_keys();
   rewind(fp);
-
 
   /* [Pseudo] */
   flexi_request_key("Pseudo",1,"%d ", &param->nval);
@@ -248,7 +277,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     flexi_request_key("Pseudo",1,"%lg",&param->rc[i]);
   }
   
-  /* mth is a character for method type (k or o) */
+  /* meth is a character for method type (k or o) */
   flexi_request_key("Pseudo",1,"%c",&param->psmeth);
 
   for (i=0; i<param->nval; i++) {
@@ -258,11 +287,18 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   if (flexi_gather_keys(fp)) return 1;
 
-  /* Prepare for 3rd flexi_gather_keys() */
+  /* Prepare for 5th flexi_gather_keys() */
   flexi_clear_keys();
   rewind(fp);
 
-  
+  /* [HFsmooth] */  
+  param->qpopt=0;
+  param->rlocalr = (double *)malloc(param->norb*sizeof(double));  
+  flexi_request_key("HFsmooth",0,"%d", &param->qpopt);
+  for (i=0; i<param->nval; i++) {
+    param->rlocalr[i]=0.0;
+    flexi_request_key("HFsmooth",0,"%lg", &param->rlocalr[i]);
+  }
   /* [KBdesign] */
   flexi_request_key("KBdesign",0,"%c %d", &loc, &param->nboxes);
   param->box_start = (int *)malloc(param->nboxes*sizeof(int));
@@ -277,10 +313,9 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 		      b_unit[i], &b_start[i], &b_end[i], &param->box_height[i]);
   }
 
-  /* 2nd flexi_gather_keys() */
   if (flexi_gather_keys(fp)) return 1;
 
-  /* Prepare for 3rd flexi_gather_keys() */
+  /* Prepare for 6th flexi_gather_keys() */
   flexi_clear_keys();
   rewind(fp);
 
@@ -295,54 +330,168 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     param->optmeth='n';
   }
 
-
-  /* 3rd flexi_gather_keys() */
   if (flexi_gather_keys(fp)) return 1;
+
+
+
+  /* Reorder ATOM, PSEUDO, and CONFIGS blocks to be in s p d f s p d f order */
+
+  ncore = param->norb - param->nval;  
+  param->lpot = (int *)malloc(80*sizeof(int));
+  param->npot = (int *)malloc(80*sizeof(int));
+
+
+  /* get the npot value, = 0 for lowest n for each l, =1 for next etc. */
+  
+  for (i=0 ; i<param->nval ; i++) {
+    ii=i+ncore;
+    param->lpot[i]=nlm_label(param->nlm[ii]).l;
+    lc[i]=0;
+  }
+  for (i=0;i<param->nval;i++) { 
+    for (j=0;j<4;j++) {
+      if (param->lpot[i]==j) {
+	param->npot[i]=lc[j];
+	lc[j]++;
+      }
+    }
+  }
+  
+  for (i=0 ; i<param->nval ; i++) {
+    ii=i+ncore;
+    mm = ii;
+    for (j=i+1 ; j<param->nval ; j++) {
+      
+      jj=j+ncore;
+      
+      if (param->npot[j] < param->npot[mm-ncore]) {
+	mm=jj;
+      }else{
+	if (param->npot[j] == param->npot[mm-ncore]) {
+	  if ((nlm_label(param->nlm[jj]).l < nlm_label(param->nlm[mm]).l)) {
+	    mm = jj;
+	  }
+	}
+      }
+    }
+
+    ntemp=param->nlm[ii];
+    wtemp=param->wnl[ii];
+    
+    nt1=param->npot[i];
+    nt2=param->lpot[i];
+    
+    strcpy(etemp[i],ens[ii]);
+    for (k=0 ; k<param->nconfigs ; k++) {
+      ntemp2[k]=param->nlm_conf[k][i];
+      wtemp2[k]=param->wnl_conf[k][i];
+      strcpy(etemp2[k][i],ensc[k][i]);
+    }
+
+    rtemp=param->rc[i];    
+    if (param->psmeth=='o') {
+      qtemp=param->qc[i];
+      nbtemp=param->nb[i];
+    }
+    
+    param->nlm[ii]=param->nlm[mm];
+    param->wnl[ii]=param->wnl[mm];
+    
+    param->npot[i]=param->npot[mm-ncore];
+    param->lpot[i]=param->lpot[mm-ncore];
+    
+    strcpy(ens[ii],ens[mm]);
+    for (k=0 ; k<param->nconfigs ; k++) {
+      param->nlm_conf[k][i]=param->nlm_conf[k][mm-ncore];
+      param->wnl_conf[k][i]=param->wnl_conf[k][mm-ncore];
+      strcpy(ensc[k][i],ensc[k][mm-ncore]);
+    }
+    param->rc[i]=param->rc[mm-ncore];
+    if (param->psmeth=='o') {
+      param->qc[i]=param->qc[mm-ncore];
+      param->nb[i]=param->nb[mm-ncore];
+    }
+    
+    param->nlm[mm]=ntemp;
+    param->wnl[mm]=wtemp;
+    param->npot[mm-ncore]=nt1;
+    param->lpot[mm-ncore]=nt2;
+    
+    strcpy(ens[mm],etemp[i]);
+    for (k=0 ; k<param->nconfigs ; k++) {
+      param->nlm_conf[k][mm-ncore]=ntemp2[k];
+      param->wnl_conf[k][mm-ncore]=wtemp2[k];
+      strcpy(ensc[k][mm-ncore],etemp2[k][i]);   
+    }
+    
+    param->rc[mm-ncore]=rtemp;
+    if (param->psmeth=='o') {
+      param->qc[mm-ncore]=qtemp;
+      param->nb[mm-ncore]=nbtemp;
+    }
+  }
+
+
+  /*for (i=0 ; i<param->nval ; i++) {
+    ii=i+ncore;
+    printf("i nlm %d %d %lg %s %lg %lg %d \n", ii,param->nlm[ii],param->wnl[ii],ens[ii],param->rc[i],param->qc[i],param->nb[i]);
+  }
+  
+    for (k=0 ; k<param->nconfigs ; k++) 
+    for (i=0 ; i<param->nval ; i++) {  
+      printf("k i ensc %d %d %s \n ",k,i,ensc[k][i]);
+    }
+    exit(1);*/
+  
 
   nlpot2_.inl = 0;          /* set AE mode flag */
   for (i=0; i<param->nval; i++) {
-    rcall_.rcall[i] = param->rc[i];
-    lparam_.qcl[i] = param->qc[i];
-    lparam_.nbl[i] = param->nb[i];
+    aval_.rcall[i] = param->rc[i];
+    /*    optparam_.qcl[i] = param->qc[i];
+	  optparam_.nbl[i] = param->nb[i];*/
   }
   
+  /* ADD CHECK for semicore violations by user */
+
   /* Cleanup */
   flexi_clear_keys();
   rewind(fp);
+
+  /*  param->ipot = (int *)malloc(80*sizeof(int));*/
 
   /* DONE WITH INPUT VALUES */
 
   /* Post processing section */
 
   /* set up semicore info */
-  
+
+  /*  
   param->ipot = (int *)malloc(80*sizeof(int));
 
-  for (i=0; i<4; i++){
+  for (i=0; i<10; i++){
     npot[i]=0;
   }
   for (i=0; i<20; i++){
     param->ipot[i]=0;
   }
   param->nll=0;
-  
-  ncore=param->norb-param->nval;
+
+  ncore = param->norb - param->nval;
   for (i=ncore; i<param->norb; i++){
     npot[nlm_label(param->nlm[i]).l]++;
     if (npot[nlm_label(param->nlm[i]).l] == 1) {
       param->ipot[param->nll]=i-ncore;
-      rcall_.rcall[param->nll] = param->rc[i-ncore];
-      lparam_.qcl[param->nll] = param->qc[i-ncore];
-      lparam_.nbl[param->nll] = param->nb[i-ncore];
+      aval_.rcall[param->nll] = param->rc[i-ncore];
+      optparam_.qcl[param->nll] = param->qc[i-ncore];
+      optparam_.nbl[param->nll] = param->nb[i-ncore];
       param->nll++;
     }
   }
 
-  npm_.nvales = param->nval;
-  npm_.ncores = param->norb - param->nval;
-  ncore = param->norb - param->nval;
-  nll_.nll = param->nll;
-
+  aorb_.nval = param->nval;
+  aorb_.ncore = param->norb - param->nval;
+  psdat_.nll = param->nll;
+  */
   /* Section to make KB local idiot proof */
 
   param->local=-67;
@@ -368,6 +517,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     fprintf(stderr," Can't determine local potential, check [KBdesign] key-block \n"); 
     exit(1); 
   }
+  ncore=param->norb-param->nval;
   for (i=ncore;i<param->norb;i++) {
     if (loctemp == nlm_label(param->nlm[i]).l) {
       
@@ -386,38 +536,39 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   }
 
   /* This is where initial guesses are chosen */
-  /* ensave is used as the default eigenvalue if an unbound state is found */
+  /* etrial is used as the default eigenvalue if an unbound state is found */
 
   /* process reference config eigenvalue guesses and free arrays */
   for (i=0; i<param->norb; i++){
-    param->ibound[i]=1;
+    
+    if (i >= ncore) param->ibound[i-ncore]=1;
     k = 0;
     j = 0;
     
     while ( k<strlen(ens[i]) && ens[i][k]=='-' ) ++k;
-    
     if (k==strlen(ens[i])){
       /* user wants opium to guess a good eigenvalue */
       n = param->nlm[i]/100;
-      param->en[i] = -1. * (param->z * param->z) / (double)(n*n*n*n);
-      param->ensave[i]=0.0;
+      param->etrial[i] = -1. * (param->z * param->z) / (double)(n*n*n*n);
+      param->en[i]=param->etrial[i];
+      if ((i >=ncore)&&(param->wnl[i]< -1e-12)) {
+	printf(" You must supply an eigenvalue for an unbound state! \n Problem with state: %d \n",param->nlm[i]);
+	fprintf(fp_log," You must supply an eigenvalue for an unbound state! \n Problem with state: %d \n",param->nlm[i]);
+	exit(1);
+      }
     }else {
       /* user provides an eigenvalue guess */
-      param->en[i] = atof(ens[i]);
-      param->ensave[i]=param->en[i];
+      param->etrial[i]= atof(ens[i]);
+      param->en[i]=param->etrial[i];
     }
 
     if (param->wnl[i] < -1e-12) {
       if (i>ncore) {
-	if (streq(param->reltype,"nrl")) {
-	  param->ibound[i]=0;
-	  param->wnl[i]=0.0;
-	} else {
-	  fprintf(fp_log, " !ERROR! Unbound states not implemented for scalar/fully relativistic \n");
-	  exit(1);
-	}
+	/*	param->ibound[i-ncore]=0;
+	  param->wnl[i]=0.0;*/
       } else {
-	fprintf(fp_log, " !ERROR! A core state can not be unbound! \n");
+	printf(" !ERROR! A core state can not be unbound! \n Problem with state: %d \n",param->nlm[i]);
+	fprintf(fp_log, " !ERROR! A core state can not be unbound! \n Problem with state: %d \n",param->nlm[i]);
 	exit(1);
 	}
     }
@@ -441,6 +592,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
         /* user provides an eigenvalue guess */
         param->en_conf[i][j] = atof(ensc[i][j]);
       }
+
       free(ensc[i][j]);
     }
     free(ensc[i]);
@@ -457,10 +609,10 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   grid_.r[0] = param->a * pow(param->z, -1./3.);
   for (i=1; i<NPDM; i++) {
     grid_.r[i]=grid_.r[0] * exp(param->b * (i));
-    if (grid_.r[i]>80.0) break;
+    if (grid_.r[i]>120.0) break;
     grid_.np++;
   }
-  
+
   if (grid_.np > param->ngrid) {
     printf("check Non-rel grid; # points needed > max np \n");
     return 1;
@@ -485,14 +637,25 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     nrgrid_.nr++;
   }
 
-  if (nrgrid_.nr > param->ngrid2) {
+/*  rgrid_.b=param->b;
+    rgrid_.a=param->a; */
+  
+/*  nrgrid_.nr=0;
+  for (i=0; i<NPDM; i++){
+    rgrid_.r[i]=param->a * pow(param->z,-1/3)*exp(param->b*(i));
+    rgrid_.rab[i] =(rgrid_.r[i]+rgrid_.a*pow(param->z,-1/3))*rgrid_.b;
+    if (rgrid_.r[i]>80.0) break;
+    nrgrid_.nr++;
+    }*/
+
+  /*  if (nrgrid_.nr > param->ngrid2) {
     printf("check Rel grid; # points needed > max np \n");
     return 1;
-  }
-  if (rgrid_.r[nrgrid_.nr]<30.0) {
+    }*/
+/*  if (rgrid_.r[nrgrid_.nr]<30.0) {
     printf("check Rel grid; grid extends to less than 30 Bohr %d \n",nrgrid_.nr);
     return 1;
-  }
+    }*/
   
     /* process the box limits in the KBdesign key-block and free temp arrays */
   for (i=0; i<param->nboxes; i++){
@@ -542,10 +705,14 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   free(b_unit);
   free(b_start);
   free(b_end);  
-  
+
+
+  /* enforce GGA damping from 0.0 -> 0.001 au 
+     for heavy atoms (>z=30). param->exccut=-1 when not set */
+  if ((param->z > 30)&&(param->ixc >= 2)&&(param->ixc < 5)&&(param->exccut <0.0)) param->exccut=1e-3;
   
   /* set up DNL stuff */
-  
+   
   local_.iloc = param->localind+1;
   box_.numbox = param->nboxes;
 
@@ -592,8 +759,36 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     fprintf(fp_log, " Exchage-correlation functional is : Perdew-Zunger LDA \n");
   }else if (streq(param->xcparam,"pwlda")){
     fprintf(fp_log, " Exchage-correlation functional is : Perdew-Wang LDA \n");
-  }else if (streq(param->xcparam,"gga")){
+  }else if (streq(param->xcparam,"vwn5")|| streq(param->xcparam,"vwn5lda")) {
+    fprintf(fp_log, " Exchage-correlation functional is : Vosko, Wilk, Nusair (V) LDA  \n");
+  }else if (streq(param->xcparam,"hf")){
+    fprintf(fp_log, " Using Hartree-Fock Exchange (Beta!!)                \n");
+    if (param->qpopt == 0) {
+      fprintf(fp_log, " HF pseudopotential NOT being smoothed! \n");
+    }else if (param->qpopt != 0) {
+      if (param->qpopt == 1) 
+	fprintf(fp_log, " HF smoothing method: Trail & Needs for Troullier Martins  \n");
+      if (param->qpopt == 2) 
+	fprintf(fp_log, " HF smoothing method: AWR#2 for Optimized/RRKJ \n");
+      if (param->qpopt == 3) 
+	fprintf(fp_log, " HF smoothing method: AWR#3 for Optimized/RRKJ \n");
+      if (param->qpopt == 4) 
+	fprintf(fp_log, " HF smoothing method: AWR#4 for Optimized/RRKJ \n");
+    }else{
+      fprintf(fp_log, " !!WARNING!! Unknown HF smoothing method! \n");
+    }
+  }else if (streq(param->xcparam,"gga")|| streq(param->xcparam,"pbegga")) {
     fprintf(fp_log, " Exchage-correlation functional is : Perdew, Burke, Ernzerhof GGA \n");
+    if (param->exccut > 0.0) {
+      fprintf(fp_log, " GGA smoothed from 0 to %f bohr \n",param->exccut);
+    }
+  }else if (streq(param->xcparam,"pw91gga")){
+    fprintf(fp_log, " Exchage-correlation functional is : Perdew Wang 91 GGA \n");
+    if (param->exccut > 0.0) {
+      fprintf(fp_log, " GGA smoothed from 0 to %f bohr \n",param->exccut);
+    }
+  }else if (streq(param->xcparam,"wcgga")){
+    fprintf(fp_log, " Exchage-correlation functional is : Wu-Cohen GGA \n");
     if (param->exccut > 0.0) {
       fprintf(fp_log, " GGA smoothed from 0 to %f bohr \n",param->exccut);
     }
@@ -670,8 +865,8 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     fprintf(fp_log," Non-relativitic grid:  a_grid=%-11.2e b_grid=%-11.2e # points=%d \n  r(1)=%-11.2e r(np)=%-11.2e \n",
 	    param->a,param->b,grid_.np,grid_.r[0],grid_.r[grid_.np]);
     
-    fprintf(fp_log," Relativistic grid   :  a_grid=%-11.2e b_grid=%-11.2e # points=%d \n  r(1)=%-11.2e r(np)=%-11.2e \n",
-	    param->a2,param->b2,nrgrid_.nr,rgrid_.r[0],rgrid_.r[nrgrid_.nr-1]);
+/*    fprintf(fp_log," Relativistic grid   :  a_grid=%-11.2e b_grid=%-11.2e # points=%d \n  r(1)=%-11.2e r(np)=%-11.2e \n",
+      param->a2,param->b2,nrgrid_.nr,rgrid_.r[0],rgrid_.r[nrgrid_.nr-1]);*/
   }
   
   fprintf(fp_log, "\n");

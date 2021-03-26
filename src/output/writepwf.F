@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ c -- PWF pseudopotential file format
       
 #include "fortdim.h"
 
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
       common /grid/ h,r1,z,r(npdm),np
       common /en/ ien(10),inv                                           
       common /dql/ dql
@@ -33,16 +32,19 @@ c -- PWF pseudopotential file format
       common /flqeta/ eta(5),flq(maxflq,5),nflq
       common /nlcore/ rvloc(npdm)
       common /pwf/ zeff, rpcc, spacing, first,
-     &             nval, igrid, inl, ist1, ncut, ilocal,ilocalind
-      common /nmax/ nmax(n0),maxim
+     &             nval2, igrid, inl, ist1, ncut, ilocal,ilocalind
 
       common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm)
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /np/ ncores,nvales
-      common /npp/ npots
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /wfn/ rnl(npdm,n0)
+      common /psdat/ nll
 
       dimension vl(npspt0),bb(npdm)
-      dimension xr(npdm),dvp(3),bb3(npdm)
+      dimension xr(npdm),bb3(npdm)
       dimension dflq(maxflq,15),ill(4)
       dimension psp(npspt0),dpsp(npspt0)
       dimension rrvloc(npdm)
@@ -56,7 +58,7 @@ c -- PWF pseudopotential file format
       common /filenames/ file_log
       character*80 file_log
 
-      data bohrad,ryd / 0.529177,13.6058 /
+      data bohrad,ryd / 0.529177,13.6057 /
       
 c     *************************************************************************
 c     redirect stdout to the log file
@@ -96,10 +98,10 @@ c          use ilocalind + 1 for fortran
          xrpcc = 'n'
       endif
 
-      if (nval.eq.1) then
+      if (nll.eq.1) then
          iproj = 0
          xproj = "    "
-      elseif (nval.eq.2) then
+      elseif (nll.eq.2) then
          if (inl.eq.1) then
             iproj = 2
             xproj = "sp  "
@@ -111,7 +113,7 @@ c          use ilocalind + 1 for fortran
                xproj="s   "
             endif
          endif
-      elseif (nval.eq.3) then
+      elseif (nll.eq.3) then
          if (inl.eq.1) then
             iproj = 3
             xproj = "spd "
@@ -125,7 +127,7 @@ c          use ilocalind + 1 for fortran
                xproj="sp  "
             endif
          endif
-      elseif (nval.eq.4) then
+      elseif (nll.eq.4) then
          if (inl.eq.1) then
             iproj = 4
             xproj = "spdf"
@@ -146,7 +148,7 @@ c          use ilocalind + 1 for fortran
 c     EJW: this will have to good enough for now
 c     guess.f in bh (which I wrote) handles the
 c     identity of the AO's in a stupid way.
-      do j=1,npots
+      do j=1,nll
          if (j.eq.1) xao(j)='s'
          if (j.eq.2) xao(j)='p'
          if (j.eq.3) xao(j)='d'
@@ -162,7 +164,7 @@ c -- hardcoded settings for now...
       aorad = 5.0
 
 c -- now call the new C routine that writes the header info      
-      call cwritepwf(ifp, symbol, zeff, NPSPT0, NFLQ, iproj, nvales,
+      call cwritepwf(ifp, symbol, zeff, NPSPT0, NFLQ, iproj, nval,
      $       xproj, xrpcc, np, spacing, first, numAOs, aorad, xao)
 
 c -- end of original writepwf comes here ---
@@ -172,7 +174,7 @@ c -- original pspfft stuff
 c     Take care of long range tail of potential
 
       do i = maxim+1,np
-         do j = 1,nvales
+         do j = 1,nll
             rvcore(i,j) = -zeff-zeff
          enddo
       enddo
@@ -185,7 +187,7 @@ c     Write real space potentials to output file
          rrvloc(k) = rvloc(k)/r(k)
 c     NOTE: redefinition of rvloc no factors of r  
          
-         do i=1,nvales 
+         do i=1,nll 
             rvcore(k,i)=rvcore(k,i)/r(k)                                    
 c     NOTE: redefinition of rvcore no factors of r 
          enddo
@@ -265,29 +267,29 @@ c -- use the C I/O call to output the local potential coefficients
 c
       call nclear(ifp)
       do i=1,npspts
-        call nwrite(ifp, "\0", 4, "%18.8f", psp(i))
+        call nwrite(ifp, "", 4, "%18.8f", psp(i))
       enddo
       call nclear(ifp)
       do i=1,npspts
-        call nwrite(ifp, "\0", 4, "%18.8f", dpsp(i))
+        call nwrite(ifp, "", 4, "%18.8f", dpsp(i))
       enddo
       call nclear(ifp)
         
 
 c     for kleinman-bylander non-local psp                               
 c     change units
-      do m=1,npots                                                      
+      do m=1,nll                                                      
          do n=1,nflq                                                    
             flq(n,m)=flq(n,m)*ryd*sqrt((bohrad)**3)                           
          enddo
          eta(m)=eta(m)*ryd                                                 
       enddo
 
-      do m=1,npots                                                      
+      do m=1,nll                                                      
          do n=2,nflq-1                                                  
             dflq(n,m)=(flq(n+1,m)-flq(n-1,m))*bohrad/(dql*2.0)                
          enddo
-         if (npots.eq.1) then                                                  
+         if (nll.eq.1) then                                                  
             dflq(1,m)=2.0*dflq(2,m)-dflq(3,m)                          
          else                                                         
             dflq(1,m)=0.0                                              
@@ -301,7 +303,7 @@ c -- New lines that omit the 0's but still produce the BH format
          ill(i)=0
       enddo
 
-      do k=1,npots
+      do k=1,nll
          if (k.ne.ilocal+1) then
             do i=1,nflq
                call nwrite(ifp, " ", 3, "%20.10f", flq(i,k))
@@ -309,8 +311,9 @@ c -- New lines that omit the 0's but still produce the BH format
          endif
       enddo
       call nclear(ifp)
+
       
-      do k=1,npots
+      do k=1,nll
          if (k.ne.ilocal+1) then
             do i=1,nflq
                call nwrite(ifp, " ", 3, "%20.10f", dflq(i,k))
@@ -319,7 +322,7 @@ c -- New lines that omit the 0's but still produce the BH format
       enddo
       call nclear(ifp)
       
-      do k=1,npots
+      do k=1,nll
          if (k.ne.ilocal+1) then
             call nwrite(ifp, " ", 3, "%20.10f", eta(k))
          endif
@@ -336,68 +339,15 @@ c -- New lines that omit the 0's but still produce the BH format
  200  format(1x,'local potential is p')                                 
  210  format(1x,'local potential is d')                                 
 
-
-
-      goto 911
-c -- append the atomic pseudo wave functions to the *.pwf file
-c -- new section to write out the LAST configuration's psi's 
-c -- EJW - please clean me up!
-
-
-
-      do i=1,nvales
-         read(15) nlm(i),wnl(i),en(i)
-         do j=1,np
-            read(15) rnl(j,i)
-         enddo
-      enddo
-      close(15)
-
-      do i=1,np
-         call nwrite(ifp,"\0", 10, "%20.15f", r(i))
-         do ik=1,4
-            ill(ik)=0
-         enddo
-         
-c         do k=1,npots
-            do j=1,nvales
-c               nnj=nlm(j)/100
-c               ljp=(nlm(j) - nnj * 100)/10 + 1
-               
-c               if ((ill(ljp).eq.0).and.(ljp.eq.k)) then
-c                  ill(ljp)=ill(ljp)+1
-                  call nwrite(ifp, "\0", 10, "%20.15f", rnl(i,j)/r(i))
-c               endif
-            enddo
-c         enddo
-         call nclear(ifp)
-      enddo
-      call nclear(ifp)
-      
-c     -- append the partial core charge to the *.pwf file if required
-
       if (rpcc.gt.1e-12) then
          do i=1,np
-          call nwrite(ifp, "\0", 2, "%26.16E",r(i))
-          call nwrite(ifp, "\0", 2, "%26.16E",rscore(i))
+          call nwrite(ifp, " ", 2, "%26.16E",r(i))
+          call nwrite(ifp, " ", 2, "%26.16E",rscore(i))
         enddo
       endif
 
       call nclear(ifp)
 
-c      write(7,*) "The following configuration was used for",
-c     $     " the wavefunction output:"
-c      
-c      do j=1,nvales
-c         write(7,9686) nlm(j),wnl(j),en(j),en(j)*ryd
-c         call iwrite(ifp,"\0",2,"%5d",nlm(j))
-c         call nwrite(ifp,"\0",2,"%20.15F",en(j)*ryd)
-c      enddo
-c      call nclear(ifp)
-
-c 9686 format(1x,'|',i3,'>',3x,f6.4,f15.5,' Ry    /',f15.5,' eV')
-
- 911  continue
 
       close(unit=7)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/*
- * $Id: do_ae.h,v 1.3 2004/10/02 18:34:48 ewalter Exp $
- */
 
 #include "parameter.h"
 
 int do_ae(param_t *param, char *logfile);
 void do_ae_report(FILE *fp);
+void startae(param_t *param, int); 
+void relorbae(param_t *param, int, char *); 
+void nrelorbae(param_t *param, int, char *); 
+char * write_reportae(param_t *param, char *rp,int,double temp_eigen[], double temp_norm[]);
+void writeAE(param_t *param);
+void dftsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *);
+void hfsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *);
+void dfsolve_(double  *, int * ,double *, int * , int *, int *, int *, int *);
+void atm_(double *, int *, int *);
+void average_(int *, double *, int *);
+void getpcc_(int *);
+void denkcomp_(char *, double[3], int[3] );
+static char report[8000];
+
+

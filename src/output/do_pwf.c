@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,14 +32,15 @@
 #include "common_blocks.h"    /* fortran common blocks */
 
 /* from atom/do_nl.c */
-void nrelorbnl(param_t *param, int);
+void nrelorbnl(param_t *param, int, char *);
+void nrelsproj(param_t *param, char *);
 /* creative passing of the 1st argument to follow */
 void writepwf_(void *, char *);
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 
 int do_pwf(param_t *param, FILE *fp_param, char *logfile){
 
-  int i,j;              /* loop counter */
+  int i,j,ic;              /* loop counter */
   char filename[180]; /* filename */
   int c,config;              /* dummy character */
   FILE *fp;           /* file pointer */
@@ -52,7 +53,10 @@ int do_pwf(param_t *param, FILE *fp_param, char *logfile){
   
   /* set the log file */
   sprintf(filenames_.file_log, "%s", logfile);
-  
+
+  nrelsproj(param,logfile);
+  /* new routine to set the arrays for semicore states */
+
   /* set the pwf common block */
   /*  sprintf(filenames_.file_ps, "%s.ps", param->name);*/
 
@@ -83,14 +87,14 @@ int do_pwf(param_t *param, FILE *fp_param, char *logfile){
   param->ncut = param->ngrid;
   pwf_.ncut = grid_.np;
 
-  np_.nvales=param->nval;
-  np_.ncores=param->norb-param->nval;
-  npp_.npots=param->nll;
-
+  aorb_.nval=param->nval;
+  aorb_.ncore=param->norb-param->nval;
+  psdat_.nll=param->nll;
+  
   /* END bad code */
   
   config=-1;
-  nrelorbnl(param,config);
+  nrelorbnl(param,config,logfile);
 
   /* read in the local potential from a binary file created by do_nl() */
   sprintf(filename, "%s.loc", param->name);
@@ -98,25 +102,27 @@ int do_pwf(param_t *param, FILE *fp_param, char *logfile){
   fread(nlcore_.rvloc, sizeof(double), param->ngrid, fp);
   fclose(fp);
 
-  sprintf(filename, "%s.psi_nl", param->name);
-  fp = fopen(filename, "rb");
-  for (i=0; i<param->nval; i++)
-    fread(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
-  fclose(fp);
-
-  sprintf(filename, "%s.pot_ps", param->name);
-  fp = fopen(filename, "rb");
-  for (i=0; i<param->nval; i++) {
+  for (i=0; i<param->nll; i++) {
+    sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    fp = fopen(filename, "rb");
     fread(totpot_.rvcore[i], sizeof(double), param->ngrid, fp);
-  }	
-  fclose(fp);
+    fseek(fp,sizeof(double) ,param->ngrid);
+    fclose(fp);
+  }
+
+  for (i=0; i<param->nll; i++) {
+    sprintf(filename, "%s.psi.ps.l=%d", param->name,i);
+    fp = fopen(filename, "rb");
+    fread(wfn_.rnl[i], sizeof(double), param->ngrid, fp);
+    fclose(fp);
+    }
 
   if (param->rpcc > 0.){
     sprintf(filename, "%s.rho_pcore", param->name);
     fp = fopen(filename, "rb");
     fread(rscore_.rscore, sizeof(double), param->ngrid, fp);
     fclose(fp);
-  }
+    }
 
   fp_log = fopen(logfile, "a");
   fprintf(fp_log,"<<calling: writepwf>>\n");
@@ -126,21 +132,21 @@ int do_pwf(param_t *param, FILE *fp_param, char *logfile){
   fp = fopen(filename, "w");
 
   writepwf_(fp, param->symbol);
-  
+
   sprintf(filename, "%s.psi_last", param->name);
   fp2 = fopen(filename, "rb");
   for (i=0; i<param->nval; i++){
-    fread(&atomic_.nlm[i], sizeof(int), 1, fp2);
-    fread(&atomic_.wnl[i], sizeof(double), 1, fp2);
-    fread(&atomic_.en[i], sizeof(double), 1, fp2);
-    fread(atomic_.rnl[i], sizeof(double), param->ngrid, fp2);
+    fread(&aorb_.nlm[i], sizeof(int), 1, fp2);
+    fread(&adat_.wnl[i], sizeof(double), 1, fp2);
+    fread(&adat_.en[i], sizeof(double), 1, fp2);
+    fread(wfn_.rnl[i], sizeof(double), param->ngrid, fp2);
   }
   fclose(fp2);
 
   for (i=0; i<param->ngrid; i++) {
     fprintf(fp,"%20.15f",grid_.r[i]);
     for (j=0; j<param->nval; j++){    
-      fprintf(fp,"%20.15f",atomic_.rnl[j][i]/grid_.r[i]);
+      fprintf(fp,"%20.15f",wfn_.rnl[j][i]/grid_.r[i]);
     }    
     fprintf(fp,"\n");
   }
@@ -156,15 +162,16 @@ int do_pwf(param_t *param, FILE *fp_param, char *logfile){
   fprintf(fp_log,"\n The following configuration was used for the wavefunction output:\n");  
 
   for (j=0; j<param->nval; j++){    
-    fprintf(fp,"%5d",atomic_.nlm[j]);
-    /* fprintf(fp,"%15.8f",atomic_.wnl[j]);*/
-    fprintf(fp,"%15.8f\n",atomic_.en[j]*13.6058);
-    fprintf(fp_log,"%5d",atomic_.nlm[j]);
-    fprintf(fp_log,"%15.8f",atomic_.wnl[j]);
-    fprintf(fp_log,"%15.8f Ry        %15.8f eV\n",atomic_.en[j],atomic_.en[j]*13.6058);
+    fprintf(fp,"%5d",aorb_.nlm[j]);
+    /* fprintf(fp,"%15.8f",adat_.wnl[j]);*/
+    fprintf(fp,"%15.8f\n",adat_.en[j]*13.6057);
+    fprintf(fp_log,"%5d",aorb_.nlm[j]);
+    fprintf(fp_log,"%15.8f",adat_.wnl[j]);
+    fprintf(fp_log,"%15.8f Ry        %15.8f eV\n",adat_.en[j],adat_.en[j]*13.6057);
   }    
 
   fclose(fp_log);  
+
 
   writeparam(param, fp, fp_param);
 
@@ -172,7 +179,10 @@ int do_pwf(param_t *param, FILE *fp_param, char *logfile){
   fprintf(fp_log, "   ================================================\n");
   fprintf(fp_log,"<<end:  do_pwf>>\n");
   fclose(fp_log);
+
   return 0;
+
+
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/* 
- * $Id: do_qplot.c,v 1.7 2004/10/02 18:34:49 ewalter Exp $
- */
-
 
 /* Bessel transform of psi and V_i */
 
@@ -100,21 +96,24 @@ int do_qplot(param_t *param, char *logfile){
   sprintf(filename, "%s.psi_nl", param->name);
   fp = fopen(filename, "rb");
   for (i=0; i<param->nval; i++) {
-    fread(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+    fread(wfn_.rnl[i], sizeof(double), param->ngrid, fp);
   }
   fclose(fp);
 
-  zeff=atomic_.xion;
+  zeff=adat_.xion;
   for (i=0; i<param->nval; i++) {
     zeff +=param->wnl[i+ncore];
   }
-  nll_.nll=param->nll;
+  psdat_.nll=param->nll;
 
   sprintf(filename1, "%s.wq_plt", param->name);
   sprintf(filename2, "%s.vq_plt", param->name);
+
   btrans_(&zeff,filename1,filename2);
 
   if ((parm = fopen("vq.par","w")) != NULL) {
+
+
     fprintf(parm,"# q-potential param file for xmgrace\n");
     fprintf(parm,"g0 on\n");
     fprintf(parm,"with g0\n");
@@ -143,30 +142,31 @@ int do_qplot(param_t *param, char *logfile){
     fprintf(parm,"legend on\n");
     fprintf(parm,"legend loctype view\n");
     fprintf(parm,"legend 0.85, 0.8\n");
-    
+
     for (i=0; i<param->nll;i++){
-      
-      if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 0) {
+
+      if (nlm_label(param->nlm[i+ncore]).l == 0) {
 	scount++;
 	lcolor=1;
 	lsty=scount;
 	lc='s';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 1) {
+      }else if (nlm_label(param->nlm[i+ncore]).l == 1) {
 	pcount++;
 	lcolor=2;
 	lsty=pcount;
 	lc='p';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 2) {
+      }else if (nlm_label(param->nlm[i+ncore]).l == 2) {
 	dcount++;
 	lcolor=3;
 	lsty=dcount;
 	lc='d';
-      }else if (nlm_label(param->nlm[param->ipot[i]+ncore]).l == 3) {
+      }else if (nlm_label(param->nlm[i+ncore]).l == 3) {
 	fcount++;
 	lcolor=4;
 	lsty=fcount;
 	lc='f';
       }
+
       fprintf(parm," s%d hidden false \n",i);
       fprintf(parm," s%d type xy \n",i);
       fprintf(parm," s%d symbol 0 \n",i);
@@ -175,7 +175,7 @@ int do_qplot(param_t *param, char *logfile){
       fprintf(parm," s%d line linewidth 2.0 \n",i);
       fprintf(parm," s%d line color %d \n",i,lcolor);
       fprintf(parm," s%d legend \"V\\s%d%c\\N\" \n",i,
-	      nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
+	      nlm_label(param->nlm[i+ncore]).n,lc);
     }
     
     fprintf(parm," s%d hidden false \n",i);
@@ -196,12 +196,13 @@ int do_qplot(param_t *param, char *logfile){
     fprintf(parm," s%d line linewidth 2.5 \n",i+1);
     fprintf(parm," s%d line color %d \n",i+1,13);
     fprintf(parm," s%d legend \"\\xr\\f{}\"\n" ,i+1);
-    
-    
+        
     fclose(parm);
-    
+
   } 
   
+
+
   /*  sprintf(comm, "xmgrace %s.plt_vq -timestamp -autoscale y -p vq.par  -saveall %s_viq.agr & ", param->name,param->name);
       system(comm);*/
 
@@ -211,7 +212,7 @@ int do_qplot(param_t *param, char *logfile){
   fcount=0;
   lcolor=0;
   lsty=0;
- 
+
   if ((parm = fopen("psiq.par","w")) != NULL) {
     
     fprintf(parm,"# q-wfn param file for xmgrace\n");
@@ -286,6 +287,7 @@ int do_qplot(param_t *param, char *logfile){
     
   /*  sprintf(comm, "xmgrace $XMG_OPTS %s.plt_wq -timestamp -autoscale y -p psiq.par  -saveall %s_psiq.agr & ",
       param->name,param->name);*/
+
   snprintf(comm, comm_size,"xmgrace $XMGRACE_OPTS -timestamp -graph 0 -viewport 0.15 0.55 1.15 0.85 -p vq.par %s.vq_plt -graph 1 -viewport 0.15 0.15 1.15 0.45 -p psiq.par %s.wq_plt -saveall %s_qp.agr & ", param->name,param->name,param->name);
 
   system(comm);

@@ -1,204 +1,9 @@
-c
-c Copyright (c) 1998-2005 The OPIUM Group
-c
-c This program is free software; you can redistribute it and/or modify
-c it under the terms of the GNU General Public License as published by
-c the Free Software Foundation; either version 2 of the License, or
-c (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to the Free Software
-c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-c
-c
-      subroutine pbe(cdu,cdd,rr,nr,b,expp,vxp,rab,
-     $     ecp,vcp,i,ixc,fxpbe,exlsd,vxlsd,rholap)
-CIG   called in velect in cdd,cdu order, here reverse since for 
-CIG   non relativistic all density is in down and i go by up density
-
-c PBE alpha2.1:
-c Perdew-Burke-Ernzerhof generalized gradient approximation to the
-c density functional for exchange-correlation energy of a many-electron
-c system.
-      IMPLICIT REAL*8 (A-H,O-Z)
-      parameter(thrd=1.d0/3.d0,thrd2=2.d0*thrd)
-      parameter(nrmax=10000)
-cEJW
-      parameter(eps=1e-18)
-cEJW
-      dimension rr(nrmax),cdd(nrmax),cdu(nrmax)
-      dimension rab(nrmax)
-      common /ilya5/ vd(nrmax),vu(nrmax),sumexc
-
-      hh=1
-      hh=b
-      sumxlsd=0.0
-      sumclsd=0.0
-      eicorr=0.0
-      eixch=0.0
-      pi=4.d0*datan(1.d0)
-      CONF=(3.D0*PI*pi)**THRD
-      CONRS=(3.D0/(4.D0*PI))**THRD
-
-c----------------------------------------------------------------------
-c----------------------------------------------------------------------
-C BEGIN THE RADIAL LOOP
-c sumexc=integrated exchange-correlation energy 
-c chng1=integrated xc energy change, based on vxc
-c nr=number of points in radial loop
-c rf=final value of r in integrals
-c dr=change in r
-c wt=weight of r in trapezoidal rule
-c dup=up density
-c agrup=|grad up|
-c delgrup=(grad up).(grad |grad up|) 
-c uplap=grad^2 up=Laplacian of up
-c dn,agrdn,delgrdn,dnlap=corresponding down quantities
-c d=up+dno
-c agrad=|grad rho|
-c delgrad=(grad rho).(grad |grad rho|) 
-CCCCCCCCCCC  make changes here due to exp grid.
-
-          sumexc=0.0D0
-          CHNG1=0.0D0
-CCCCCCC  get density and grid  from atomic code
-             R=rr(i)
-
-             wt=4.d0*PI*R*R
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-             cdsum=cdu(i)
-c +cdd(i)
-             dup=cdsum/2
-c/(4*pi*rr(i)**2)
-CIG
-             ddn=dup
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-CCCCCCCCCC have to change these due to different grid?
-CCC  put in real value for hh
-             
-             agrup=abs(cdu(i+1)-cdu(i-1))/2 
-             agrup=agrup/(2*rab(i)+eps)
-             agrup_plus=abs(cdu(i+2)-cdu(i))/2
-
-             agrup_plus=agrup_plus/(2*rab(i+1)+eps)
-             if (i.ge.3) then
-                agrup_minus=abs(cdu(i)-cdu(i-2))/2
-             else
-                agrup_minus=0.0
-             endif
-             agrup_minus=agrup_minus/(2*rab(i-1)+eps)
-             
-             
-             delgrup=(agrup_plus-agrup_minus)
-CIG
-             delgrup=delgrup/(2*rab(i)+eps)
-             delgrup=delgrup*(cdu(i+1)-cdu(i-1))/(2*rab(i)+eps)/2
-CIG
-             uplap1=0.0
-             uplap2=0.0
-             uplap1=2*(cdu(i+1)-cdu(i-1))/2/(rab(i)+eps)/2
-             uplap1=uplap1/(rr(i)+eps)
-           
-c/wt
-CIG              
-             if(i.ge.3.and.i.lt.nr) then
-                uplap2=((cdu(i+2)-cdu(i))/2/(rab(i+1)+eps)
-     $               -(cdu(i)-cdu(i-2))/2/rab(i-1))/2/(rab(i)+eps)/2
-c/wt
-CIG               
-             endif
-             uplap=uplap1+uplap2
-             
-             
-             uplap_plus=rr(i+1)*((cdu(i+2)-cdu(i))/(2*rab(i+1)+eps))
-     $            +cdu(i+1)
-             uplap_minus=rr(i-1)*((cdu(i)-cdu(i-2))/(2*rab(i-1)+eps))
-     $            +cdu(i-1)
-             uplap_new=(uplap_plus-uplap_minus)/(2*rab(i)+eps)
-             uplap_new=0.5*uplap_new/(rr(i)+eps)
-
-             agrdn=agrup
-             delgrdn=delgrup
-             dnlap=uplap
-             rholap=uplap+dnlap
-             agrad=agrup+agrdn
-             delgrad=delgrup*4
-             
-             D=DUP+DDN
-
-             eclsd=0.0
-             ecpbe=0.0
-
-            call easypbe(dup,agrup,delgrup,uplap,ddn,agrdn,delgrdn,
-     1           dnlap,agrad,delgrad,1,1,
-     1           exlsd,vxuplsd,vxdnlsd,eclsd,vcuplsd,vcdnlsd,
-     1           expw91,vxuppw91,vxdnpw91,ecpw91,vcuppw91,vcdnpw91,
-     1           expbe,vxuppbe,vxdnpbe,ecpbe,vcuppbe,vcdnpbe,fxpbe)
-
-            vu(i)=vxuplsd+vcuplsd
-cvxuppbe+vcuppbe
-            vd(i)=vxdnlsd+vcdnlsd
-cvxdnpbe+vcdnpbe
-
-            expp=2*exlsd
-            
-            ecp=2*eclsd
-CIG A LOT OF CONFUSION HERE            
-            if(ixc.ne.2) then
-               
-               vxp=2*vxuplsd
-            else
-               vxp=vxuplsd
-            endif
-
-             if(ixc.ne.2) then
-             vxlsd=2*vxuplsd
-             else
-                vxlsd=vxuplsd
-             endif
-
-CIG note that exchange is computed using only up density i.e. all charge 
-CIG is up, while correlation has zeta=0 hardwired, i.e. half density is
-CIG up and half is down. This is done to get LDA results. Therefore have
-CIG vxp=2*(vxuplsd+vxdnlsd) since vxdnlsd =0 doesn't hurt us.  but 
-CIG vcdnlsd is not =0 but rather vcdnlsd=vcuplsd so delete the 2 prefactor
-
-c            vcp=(vcuplsd+vcdnlsd)
-             vcp=2*vcuplsd
-
-            if(ixc.eq.2.and.i.ge.4.and.i.lt.nr-1) then
-               expp=2*expbe
-               ecp=2*ecpbe
-               exlsd=2*exlsd
-               vxlsd=2*vxlsd
-               vxp=(vxuppbe+vxdnpbe)
-               vcp=(vcuppbe+vcdnpbe)
-            endif 
-            
-
-          IF(KDIF.EQ.1)then
-            sumEXCO=sumEXC
-          endif
-
-      sumexc=sumxlsd
-      exc=sumexc
-c     $+sumclsd
-      exc=sumexc
-
-  200 FORMAT(4f4.1,2f16.12,f14.10)
-      END
-
-
+c     These are the original routines from K. Burke's website
+c     from the file PBE.asc
 c----------------------------------------------------------------------
 c######################################################################
 c----------------------------------------------------------------------
-      SUBROUTINE EXCHPW91(D,S,U,V,EX,VX)
+      SUBROUTINE EXCHPW91(D,S,U,V,EX,VX,f,fs,fss)
 C  GGA91 EXCHANGE FOR A SPIN-UNPOLARIZED ELECTRONIC SYSTEM
 C  INPUT D : DENSITY
 C  INPUT S:  ABS(GRAD D)/(2*KF*D)
@@ -439,9 +244,9 @@ c v=Laplacian/(rho*(2*fk)**2)_(rho=2*up)
         s=2.d0*agrup/(2.d0*fk*rho2)
         u=4.d0*delgrup/(rho2*rho2*(2.d0*fk)**3)
         v=2.d0*uplap/(rho2*(2.d0*fk)**2)
-        call exchpbe(rho2,s,u,v,0,lpot,exuplsd,vxuplsd,fxpbe)
-        call exchpw91(rho2,s,u,v,exuppw91,vxuppw91)
-        call exchpbe(rho2,s,u,v,1,lpot,exuppbe,vxuppbe,fxpbe)
+        call exchpbe(rho2,s,u,v,0,lpot,exuplsd,vxuplsd,fxpbe,fs,fss)
+        call exchpw91(rho2,s,u,v,exuppw91,vxuppw91,fxpw91,fs,fss)
+        call exchpbe(rho2,s,u,v,1,lpot,exuppbe,vxuppbe,fxpbe,fs,fss)
       else
         exuplsd=0.d0
         vxuplsd=0.d0
@@ -457,9 +262,9 @@ c repeat for down
         s=2.d0*agrdn/(2.d0*fk*rho2)
         u=4.d0*delgrdn/(rho2*rho2*(2.d0*fk)**3)
         v=2.d0*dnlap/(rho2*(2.d0*fk)**2)
-        call exchpbe(rho2,s,u,v,0,lpot,exdnlsd,vxdnlsd,fxpbe)
-        call exchpw91(rho2,s,u,v,exdnpw91,vxdnpw91)
-        call exchpbe(rho2,s,u,v,1,lpot,exdnpbe,vxdnpbe,fxpbe)
+        call exchpbe(rho2,s,u,v,0,lpot,exdnlsd,vxdnlsd,fxpbe,fs,fss)
+        call exchpw91(rho2,s,u,v,exdnpw91,vxdnpw91,fxpw91,fs,fss)
+        call exchpbe(rho2,s,u,v,1,lpot,exdnpbe,vxdnpbe,fxpbe,fs,fss)
       else
         exdnlsd=0.d0
         vxdnlsd=0.d0
@@ -524,7 +329,7 @@ c dvcdn=gradient correction to down correlation potential
 c----------------------------------------------------------------------
 c######################################################################
 c----------------------------------------------------------------------
-      SUBROUTINE EXCHPBE(rho,S,U,V,lgga,lpot,EX,VX,fxpbe)
+      SUBROUTINE EXCHPBE(rho,S,U,V,lgga,lpot,EX,VX,fxpbe,fs,fss)
 c----------------------------------------------------------------------
 C  PBE EXCHANGE FOR A SPIN-UNPOLARIZED ELECTRONIC SYSTEM
 c  K Burke's modification of PW91 codes, May 14, 1996
@@ -750,4 +555,93 @@ c K. Burke, May 11, 1996.
       END
 
 
+c    This piece delivers all of the Wu-Cohen functional ingredients
+c    EJW
+c----------------------------------------------------------------------
+c######################################################################
+c----------------------------------------------------------------------
+      SUBROUTINE EXCHPBEWC(rho,S,U,V,lgga,lpot,EX,VX,fxpbe,fs,fss)
+c----------------------------------------------------------------------
+C  PBE EXCHANGE FOR A SPIN-UNPOLARIZED ELECTRONIC SYSTEM
+c  K Burke's modification of PW91 codes, May 14, 1996
+c  Modified again by K. Burke, June 29, 1996, with simpler Fx(s)
+c----------------------------------------------------------------------
+c----------------------------------------------------------------------
+C  INPUT rho : DENSITY
+C  INPUT S:  ABS(GRAD rho)/(2*KF*rho), where kf=(3 pi^2 rho)^(1/3)
+C  INPUT U:  (GRAD rho)*GRAD(ABS(GRAD rho))/(rho**2 * (2*KF)**3)
+C  INPUT V: (LAPLACIAN rho)/(rho*(2*KF)**2)
+c   (for U,V, see PW86(24))
+c  input lgga:  (=0=>don't put in gradient corrections, just LDA)
+c  input lpot:  (=0=>don't get potential and don't need U and V)
+C  OUTPUT:  EXCHANGE ENERGY PER ELECTRON (EX) AND POTENTIAL (VX)
+c----------------------------------------------------------------------
+c----------------------------------------------------------------------
+c References:
+c [a]J.P.~Perdew, K.~Burke, and M.~Ernzerhof, submiited to PRL, May96
+c [b]J.P. Perdew and Y. Wang, Phys. Rev.  B {\bf 33},  8800  (1986);
+c     {\bf 40},  3399  (1989) (E).
+c----------------------------------------------------------------------
+c----------------------------------------------------------------------
+c Formulas:
+c       e_x[unif]=ax*rho^(4/3)  [LDA]
+c ax = -0.75*(3/pi)^(1/3)
+c       e_x[PBE]=e_x[unif]*FxPBE(s)
+c       FxPBE(s)=1+uk-uk/(1+ul*s*s)                 [a](13)
+c uk, ul defined after [a](13) 
+c-------------------------------------493---------------------------------
+c----------------------------------------------------------------------
+      IMPLICIT REAL*8 (A-H,O-Z)
+      parameter(thrd=1.d0/3.d0,thrd4=4.d0/3.d0)
+      parameter(pi=3.14159265358979323846264338327950d0)
+      parameter(ax=-0.738558766382022405884230032680836d0)
+      parameter(um=0.2195149727645171,uk=0.804,ul=um/uk)
+      parameter(um2=0.123456790123,ul2=um2/uk)
+      parameter(cpm=0.00793746933516)
+      parameter(dmu=um-um2,ul3=dmu/uk,paralpha=1.0)
+c----------------------------------------------------------------------
+c----------------------------------------------------------------------
+c construct LDA exchange energy density
+      exunif = AX*rho**THRD
+      if(lgga.eq.0)then
+        ex=exunif
+        vx=ex*thrd4
+        return
+      endif
+c----------------------------------------------------------------------
+c----------------------------------------------------------------------
+c construct PBE enhancement factor
+      S2 = S*S
+c      P0=1.d0+ul*S2
+c      FxPBE = 1d0+uk-uk/P0
+c      EX = exunif*FxPBE
+c      Fs=2.d0*uk*ul/(P0*P0)
+c      Fss=-4.d0*ul*S*Fs/P0
+c      write(7,*) 'P1',Fss
 
+      tmpexp = exp(-paralpha*S2)
+      P0=1.d0+ul2*S2+ul3*S2*tmpexp+log(1.0+cpm*S2*S2)/uk
+      FxPBE = 1d0+uk-uk/P0
+      EX = exunif*FxPBE
+
+      if(lpot.eq.0)return
+c----------------------------------------------------------------------
+c----------------------------------------------------------------------
+C  ENERGY DONE. NOW THE POTENTIAL:
+c  find first and second derivatives of Fx w.r.t s.
+c  Fs=(1/s)*d FxPBE/ ds
+c  Fss=d Fs/ds
+      tmp0   = 1.0+cpm*S2*S2
+      tmp1=um2+dmu*(1.0-paralpha*S2)*tmpexp
+      tmp1=tmp1+2.0*cpm*S2/tmp0
+      tmp2=dmu*paralpha*S*(paralpha*S2-2.0)*tmpexp
+      tmp2=tmp2+2.0*cpm/tmp0-4.0*cpm*cpm*S2*S2/(tmp0*tmp0)
+      Fs  =2.0*tmp1/(P0*P0)
+      Fss =4.0*tmp2/(P0*P0)-8.0*S*tmp1*tmp1/(uk*P0*P0*P0)
+c      write(7,*) '     P2',Fxpbe,Fs,Fss
+c----------------------------------------------------------------------
+c----------------------------------------------------------------------
+c calculate potential from [b](24) 
+      VX = exunif*(THRD4*FxPBE-(U-THRD4*S2*s)*FSS-V*FS)
+      RETURN
+      END

@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine optim(ixc,exccut)
+      subroutine optim(ixc,irel,exccut)
       
 c*************************************************************************
 c generates optimized pseudopotentials [Rappe, et al. PRB 41, 1227 (1990)]
@@ -29,13 +29,27 @@ c*************************************************************************
 c -------------------------------------------------------------------------
 c     External (shared between C and Fortran) common blocks
 c -------------------------------------------------------------------------
+
+      common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+
+      common /consts/ etol,vtol,maxit,isoft
       common /grid/ h,r1,z,r(npdm),np
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
-      common /rcall/ rcall(nvale0)
+
       common /filenames/ file_log
-      common /lparam/ qcl(10),nbl(10)
-      common /np/ ncores,nvales
-      common /ibound/ ibd(n0)
+
+      common /rpcc/ rpcc,rpccz
+
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
+
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+
+      common /wfn/ rnl(npdm,n0)
+
+      common /optparam/ qcl(n0),nbl(n0)
 c -------------------------------------------------------------------------
 
 c -------------------------------------------------------------------------
@@ -46,31 +60,35 @@ c -------------------------------------------------------------------------
       common /cuts/ qc,rc
       common /nnn/ nnn
       common /numfn/ numfn
-      common /atom3/ rsvale(npdm)
 c -------------------------------------------------------------------------
 
       character*80 file_log
       
       open(unit=7,file=file_log,form='formatted',access='append')
       
-      write (7,*) 'Optimized Pseudopotential Generation'
+      write (7,*) 'Optimized Pseudopotential Generation ...'
       transumry=0
       
       do i=1,np
-         rsvale(i)=0.0
+         rsval(i)=0.0
       enddo
-      
-      do nnn = 1,nvales
 
+      zeff=xion
+      do nnn=1,nval
+         zeff=zeff+wnl(nnn)
+      enddo
+
+      do nnn = 1,nval
          write(7,*) 
          write(7,*) '=================='
+         write(7,*) 'zeff=',zeff
 
          ic1=nlm(nnn)/100
          ll=(nlm(nnn)-ic1*100)/10
          rc = rcall(nnn)
          qc = qcl(nnn)
          numfn = nbl(nnn)
-
+         lo(nnn)=ll
          if (numfn.gt.numfn0) then
             write (7,*) "Too many basis functions requested"
             write (7,*) "Execution terminates."
@@ -95,21 +113,21 @@ c -------------------------------------------------------------------------
             call finteg
             call ginteg
             
-            call optsolve
+            call optsolve(ixc)
             
          else
             write(7,*) "Using Kerker method for unbound state"
-            call kpot
+            call kpot(ixc)
          endif
 
       enddo
 
-c      write(7,*) 
-c      write(7,*) '======Potentials created======'
-c      write(7,9011) transumry*1000.0,transumry*13.6058*1000.0
-      
-      call descreen(ixc,exccut)
-      call ghost
+      if (ixc.ge.0) then
+         call descreen(ixc,exccut)
+         call ghost
+      else          
+         call hfinvdesc(ixc,irel,zeff)
+      endif
 
  9000 format(1x,'Pseudizing state : |',i3,'>')
  9001 format(1x,'eigenvalue       :',f10.6)

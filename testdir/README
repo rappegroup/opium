@@ -1,8 +1,87 @@
 
-9/8/2006
 
-The script "run" will run tests on the set of param files in "params".
+8/22/07  Description of tests in $OPIUM/testdir
 
-The results obtained using the static PC version are in "results"
+This directory contains parameter files and sample results for the following
+tests.  After compiling the opium program use the script "run" to cycle
+through these tests.  
 
-EJW
+al
+au
+b
+c
+ca
+cu
+fe
+h
+hf
+ir
+la
+li
+mn_spd
+mn_dsp
+n
+ne
+o
+p
+pt
+rh
+s
+te
+ti
+y_spdsp
+y_ssppd
+
+Here are some comments about each test:
+
+1) Al - DFT/ Perdew-Zunger LDA, optimized pseudopotential.  [Loginfo] keyblock is included
+to show how to plot log. derivs (only works available for non-relativistic DFT psps).
+
+2) Au - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, scalar-relativistic
+
+3) B  - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential 
+
+4) C  - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, finer grid
+
+5) Ca - DFT/ Perdew-Zunger LDA, semicore, designed-non-local pseudopotential 
+
+6) Cu - DFT/ Perdew-Zunger LDA, optimized pseudopotential 
+
+7) Fe - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, finer grid, partial core correction
+
+8) H  - DFT/ Perdew-Zunger LDA, optimized pseudopotential
+
+9) Hf - DFT/ Perdew-Zunger LDA, optimized pseudopotential, scalar-relativistic
+
+10) Ir - DFT/ Perdew-Zunger LDA, optimized pseudopotential, scalar-relativistic, unbound f-state
+
+11) La - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential, scalar-relativistic, bound f-state
+
+12) Li - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential
+
+13) Mn_spd, Mn_dsp - HF, optimized pseudopotential, smoothing on (3), this test exists to show that
+HF psps are independent of the order of the valence orbitals.
+
+14) N - HF, Troullier-Martins pseudopotential, smoothing on (1)
+
+15) Ne - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential 
+
+16) O - DFT/ Perdew-Zunger LDA, optimized pseudopotential, unbound d-state
+
+17) P - HF, optimized pseudopotential, smoothing on (3)
+
+18) Pt - DFT/ Perdew-Burke-Ernzerhof GGA, optimized pseudopotential, scalar- relativistic, finer grid
+
+19) Rh - DFT/ Perdew-Burke-Ernzerhof GGA, designed non-local  pseudopotential, scalar-relativistic, finer grid
+
+20) S - DFT/ Perdew-Zunger LDA, optimized pseudopotential, unbound d-state
+
+21) Te - HF, optimized pseudopotential, smoothing on (3), scalar-relativistic
+
+22) Ti - DFT/ Perdew-Zunger LDA, semicore, optimized pseudopotential
+
+23) Y_spdsp, Y_ssppd - DFT/ Wu-Cohen GGA, semicore, optimized pseudopotential, scalar-relativistic, fine 
+convergence tolerance, this test exists to show that DFT psps are independent of order of the valence
+states.
+
+

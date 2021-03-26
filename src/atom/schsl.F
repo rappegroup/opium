@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine schsl(iorb,nqn,lang,ei,imax,rv,p,igh)
+      subroutine schsl(iorb,nqn,lang,ei,imax,rv,p,igh,ibound)
       implicit double precision (a-h,o-z)
       
 #include "fortdim.h"
@@ -27,9 +27,8 @@ c -------------------------------------------------------------------------
       common /consts/ etol,vtol,maxit,isoft
       common /grid/ h,r1,z,r(npdm),np
       common /nlpot2/ inl,indrc(n0),IB,ID,IG
-      common /ibound/ ibd(n0)
-      common /ensave/ ensave(n0)
-      common /npm/ ncores,nvales,iskip,maxip
+
+      common /etrial/ etrial(n0)
 c -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks                
 c -------------------------------------------------------------------------
@@ -38,6 +37,7 @@ c -------------------------------------------------------------------------
       common /elim/ emore,eless,elim
       common /ipos/ ipos(n0),itermcount
       common /itoo/ ietoolo,ietoohi
+      common /iskip/ iskip
       logical bound
 c -------------------------------------------------------------------------
       dimension rv(npdm), p(npdm), phom(npdm)
@@ -65,11 +65,10 @@ c -------------------------------------------------------------------------
       enddo
 
       bound=.true.
-      if (ibd(iorb).eq.0) then
+      if (ibound.eq.0) then
          bound=.false.
-         ei=ensave(iorb)
       endif
-
+      
       if (inl.ne.0) call nlcont(lang,phiguess(1,iorb),phipsref(1,iorb),
      $     flstar,wnlfract)
 
@@ -78,11 +77,11 @@ c -------------------------------------------------------------------------
       if (iterm.eq.1) then
          itermcount=itermcount+1
          write (7,9003) nqn,lang
-         if (itermcount.gt.5.and.igh.eq.0) then 
-            write(7,*) '!NOTE! : setting',nqn,lang,' to be unbound!'            
-            ei=ensave(iorb)
-            ibd(iorb)=0
-         endif
+c         if (itermcount.gt.5.and.igh.eq.0) then 
+c            write(7,*) '!NOTE! : setting',nqn,lang,' to be unbound!'            
+c            ei=etrial(iorb)
+c            ibound=0
+c         endif
          goto 912
       endif
 
@@ -108,7 +107,8 @@ c -------------------------------------------------------------------------
 
          call outward(ei,lang,rv,p,phom,pinhom,
      $        flstar,phipsref(1,iorb),imat,xt,wt)
-         
+
+
          if (bound) call cntnodes(nqn,lang,ei,p,imat,node,iskip,iclose)
          if (iterm.eq.1) goto 912
          if (iskip.eq.1) goto 1
@@ -120,22 +120,22 @@ c -------------------------------------------------------------------------
          val = abs(de/ei)
 
          if (val.le.etol) goto 911
-
+         
  1303    ep = ei + de
          if (ep.lt.emore) goto 1304
          de = de * 0.5
          val = val * 0.5
-         
+
          if (val.gt.etol) goto 1303
 
          write (iout,9000) nqn,lang
          iterm=1
          ipos(iorb)=ipos(iorb)+1
-         if (igh.eq.0.and.ipos(iorb).gt.4) then 
-            write(7,*) '!NOTE! : setting',nqn,lang,' to be unbound!'
-            ei=ensave(iorb)
-            ibd(iorb)=0
-         endif
+c         if (igh.eq.0.and.ipos(iorb).gt.4) then 
+c            write(7,*) '!NOTE! : setting',nqn,lang,' to be unbound!'
+c            ei=etrial(iorb)
+c            ibound=0
+c         endif
          goto 912
 
  1304    ei = ep
@@ -163,7 +163,7 @@ c      write (iout,9101) iter,iorb,nqn,lang,ei,de,imat
       itermcount=itermcount+1
 c      write (iout,9102) iter,iorb,nqn,lang,ei,de,imat
 
- 9000 format(1x,'WARNING! : schsl found a positive eigenvalue.',
+ 9000 format(1x,'!WARNING! : schsl found a positive eigenvalue.',
      $     ' n,l=:', 2i4)
  9003 format(1x,'!WARNING! : schsl found a positive eigenvalue.',
      $     ' n,l=:', 3i4)
@@ -222,7 +222,6 @@ c      write (iout,9102) iter,iorb,nqn,lang,ei,de,imat
 #include "fortdim.h"
       common /grid/ h,r1,z,r(npdm),np
       common /elim/ emore,eless,elim
-      common /ibound/ ibd(n0)
       common /iterm/ iterm
       dimension wnlf(npdm),rv(npdm),v(npdm)
 
@@ -328,7 +327,7 @@ c     if (ei.ge.-etol.or.ncross.gt.node) then
       common /nlpot2/ inl,indrc(n0),IB,ID,IG
       
       dimension a(npdm),phom(npdm),pinhom(npdm),rv(npdm)
-      dimension dl(npl0,4,3,2),dld(5),g(npdm),fs(npdm),pref(npdm)
+      dimension dl(n0),dld(5),g(npdm),fs(npdm),pref(npdm)
       dimension flph(npdm),flw(npdm),flx(npdm),p(npdm)
 
       do i =1, np

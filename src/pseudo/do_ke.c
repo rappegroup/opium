@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,18 +54,18 @@ int do_ke(param_t *param, char *logfile){
   /* set the log file */
   sprintf(filenames_.file_log, "%s", logfile);
 
-  atomic_.norb=param->nll;
-  np_.nvales=param->nll;
+  aorb_.norb=param->nll;
+  aorb_.nval=param->nll;
 
   readAE(param);
   readPS(param);
   nrelorbnl(param,config);
 
-  sprintf(filename, "%s.psi_nl", param->name);
+  /*sprintf(filename, "%s.psi_nl", param->name);
   fp = fopen(filename, "rb");
   for (i=0; i<param->nval; i++)
-    fread(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
-  fclose(fp);
+    fread(wfn_.rnl[i], sizeof(double), param->ngrid, fp);
+    fclose(fp);*/
   
   sprintf(filename, "%s.kedat", param->name);
   kcomp_(filename,rkstor,ikstor);
@@ -98,11 +98,11 @@ char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikst
   rp+=sprintf(rp, "\t --------------------------------------------------------------- \n");
   rp+=sprintf(rp, "\t\t \t Ecut[Ry] \t error [meV/e] \n");
   for (i=0; i<param->nll; i++){
-    if (ibound_.ibd[i]==1) {
+    if (aval_.ibd[i]==1) {
       if (ikstor[j][i] < 0) {
-	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",atomic_.nlm[i]);
+	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i]);
       }else{
-	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",atomic_.nlm[i],ikstor[j][i],rkstor[j][i]);
+	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",aorb_.nlm[i],ikstor[j][i],rkstor[j][i]);
       }
     }
   }     
@@ -111,11 +111,11 @@ char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikst
   rp+=sprintf(rp, "\t --------------------------------------------------------------- \n");
   rp+=sprintf(rp, "\t\t \t Ecut[Ry] \t error [meV/e] \n");
   for (i=0; i<param->nll; i++){
-    if (ibound_.ibd[i]==1) {
+    if (aval_.ibd[i]==1) {
       if (ikstor[j][i] < 0) {
-	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",atomic_.nlm[i]);
+	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i]);
       }else{
-	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",atomic_.nlm[i],ikstor[j][i],rkstor[j][i]);
+	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",aorb_.nlm[i],ikstor[j][i],rkstor[j][i]);
       }
     }
   }     
@@ -125,11 +125,11 @@ char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikst
   rp+=sprintf(rp, "\t --------------------------------------------------------------- \n");
   rp+=sprintf(rp, "\t\t \t Ecut[Ry] \t error [meV/e] \n");
   for (i=0; i<param->nll; i++){
-    if (ibound_.ibd[i]==1) {
+    if (aval_.ibd[i]==1) {
       if (ikstor[j][i] < 0) {
-	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",atomic_.nlm[i]);
+	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i]);
       }else{
-	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",atomic_.nlm[i],ikstor[j][i],rkstor[j][i]);
+	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",aorb_.nlm[i],ikstor[j][i],rkstor[j][i]);
       }
     }
   }     
@@ -139,11 +139,11 @@ char * write_reportke(param_t *param , char *rp, double rkstor[10][N0], int ikst
   rp+=sprintf(rp, "\t --------------------------------------------------------------- \n");
   rp+=sprintf(rp, "\t\t \t Ecut[Ry] \t error [meV/e] \n");
   for (i=0; i<param->nll; i++){
-    if (ibound_.ibd[i]==1) {
+    if (aval_.ibd[i]==1) {
       if (ikstor[j][i] < 0) {
-	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",atomic_.nlm[i]);
+	rp+=sprintf(rp, "\t%3d \t\t   -----  >400 Ry   -----\n",aorb_.nlm[i]);
       }else{
-	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",atomic_.nlm[i],ikstor[j][i],rkstor[j][i]);
+	rp+=sprintf(rp, "\t%3d \t\t   %d \t %16.3f \n",aorb_.nlm[i],ikstor[j][i],rkstor[j][i]);
       }
     }
   }     

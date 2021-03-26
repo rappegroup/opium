@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -21,25 +21,18 @@ c
       
 #include "fortdim.h"
 
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /wfn/ rnl(npdm,n0)
       common /grid/ h,r1,z,r(npdm),np
-      common /box/ iboxstart(10),iboxend(10),boxheight(10),numbox
-      common /ilogder/ ilogder
-      common /ibound/ ibd(n0)
-      common /local/ iloc,idesign
-      common /logarith/ rphas,elogmax,elogmin,dlwf(npl0,n0)
-      common /nlpot2/ inl,indrc(n0),IB,ID,IG
-      common /npm/ ncores,nvales,iskip,maxip
-      common /rpcc/ rpcc,rpccz
-      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm)
-      common /rcall/ rcall(n0)
+      common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
+     $     rsval(npdm)
       common /filenames/ file_log
-      common /results/ rnorm(30), etot, lghost(30)
-      common /nmax/ nmax(n0),maxim
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /valden/ rsval(npdm)
       common /nlcore/ rvloc(npdm)
-      common /nll/ nll
+      common /psdat/ nll
 
       character*80 name1
       character*80 name2
@@ -56,7 +49,7 @@ c
       pi4=4.0*pi                                                      
       rnq=sqrt(2.0/pi)
 
-      do m=1,nvales
+      do m=1,nval
          l = nlm(m)/10 - 10 * (nlm(m)/100)
          qmax=20
          qp=500

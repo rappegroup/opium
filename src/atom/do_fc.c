@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 The OPIUM Group
+ * Copyright (c) 1998-2008 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-/* 
- * $Id: do_nl.c,v 1.10 2004/10/02 18:34:48 ewalter Exp $
- */
 
 /* standard libraries */
 #include <stdio.h>
@@ -34,10 +31,10 @@
 
 /* report feature */
 
-static char report[800];
+static char report[8000];
 void nrelorbnl(param_t *param, int); 
 char * write_reportfc(param_t *param, char *rp,int,double temp_eigen[], double temp_norm[]);
-void scpot_(double  *, int * ,int *, int *, int*);
+void dftsolve_(double  *, int * ,double *, int *, int *, int *, int *, int *);
 
 int do_fc(param_t *param, char *logfile){
 
@@ -48,6 +45,8 @@ int do_fc(param_t *param, char *logfile){
   int ipsp=1;
   int ifc=1;
   int iexit=0;
+  int iprint=1;
+  int irel=1;
   int ncore;
   FILE *fp;
   char filename[160];
@@ -72,40 +71,40 @@ int do_fc(param_t *param, char *logfile){
   sprintf(filename, "%s.psi_ae_core", param->name);
   fp = fopen(filename, "rb");
   for (i=0; i<ncore; i++) 
-    fread(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+    fread(wfn_.rnl[i], sizeof(double), param->ngrid, fp);
   fclose(fp);
 
   sprintf(filename, "%s.eig_ae_core", param->name);
   fp = fopen(filename, "rb");
 
    for (i=0; i<ncore; i++) {
-    fread(&atomic_.en[i], sizeof(double),1, fp);
-    fread(&atomic_.wnl[i], sizeof(double),1, fp);
-    fread(&atomic_.nlm[i], sizeof(int),1, fp);
-    fread(&nmax_.nmax[i], sizeof(int),1, fp);
-    fread(&nmax_.maxim, sizeof(int),1, fp);
-    fread(&atomic_.xion, sizeof(double),1, fp);
-    fread(&ibound_.ibd[i], sizeof(int),1, fp);
-    fread(&ensave_.ensave[i], sizeof(double),1, fp);
+    fread(&adat_.en[i], sizeof(double),1, fp);
+    fread(&adat_.wnl[i], sizeof(double),1, fp);
+    fread(&aorb_.nlm[i], sizeof(int),1, fp);
+    fread(&aorb_.nmax[i], sizeof(int),1, fp);
+    fread(&aorb_.maxim, sizeof(int),1, fp);
+    fread(&adat_.xion, sizeof(double),1, fp);
+    fread(&aval_.ibd[i], sizeof(int),1, fp);
+    fread(&etrial_.etrial[i], sizeof(double),1, fp);
   }
   fclose(fp);
   
-  zeff=atomic_.xion;
+  zeff=adat_.xion;
   for (i=0; i<param->nll; i++) {
-    if (ibound_.ibd[i]==0) {
+    if (aval_.ibd[i]==0) {
       fp_log = fopen(logfile, "a");
       fprintf(fp_log," !NOTE! State: |%3d> marked as unbound, using reference eigenvalue of %6.3f \n",
-	      atomic_.nlm[i],ensave_.ensave[i]);
+	      aorb_.nlm[i],etrial_.etrial[i]);
       fclose(fp_log);
     }
-    zeff +=atomic_.wnl[i];
+    zeff +=adat_.wnl[i];
   }
 
-  scpot_(&zeff,&param->ixc,&ipsp,&ifc, &iexit); 
+  dftsolve_(&param->z,&param->ixc,&param->exccut,&ipsp,&ifc,&iexit,&irel,&iprint);
   
   rp = write_reportfc(param,rp,config,temp_eigen,temp_norm);
 
-  enfc[0] = results_.etot;
+  enfc[0] = aval_.etot;
 
   fp_log = fopen(logfile, "a");
 
@@ -136,8 +135,8 @@ char * write_reportfc(param_t *param, char *rp, int config, double temp_eigen[],
 		"    ------------------------------------------------------------------\n");
     for (i=ncore; i<param->norb; i++)
       rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\t%6s\n",
-		  atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
-		  results_.rnorm[i],(results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
+		  aorb_.nlm[i], adat_.wnl[i], adat_.en[i],
+		  aval_.rnorm[i],(local_.nlghost[i]>0)?"yes":((local_.nlghost[i]<0)?"?":"no"));
     
   }else{
     rp+=sprintf(rp, 
@@ -145,12 +144,12 @@ char * write_reportfc(param_t *param, char *rp, int config, double temp_eigen[],
 		"    ------------------------------------------------------------------\n");
     for (i=ncore; i<param->norb; i++)
       rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\t%6s\n",
-		  atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
-		  results_.rnorm[i],(results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
+		  aorb_.nlm[i], adat_.wnl[i], adat_.en[i],
+		  aval_.rnorm[i],(local_.nlghost[i]>0)?"yes":((local_.nlghost[i]<0)?"?":"no"));
     
   }
   rp+=sprintf(rp, "\n      E_tot = %19.10f Ry\n",
-	      results_.etot);
+	      aval_.etot);
 
   if (config>=0) {
     rp+=sprintf(rp, 
@@ -161,11 +160,11 @@ char * write_reportfc(param_t *param, char *rp, int config, double temp_eigen[],
     for (i=ncore; i<param->norb; i++) {
       j=i-ncore;
       rp+=sprintf(rp, " AE-FC- %3d\t%6.3f\t%19.10f\t%14.10f\t\n",
-		  atomic_.nlm[i], atomic_.wnl[i], 1000.0*(temp_eigen[j]-atomic_.en[i]),
-		  1000.0*(temp_norm[j]-results_.rnorm[i]));
+		  aorb_.nlm[i], adat_.wnl[i], 1000.0*(temp_eigen[j]-adat_.en[i]),
+		  1000.0*(temp_norm[j]-aval_.rnorm[i]));
       
-      temp_eigen_tot += fabs(temp_eigen[j]-atomic_.en[i]);
-      temp_norm_tot += fabs(temp_norm[j]-results_.rnorm[i]);
+      temp_eigen_tot += fabs(temp_eigen[j]-adat_.en[i]);
+      temp_norm_tot += fabs(temp_norm[j]-aval_.rnorm[i]);
     }
     rp+=sprintf(rp, " AE-FC-  total error =\t%19.10f\t%14.10f\n\n",
 		1000*temp_eigen_tot, 1000*temp_norm_tot);

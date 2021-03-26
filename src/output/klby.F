@@ -1,5 +1,5 @@
 c
-c Copyright (c) 1998-2005 The OPIUM Group
+c Copyright (c) 1998-2008 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
 c it under the terms of the GNU General Public License as published by
@@ -24,18 +24,23 @@ c
 c      common /atomic2/ rnl(npdm,5)                                      
 c      common /pseudo2/ r(npdm),rvps(5,npdm),rvlr(npdm),
 c     &                 npoint,iz,izv,idi,mcut
-      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
+c      common /atomic/ xion,rnl(npdm,n0),nlm(n0),wnl(n0),en(n0),norb
       common /grid/ h,r1,z,r(npdm),np
       common /dql/ dql
       common /maxx/ maxx(5)
       common /en/ ien(10),inv                                           
       common /flqeta/ eta(5),flq(maxflq,5),nflq
-      common /np/ ncores,nvales      
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /wfn/ rnl(npdm,n0)
+      common /psdat/ nll
+
       common /nlcore/ rvloc(npdm)
       common /pwf/ zeff, rpcc, spacing, first,
-     &             nval, igrid, inl, ist1, ncut, ilocal,ilocalind
+     &             nval2, igrid, inl, ist1, ncut, ilocal,ilocalind
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
-      common /nmax/ nmax(n0),maxim
       dimension delcor(npdm),f(npdm),f3(npdm),ill(4)                      
 
 c -gjt-------------------------------------------------------------
@@ -77,8 +82,8 @@ c ---------------------------------------------------------
 
 c -- print and check the number of projectors
 
-      write(7,10) nval                                                   
-      if (nval.le.1) then                                                 
+      write(7,10) nll                                                
+      if (nll.le.1) then                                                 
          write(7,2223)                                                 
          stop                                                          
       endif                                                         
@@ -92,25 +97,25 @@ c -- main loop over projectors
          ill(i)=0
       enddo
 
-      do k=1,nval
-         do lp=1,nvales
-            nnj=nlm(lp)/100
-            ljp=(nlm(lp) - nnj * 100)/10 + 1
-            if ((ill(ljp).eq.0).and.(ljp.eq.k)) then
-               ill(ljp)=ill(ljp)+1
+      k=0
+      do k=1,nll
+c            ljp=lo(lp)+1
+c            if (ill(ljp).eq.0) then
+c               ill(ljp)=ill(ljp)+1
                
-               im=nmax(lp)
+               im=nmax(k)
 
+c               write(7,*) 'klb', k,ljp,ill(ljp),ilocalind+1
 c -- -- get the local potential into the right format
-        
+
                do j=1,im
                   if (inl.ne.0) then
-                     delcor(j) = rvcore(j,lp)-rvloc(j)
+                     delcor(j) = rvcore(j,k)-rvloc(j)
                   else
-                     delcor(j)=rvcore(j,lp)-rvcore(j,ilocalind+1)
+                     delcor(j)=rvcore(j,k)-rvcore(j,ilocalind+1)
                   endif
 
-                  f3(j)=delcor(j)*rnl(j,lp)**2                    
+                  f3(j)=delcor(j)*rnl(j,k)**2                    
                enddo
                
 c     -- -- calculate the KB denominator: eta
@@ -119,7 +124,7 @@ c     -- -- calculate the KB denominator: eta
                call radina(r,f3,-1,im,h,fx,inv,ien)
 
                eta(k) = fx
-               write(7,998) k-1,eta(k)
+               write(7,998) lo(k),eta(k)
                
 c     -- -- KB factor loop
                
@@ -132,7 +137,7 @@ c     -- ---- use besfn() to do Fourier transform of the potential
                   do i=1,im        
                                              
                      qr = r(i)*q
-                     f(i) = delcor(i)*rnl(i,lp)*besfn(qr,k-1)
+                     f(i) = delcor(i)*rnl(i,k)*besfn(qr,k-1)
                   enddo
                   
                   fx = dble(k+k)
@@ -143,8 +148,7 @@ c     -- ---- use besfn() to do Fourier transform of the potential
                   
                enddo
             
-            endif   
-         enddo
+c            endif   
       enddo
 
  10   format(1x,'number of angular momentum states',i5)                 
