@@ -149,35 +149,6 @@ c     EJW this is for dirac-fock potrdf2.F
 
             call potl(yr,nnn)
             call xch(x,nnn,1)
-
-            !debug: print out potentials
-c            write(*,*) "in psp, maxim=", maxim," nval=",nval," nnn=",nnn
-c            open(unit=91,file="rvps_psp.dat")
-c            open(unit=92,file="yr_psp.dat")
-c            open(unit=93,file="xrnl_psp.dat")
-c            open(unit=94,file="rvdft_psp.dat")
-c            open(unit=95,file="rvh_psp.dat")
-c            open(unit=96,file="rvx_psp.dat")
-c            open(unit=97,file="rvc_psp.dat")
-c            do j=1,np
-c               write(91,*) rvps(j,nnn)
-c               write(92,*) 2.d0*yr(j)
-c               write(93,*) x(j)/rnl(j,nnn)
-c               write(94,*) rvdft(j)
-c               write(95,*) rvh(j)
-c               write(96,*) rvx(j)
-c               write(97,*) rvc(j)
-c            enddo
-c
-c            close(unit=91)
-c            close(unit=92)
-c            close(unit=93)
-c            close(unit=94)
-c            close(unit=95)
-c            close(unit=96)
-c            close(unit=97)
-
-            
             do j=1,np
                rps=rnl(j,nnn)*sqrt(r(j))
                if (r(j).lt.rmmax) then
@@ -190,6 +161,7 @@ c            close(unit=97)
                endif
             enddo
          else
+            !if irel neq 0 or relativistic
             m=1
             do j=1,np
                rjunk(j)=0.d0
@@ -210,29 +182,8 @@ c            close(unit=97)
                endif
             enddo
          endif
-      enddo
+         enddo !end loop of nnn=1,nval
  
-c      if (irel.eq.1) then
-c         iexit=0
-c         ifc=0
-c         exccut=0.d0
-c         do i=1,norb
-c            no(i)=lo(i)+1
-c            esave(i)=en(i)
-c         enddo
-c         close(7)
-c         call dfsolve(zeff,ixc,exccut,ipsp,ifc,iexit,irel,iprint)
-c         
-c         open(unit=7,file=file_log,form='formatted',access='append')
-c         write(7,*) "Results of DF psp solve..."
-c         do k=1,nval
-c            xst=" "
-c            if (ka(k).gt.0) xst="*"
-c         
-c            write(7,9112) no(k),xc(lo(k)),xst,esave(k),en(k)
-c         enddo
-c      endif
-
 
       if (irel.eq.1) then
          nc=0
@@ -326,6 +277,9 @@ c      endif
 
       close(7)
 
+c***************************************************************      
+c     rvcore now is a descreened pseudopotential
+c***************************************************************      
       call hfsolve(zeff,ixc,exccut,ipsp,ifc,iexit,irel,iprint)
 
       open(unit=7,file=file_log,form='formatted',access='append')

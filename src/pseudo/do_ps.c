@@ -454,9 +454,9 @@ void writePS(param_t *param) {
   for (i=0; i<param->nll;i++) {
     for (j=0;j<param->ngrid;j++) {
       if ((grid_.r[j]<aval_.rcall[i])||(iset)) {
-	fprintf(fp,"%20.10lg %20.10lg 0.0\n",grid_.r[j],totpot_.rvcore[i][j]/grid_.r[j]);
+	fprintf(fp,"%20.10lg %20.10lg 0.0 1\n",grid_.r[j],totpot_.rvcore[i][j]/grid_.r[j]);
       }else{
-	fprintf(fp,"%20.10lg %20.10lg 1e-8\n",grid_.r[j],totpot_.rvcore[i][j]/grid_.r[j]);
+	fprintf(fp,"%20.10lg %20.10lg 1e-8 1\n",grid_.r[j],totpot_.rvcore[i][j]/grid_.r[j]);
 	iset=1;
       }
     }
@@ -476,9 +476,9 @@ void writePS(param_t *param) {
   for (i=0; i<param->nll;i++) {
     for (j=0;j<param->ngrid;j++) {
       if ((grid_.r[j]<aval_.rcall[i])||(iset)) {
-	fprintf(fp,"%20.10lg %20.10lg 0.0\n",grid_.r[j],totpot_.rvps[i][j]/grid_.r[j]);
+	fprintf(fp,"%20.10lg %20.10lg 0.0 2\n",grid_.r[j],totpot_.rvps[i][j]/grid_.r[j]);
       }else{
-	fprintf(fp,"%20.10lg %20.10lg 1e-8\n",grid_.r[j],totpot_.rvps[i][j]/grid_.r[j]);
+	fprintf(fp,"%20.10lg %20.10lg 1e-8 2\n",grid_.r[j],totpot_.rvps[i][j]/grid_.r[j]);
 	iset=1;
       }
     }

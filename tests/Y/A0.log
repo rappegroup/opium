@@ -1,0 +1,1560 @@
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+           OPIUM  Version:        4.1                             
+           =====================================            
+ See http://opium.sourceforge.net for help and information                 
+ Copyright 2009 : The OPIUM project                         
+
+ Compile host     : dhcp-18-111-28-83.dyn.mit.edu
+ Compile OS       : Darwin 17.6.0 i386
+ Compile date     : Mon Jul  9 16:33:49 EDT 2018
+
+ Execution host   : dhcp-18-111-28-83.dyn.mit.edu
+ time of execution: Mon Jul  9 16:36:33 2018
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Reading parameter file:  <A0.param> ... 
+ File prefix             : A0 
+ Element                 : Yttrium    (Y) 
+ Z                       : 39 
+ 
+ Number of all-electron orbitals   : 11 
+ Number of pseudo       orbitals   : 5 
+ 
+ Fully relativistic pseudopotential 
+ Relativistic corrections applied to XC potential 
+ Exchage-correlation functional is : Perdew, Burke, Ernzerhof GGA 
+ GGA smoothed from 0 to 0.001000 bohr using switch to LDA 
+ The s potential is used for the KB construction 
+ Optimized (RRKJ) pseudopotential method will be used 
+
+ nl    cutoff radii    q-max      # bessel functions
+ 4s       1.580        7.070              10 
+ 4p       1.730        7.070              10 
+ 4d       1.780        7.070              10 
+ 5s       1.580        7.070              10 
+ 5p       1.730        7.070              10 
+
+ Reference Configuration: core  <-/-> valence 
+ 1s2  2s2  2p6  3s2  3p6  3d10  <-/-> 4s2  4p6  4d3  5s0  5p0 
+
+ Grid definitions: 
+ a_grid=1.00e-04    b_grid=1.30e-02    # points=1170 
+ r(1)=2.95e-05      r(np)=1.17e+02    
+
+ dEmax tolerance:  1.00e-08      dVmax tolerance:  1.00e-06     
+
+ Box 1  0.010107 --> 1.588  height: 0 
+ Starting calculation...
+
+ ======================================================================== 
+ Begin AE calculation
+ ======================================================================== 
+ Performing relativistic AE calculation...  
+ ---------Eigenvalue guesses---------
+ 1s         -1521.00000000
+ 2s          -380.25000000
+ 2p          -380.25000000
+ 2p          -380.25000000
+ 3s          -169.00000000
+ 3p          -169.00000000
+ 3p          -169.00000000
+ 3d          -169.00000000
+ 3d          -169.00000000
+ 4s           -95.06250000
+ 4p           -95.06250000
+ 4p           -95.06250000
+ 4d           -95.06250000
+ 4d           -95.06250000
+ 5s           -60.84000000
+ 5p           -60.84000000
+ 5p           -60.84000000
+ orb # 13 did not converge
+ ev = -0.1218780492E+00 nodes =       1 dev =  0.1704752508E-01
+ orb # 14 did not converge
+ ev = -0.1543427682E+00 nodes =       1 dev =  0.1164385321E+00
+
+ iter       Etot             Ebs             Ehxc       de_max   dv_max
+   1    -6938.4114644   -4173.6617139   -2764.7497505 0.10E+01 0.33E+01
+   2    -6882.5817131   -4096.0067171   -2786.5749960 0.30E+01 0.30E+01
+   3    -6735.8486627   -4011.9619726   -2723.8866901 0.54E+00 0.12E+01
+   4    -6758.2173483   -4023.3004181   -2734.9169303 0.47E+00 0.20E+00
+   5    -6773.3107406   -4028.7666696   -2744.5440709 0.43E+00 0.10E+00
+   6    -6772.0632639   -4025.7041165   -2746.3591473 0.14E+00 0.12E+00
+   7    -6766.0007225   -4020.7541733   -2745.2465492 0.14E+00 0.79E-01
+   8    -6766.5956076   -4020.8051331   -2745.7904744 0.31E+00 0.36E-01
+   9    -6766.4330766   -4020.6170387   -2745.8160380 0.32E-01 0.28E-01
+  10    -6765.6932659   -4020.3820197   -2745.3112462 0.92E-01 0.16E-01
+  11    -6765.8855088   -4020.5924165   -2745.2930922 0.27E-01 0.68E-02
+  12    -6766.4104186   -4020.8498007   -2745.5606179 0.28E-01 0.73E-02
+  13    -6766.3325200   -4020.7533034   -2745.5792166 0.11E-01 0.41E-02
+  14    -6766.0230330   -4020.6098683   -2745.4131647 0.16E-01 0.46E-02
+  15    -6766.0726602   -4020.6697114   -2745.4029487 0.70E-02 0.26E-02
+  16    -6766.1729733   -4020.7173879   -2745.4555854 0.55E-02 0.44E-03
+  17    -6766.2035354   -4020.7193148   -2745.4842206 0.20E-03 0.89E-03
+  18    -6766.1866890   -4020.7052012   -2745.4814877 0.16E-02 0.37E-03
+  19    -6766.1614063   -4020.6948309   -2745.4665754 0.13E-02 0.37E-03
+  20    -6766.1638233   -4020.6990606   -2745.4647627 0.55E-03 0.24E-03
+  21    -6766.1762836   -4020.7035535   -2745.4727301 0.84E-03 0.25E-03
+  22    -6766.1751442   -4020.7018316   -2745.4733126 0.34E-03 0.14E-03
+  23    -6766.1711044   -4020.7003116   -2745.4707928 0.28E-03 0.30E-04
+  24    -6766.1700998   -4020.7006196   -2745.4694802 0.14E-04 0.51E-04
+  25    -6766.1711998   -4020.7014711   -2745.4697287 0.98E-04 0.25E-04
+  26    -6766.1721610   -4020.7018548   -2745.4703063 0.54E-04 0.70E-05
+  27    -6766.1723039   -4020.7017825   -2745.4705214 0.28E-05 0.88E-05
+  28    -6766.1720684   -4020.7016232   -2745.4704452 0.14E-04 0.49E-05
+  29    -6766.1719041   -4020.7015654   -2745.4703386 0.51E-05 0.20E-05
+  30    -6766.1718955   -4020.7015868   -2745.4703087 0.25E-05 0.15E-05
+  31    -6766.1719422   -4020.7016159   -2745.4703263 0.29E-05 0.13E-05
+  32    -6766.1719680   -4020.7016244   -2745.4703437 0.60E-06 0.11E-05
+  33    -6766.1719668   -4020.7016202   -2745.4703467 0.70E-06 0.75E-06
+  34    -6766.1719589   -4020.7016159   -2745.4703429 0.58E-06 0.40E-06
+  35    -6766.1719557   -4020.7016152   -2745.4703404 0.11E-06 0.21E-06
+  36    -6766.1719567   -4020.7016162   -2745.4703405 0.10E-06 0.14E-06
+  37    -6766.1719581   -4020.7016167   -2745.4703414 0.63E-07 0.10E-06
+  38    -6766.1719584   -4020.7016166   -2745.4703418 0.13E-07 0.71E-07
+  39    -6766.1719580   -4020.7016164   -2745.4703417 0.33E-07 0.43E-07
+  40    -6766.1719578   -4020.7016162   -2745.4703415 0.16E-07 0.24E-07
+  41    -6766.1719577   -4020.7016163   -2745.4703415 0.14E-08 0.15E-07
+
+   41 iterations: (units are Ry and bohr)
+ Energy:   -6766.17195772  Ebs:   -4020.70161626  Ehxc:   -2745.47034146
+ Eh    :    2805.52353002  Exc:    -214.46527035  Evxc:    -274.51845891
+
+   Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
+    |100 >      2.000       -1235.844718
+    |200 >      2.000        -169.265254
+    |210->      2.000        -154.496172
+    |210+>      4.000        -148.885256
+    |300 >      2.000         -26.860665
+    |310->      2.000         -21.426780
+    |310+>      4.000         -20.549352
+    |320->      4.000         -10.998020
+    |320+>      6.000         -10.840716
+    |400 >      2.000          -3.326803      0.239582      1.132551
+    |410->      2.000          -1.939843      0.272404      1.240448
+    |410+>      4.000          -1.836080      0.294265      1.256679
+    |420->      1.200          -0.090069      0.794325      1.880377
+    |420+>      1.800          -0.085519      0.802693      1.904982
+    |500 >      0.000          -0.250179      0.966105      3.509496
+    |510->      0.000          -0.088698      0.981352      4.857250
+    |510+>      0.000          -0.084552      0.981480      4.985194
+
+ ======================================================================== 
+ End AE calculation
+ ======================================================================== 
+
+ ======================================================================== 
+ Begin PS construction
+ ======================================================================== 
+ Optimized Pseudopotential Generation ...
+
+ ==================
+ zeff=   11.000000000000000     
+ Pseudizing state : |400>
+ eigenvalue       : -3.326803
+ qc               :  7.070000
+ # bessel fxns    : 10
+ point nearest rc :  839
+ rc               :  1.580000
+ actual rc        :  1.587995
+
+ Psi(rc)          :     0.4822172860
+ Slope at rc      :    -0.8034493038
+ Curvature at rc  :     0.9450864585
+ Del^2 Psi at rc  :    -0.0668174131
+ Log Deriv at rc  :    -1.6661561648
+
+ Starting KE minimization...
+  step #    theta       slope       curv       KEresid    coeffsum
+     1    0.002987   -1.168722  195.635515    0.000106    0.180026
+     2   -0.000719    0.132397   92.071368    0.000058    0.197741
+     3   -0.000288    0.063665  110.682470    0.000049    0.197268
+     4   -0.000257    0.024325   47.332889    0.000046    0.196276
+    11   -0.000004    0.000996  134.271065    0.000038    0.200970
+
+ # steps:    11
+ Final KE error:    0.0000378835
+ Sum of coeffs :    0.2009698331
+ ---------------------------------------------------------------
+ Coeff:      1.219775 -0.531708 -0.484252  0.001324 -0.010132  0.006924 -0.005240  0.004421 -0.004046  0.003904
+ ---------------------------------------------------------------
+ Resid KE (Ry)     :        0.0000378835
+ Norm error        :    -0.222E-15
+ Continuity error  :    -0.278E-15
+ Curvature error   :    -0.150E-13
+ ---------------------------------------------------------------
+ Bessel wavevectors and final coefficients
+   1        1.3921651285        1.2197752923
+   2        3.1666920043       -0.5317078052
+   3        5.0727611324       -0.4842517050
+   4        7.0165361309        0.0013236441
+   5        8.9749247489       -0.0101324547
+   6       10.9403424316        0.0069241847
+   7       12.9096501044       -0.0052402567
+   8       14.8813279392        0.0044208773
+   9       16.8545540588       -0.0040457054
+  10       18.8288462193        0.0039037618
+
+ Total KE           (Ry) :     1.6422457693
+ 0  -> qc contribution   :     1.6422078858
+ qc -> oo contribution   :     0.0000378835   (=Convergence term)
+ Occupancy of this state :     2.0000000000
+ Convergence term (Ry/e) :     0.0000378835
+ Convergence error (mRy) :     0.0757670903
+ Convergence error (meV) :     1.0308718770
+
+
+ ==================
+ zeff=   11.000000000000000     
+ Pseudizing state : |410>
+ eigenvalue       : -1.939843
+ qc               :  7.070000
+ # bessel fxns    : 10
+ point nearest rc :  846
+ rc               :  1.730000
+ actual rc        :  1.739282
+
+ Psi(rc)          :     0.4187247618
+ Slope at rc      :    -0.5808227097
+ Curvature at rc  :     0.5918680460
+ Del^2 Psi at rc  :    -0.3528533238
+ Log Deriv at rc  :    -1.3871229092
+
+ Starting KE minimization...
+  step #    theta       slope       curv       KEresid    coeffsum
+     1    0.003770   -1.030495  136.666064    0.001552    1.792882
+     2   -0.001529    0.430167  140.691323    0.001223    1.826224
+     3   -0.003394    0.286741   42.242818    0.000736    1.877894
+     4   -0.002515    0.242339   48.180012    0.000432    1.887309
+    11   -0.000075    0.019852  132.737497    0.000046    1.875269
+    21   -0.000027    0.007079  132.899286    0.000041    1.879034
+    31   -0.000052    0.011137  106.819671    0.000031    1.900266
+    41   -0.000039    0.013633  176.944726    0.000021    1.929763
+    51   -0.000006    0.001801  150.797446    0.000020    1.929381
+    61   -0.000020    0.005330  133.986480    0.000019    1.943075
+
+ # steps:    68
+ Final KE error:    0.0000181551
+ Sum of coeffs :    1.9426885232
+ ---------------------------------------------------------------
+ Coeff:      1.689305  0.388568 -0.136171  0.003677 -0.006067  0.004226 -0.003149  0.002567 -0.002259  0.001991
+ ---------------------------------------------------------------
+ Resid KE (Ry)     :        0.0000181551
+ Norm error        :     0.555E-15
+ Continuity error  :     0.000E+00
+ Curvature error   :    -0.833E-14
+ ---------------------------------------------------------------
+ Bessel wavevectors and final coefficients
+   1        1.8759095553        1.6893052630
+   2        3.6494598894        0.3885675096
+   3        5.4436994292       -0.1361714233
+   4        7.2438064440        0.0036766242
+   5        9.0463399965       -0.0060668037
+   6       10.8501038316        0.0042263928
+   7       12.6545757666       -0.0031486293
+   8       14.4594921375        0.0025673144
+   9       16.2647055989       -0.0022590258
+  10       18.0701274041        0.0019913013
+
+ Total KE           (Ry) :     2.6773572102
+ 0  -> qc contribution   :     2.6773390551
+ qc -> oo contribution   :     0.0000181551   (=Convergence term)
+ Occupancy of this state :     2.0000000000
+ Convergence term (Ry/e) :     0.0000181551
+ Convergence error (mRy) :     0.0363102207
+ Convergence error (meV) :     0.4940296002
+
+
+ ==================
+ zeff=   11.000000000000000     
+ Pseudizing state : |410>
+ eigenvalue       : -1.836080
+ qc               :  7.070000
+ # bessel fxns    : 10
+ point nearest rc :  846
+ rc               :  1.730000
+ actual rc        :  1.739282
+
+ Psi(rc)          :     0.4264628136
+ Slope at rc      :    -0.5693893985
+ Curvature at rc  :     0.5331011719
+ Del^2 Psi at rc  :    -0.4035889309
+ Log Deriv at rc  :    -1.3351443090
+
+ Starting KE minimization...
+  step #    theta       slope       curv       KEresid    coeffsum
+     1    0.003709   -1.006119  135.644140    0.001421    1.696668
+     2   -0.001557    0.398749  128.047385    0.001111    1.730288
+     3   -0.003510    0.269259   38.359671    0.000639    1.780203
+     4   -0.002217    0.224216   50.576175    0.000390    1.784967
+    11   -0.000058    0.016076  138.188368    0.000043    1.775289
+    21   -0.000025    0.006230  125.051875    0.000039    1.778398
+    31   -0.000046    0.013422  144.625177    0.000031    1.797905
+    41   -0.000044    0.003107   34.957722    0.000028    1.800139
+    51   -0.000003    0.000907  137.205170    0.000018    1.848151
+
+ # steps:    51
+ Final KE error:    0.0000181748
+ Sum of coeffs :    1.8481511337
+ ---------------------------------------------------------------
+ Coeff:      1.659695  0.331411 -0.144992  0.004792 -0.006441  0.004460 -0.003335  0.002717 -0.002364  0.002207
+ ---------------------------------------------------------------
+ Resid KE (Ry)     :        0.0000181748
+ Norm error        :    -0.777E-15
+ Continuity error  :    -0.167E-15
+ Curvature error   :     0.172E-14
+ ---------------------------------------------------------------
+ Bessel wavevectors and final coefficients
+   1        1.8615933933        1.6596953651
+   2        3.6415068580        0.3314111760
+   3        5.4382817205       -0.1449917556
+   4        7.2397116196        0.0047918060
+   5        9.0430522843       -0.0064407274
+   6       10.8473586672        0.0044603417
+   7       12.6522199639       -0.0033345041
+   8       14.4574292134        0.0027171108
+   9       16.2628709138       -0.0023643865
+  10       18.0684755592        0.0022067077
+
+ Total KE           (Ry) :     2.5590760972
+ 0  -> qc contribution   :     2.5590579224
+ qc -> oo contribution   :     0.0000181748   (=Convergence term)
+ Occupancy of this state :     4.0000000000
+ Convergence term (Ry/e) :     0.0000181748
+ Convergence error (mRy) :     0.0726990650
+ Convergence error (meV) :     0.9891289391
+
+
+ ==================
+ zeff=   11.000000000000000     
+ Pseudizing state : |420>
+ eigenvalue       : -0.090069
+ qc               :  7.070000
+ # bessel fxns    : 10
+ point nearest rc :  848
+ rc               :  1.780000
+ actual rc        :  1.785096
+
+ Psi(rc)          :     0.3070213327
+ Slope at rc      :    -0.1535240434
+ Curvature at rc  :    -0.0242149895
+ Del^2 Psi at rc  :    -0.7743127721
+ Log Deriv at rc  :    -0.5000435705
+
+ Starting KE minimization...
+  step #    theta       slope       curv       KEresid    coeffsum
+     1    0.003563   -0.301931   42.370132    0.000272    1.644037
+     2   -0.001738    0.087370   25.138438    0.000196    1.646397
+     3   -0.003304    0.063492    9.608483    0.000092    1.624390
+     4   -0.000873    0.042144   24.137831    0.000073    1.617673
+    11   -0.000101    0.008069   39.866903    0.000044    1.616953
+
+ # steps:    17
+ Final KE error:    0.0000067449
+ Sum of coeffs :    1.5847514632
+ ---------------------------------------------------------------
+ Coeff:      1.216688  0.341622  0.019841  0.006036 -0.002708  0.002253 -0.000384  0.001345 -0.001263  0.001321
+ ---------------------------------------------------------------
+ Resid KE (Ry)     :        0.0000067449
+ Norm error        :     0.833E-16
+ Continuity error  :    -0.111E-15
+ Curvature error   :    -0.666E-15
+ ---------------------------------------------------------------
+ Bessel wavevectors and final coefficients
+   1        2.1416293875        1.2166876607
+   2        4.1604871173        0.3416217072
+   3        5.9954323712        0.0198405095
+   4        7.7937287646        0.0060364681
+   5        9.5772580577       -0.0027078238
+   6       11.3532382256        0.0022532806
+   7       13.1248126317       -0.0003838488
+   8       14.8935833307        0.0013450227
+   9       16.6604563839       -0.0012627737
+  10       18.4259840594        0.0013212607
+
+ Total KE           (Ry) :     1.6293527579
+ 0  -> qc contribution   :     1.6293460130
+ qc -> oo contribution   :     0.0000067449   (=Convergence term)
+ Occupancy of this state :     1.2000000000
+ Convergence term (Ry/e) :     0.0000067449
+ Convergence error (mRy) :     0.0080938654
+ Convergence error (meV) :     0.1101235143
+
+
+ ==================
+ zeff=   11.000000000000000     
+ Pseudizing state : |420>
+ eigenvalue       : -0.085519
+ qc               :  7.070000
+ # bessel fxns    : 10
+ point nearest rc :  848
+ rc               :  1.780000
+ actual rc        :  1.785096
+
+ Psi(rc)          :     0.3025578465
+ Slope at rc      :    -0.1476285483
+ Curvature at rc  :    -0.0293043122
+ Del^2 Psi at rc  :    -0.7643925440
+ Log Deriv at rc  :    -0.4879349521
+
+ Starting KE minimization...
+  step #    theta       slope       curv       KEresid    coeffsum
+     1    0.003509   -0.287316   40.938865    0.000238    1.602749
+     2   -0.001729    0.079733   23.052594    0.000169    1.604385
+     3   -0.003113    0.058147    9.340613    0.000079    1.583448
+     4   -0.000797    0.036982   23.203711    0.000064    1.577878
+    11   -0.000104    0.007726   37.220013    0.000038    1.576271
+
+ # steps:    16
+ Final KE error:    0.0000096847
+ Sum of coeffs :    1.5463010118
+ ---------------------------------------------------------------
+ Coeff:      1.193045  0.330111  0.021069  0.006392 -0.003409  0.001208 -0.001618  0.001507 -0.002190  0.000186
+ ---------------------------------------------------------------
+ Resid KE (Ry)     :        0.0000096847
+ Norm error        :     0.000E+00
+ Continuity error  :     0.111E-15
+ Curvature error   :    -0.877E-14
+ ---------------------------------------------------------------
+ Bessel wavevectors and final coefficients
+   1        2.1361736112        1.1930452637
+   2        4.1586533529        0.3301107307
+   3        5.9942371602        0.0210693907
+   4        7.7928300308        0.0063915472
+   5        9.5765346638       -0.0034086247
+   6       11.3526317298        0.0012078657
+   7       13.1242899886       -0.0016175104
+   8       14.8931239131        0.0015069954
+   9       16.6600464074       -0.0021902681
+  10       18.4256138359        0.0001856215
+
+ Total KE           (Ry) :     1.5772012740
+ 0  -> qc contribution   :     1.5771915893
+ qc -> oo contribution   :     0.0000096847   (=Convergence term)
+ Occupancy of this state :     1.8000000000
+ Convergence term (Ry/e) :     0.0000096847
+ Convergence error (mRy) :     0.0174325154
+ Convergence error (meV) :     0.2371833178
+
+ ------------------------------
+ Descreening potential
+ valence charge          :  11.000000
+ core    charge          :   0.000000
+
+ ----Solving the Schrodinger equation for all states----
+ State: 4s  AE eigenvalue =  -3.326803  PS eigenvalue =  -3.326803
+ State: 4p  AE eigenvalue =  -1.939843  PS eigenvalue =  -1.939842
+ State: 4p  AE eigenvalue =  -1.836080  PS eigenvalue =  -1.836080
+ State: 4d  AE eigenvalue =  -0.090069  PS eigenvalue =  -0.090069
+ State: 4d  AE eigenvalue =  -0.085519  PS eigenvalue =  -0.085519
+
+ ---Semilocal ghost testing---
+ Local state: 4s
+
+ Test  state: 4p
+ KB energy : -17.383796  KB strength:   1.880060  KB cosine:  -0.108150
+ el0       :  -1.834596  el1        :  -0.082938  eig      :  -1.939843
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4p
+ KB energy : -39.248736  KB strength:   1.654024  KB cosine:  -0.042142
+ el0       :  -1.834596  el1        :  -0.082938  eig      :  -1.836080
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4d
+ KB energy : -23.062861  KB strength:   0.789453  KB cosine:  -0.034230
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+    !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ el0       :  -0.085401  el1        :   0.000000  eig      :  -0.090069
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4d
+ KB energy : -28.432367  KB strength:   0.768934  KB cosine:  -0.027044
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+    !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ el0       :  -0.085401  el1        :   0.000000  eig      :  -0.085519
+ No ghosts!  Ekb<0  and eig < el0
+
+ No ghosts for local potential: 4s
+ ------------------------------
+
+ Local state: 4p
+
+ Test  state: 4s
+ KB energy :  17.040864  KB strength:   2.150380  KB cosine:   0.126190
+ el0       :  -4.063602  el1        :  -0.398819  eig      :  -3.326803
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4p
+ KB energy :   0.332337  KB strength:   0.182122  KB cosine:   0.548005
+ el0       :  -1.939842  el1        :  -0.089635  eig      :  -1.836080
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4d
+ KB energy :  -8.237619  KB strength:   0.434867  KB cosine:  -0.052790
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+    !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ el0       :  -0.079506  el1        :   0.000000  eig      :  -0.090069
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4d
+ KB energy : -10.593989  KB strength:   0.423250  KB cosine:  -0.039952
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+    !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ el0       :  -0.079506  el1        :   0.000000  eig      :  -0.085519
+ No ghosts!  Ekb<0  and eig < el0
+
+ No ghosts for local potential: 4p
+ ------------------------------
+
+ Local state: 4p
+
+ Test  state: 4s
+ KB energy :  32.210563  KB strength:   2.037852  KB cosine:   0.063267
+ el0       :  -3.823674  el1        :  -0.362531  eig      :  -3.326803
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4p
+ KB energy :  -0.340096  KB strength:   0.191480  KB cosine:  -0.563017
+ el0       :  -1.836080  el1        :  -0.085326  eig      :  -1.939843
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4d
+ KB energy :  -6.032279  KB strength:   0.491617  KB cosine:  -0.081498
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+    !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ el0       :  -0.068457  el1        :   0.000000  eig      :  -0.090069
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4d
+ KB energy :  -6.862440  KB strength:   0.477166  KB cosine:  -0.069533
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+    !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ el0       :  -0.068457  el1        :   0.000000  eig      :  -0.085519
+ No ghosts!  Ekb<0  and eig < el0
+
+ No ghosts for local potential: 4p
+ ------------------------------
+
+ Local state: 4d
+
+ Test  state: 4s
+ KB energy :  14.053802  KB strength:   3.441821  KB cosine:   0.244903
+ el0       :  -6.592765  el1        :  -0.949308  eig      :  -3.326803
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4p
+ KB energy :   4.634220  KB strength:   1.340517  KB cosine:   0.289265
+ el0       :  -2.568618  el1        :  -0.128269  eig      :  -1.939843
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4p
+ KB energy :   4.670329  KB strength:   1.431690  KB cosine:   0.306550
+ el0       :  -2.568618  el1        :  -0.128269  eig      :  -1.836080
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4d
+ KB energy :   0.265017  KB strength:   0.034272  KB cosine:   0.129318
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+    !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ el0       :  -0.090069  el1        :   0.000000  eig      :  -0.085519
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ No ghosts for local potential: 4d
+ ------------------------------
+
+ Local state: 4d
+
+ Test  state: 4s
+ KB energy :  13.968778  KB strength:   3.365173  KB cosine:   0.240907
+ el0       :  -6.174751  el1        :  -0.807687  eig      :  -3.326803
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4p
+ KB energy :   4.806856  KB strength:   1.320283  KB cosine:   0.274667
+ el0       :  -2.532066  el1        :  -0.126677  eig      :  -1.939843
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4p
+ KB energy :   4.800722  KB strength:   1.411689  KB cosine:   0.294058
+ el0       :  -2.532066  el1        :  -0.126677  eig      :  -1.836080
+ No ghosts!  Ekb>0  and el0 < eig < el1
+
+ Test  state: 4d
+ KB energy :  -0.270605  KB strength:   0.035544  KB cosine:  -0.131349
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+    !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ el0       :  -0.085519  el1        :   0.000000  eig      :  -0.090069
+ No ghosts!  Ekb<0  and eig < el0
+
+ No ghosts for local potential: 4d
+ ------------------------------
+
+
+ ======================================================================== 
+ End PS construction
+ ======================================================================== 
+
+ ======================================================================== 
+ Begin NL calculation
+ ======================================================================== 
+ ---------Eigenvalue guesses---------
+ 1s            -3.32680286
+ 2p            -1.93984253
+ 2p            -1.83608034
+ 3d            -0.09006937
+ 3d            -0.08551911
+ 2s            -0.25017916
+ 3p            -0.08869773
+ 3p            -0.08455235
+ Performing non-local pseudopotential calculation
+ Using the s potential as the local potential
+
+ --Augmentation operator info--
+ Number of functions:   1
+ # 1 range(a.u.):   0.009976 ----->  1.567485   size(Ry):  0.000000
+ ------------------------------
+
+ iter       Etot             Ebs             Ehxc       de_max   dv_max
+   1      -76.1242654     -18.1396285     -57.9846369 0.14E+02 0.83E-06
+   2      -76.1242542     -18.1396267     -57.9846275 0.60E-03 0.11E-05
+   3      -76.1242675     -18.1396299     -57.9846375 0.20E-05 0.96E-06
+   4      -76.1242602     -18.1396274     -57.9846328 0.14E-05 0.24E-06
+   5      -76.1242590     -18.1396279     -57.9846311 0.29E-06 0.37E-06
+   6      -76.1242614     -18.1396291     -57.9846323 0.67E-06 0.42E-07
+   7      -76.1242623     -18.1396292     -57.9846331 0.94E-07 0.12E-06
+   8      -76.1242617     -18.1396288     -57.9846329 0.19E-06 0.36E-07
+   9      -76.1242612     -18.1396286     -57.9846326 0.66E-07 0.41E-07
+  10      -76.1242613     -18.1396288     -57.9846325 0.63E-07 0.23E-07
+  11      -76.1242615     -18.1396288     -57.9846327 0.41E-07 0.11E-07
+  12      -76.1242615     -18.1396288     -57.9846327 0.17E-07 0.96E-08
+  13      -76.1242615     -18.1396288     -57.9846327 0.17E-07 0.26E-08
+  14      -76.1242614     -18.1396288     -57.9846326 0.27E-08 0.37E-08
+
+   14 iterations: (units are Ry and bohr)
+ Energy:     -76.12426144  Ebs:     -18.13962879  Ehxc:     -57.98463265
+ Eh    :      60.94579992  Exc:      -9.98111342  Evxc:     -12.94228068
+
+   Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
+    |400>      2.000          -3.326803      0.239571      1.147370
+    |410>      2.000          -1.939842      0.272402      1.256679
+    |410>      4.000          -1.836080      0.294251      1.289781
+    |420>      1.200          -0.090069      0.794321      1.880377
+    |420>      1.800          -0.085519      0.802680      1.904982
+    |500>      0.000          -0.254726      0.963068      3.464168
+    |510>      0.000          -0.089843      0.980041      4.857250
+    |510>      0.000          -1.292479      0.042665      1.323755
+
+ ---Non-local ghost testing---
+ Local state: 4s
+
+ Test  state: 4s
+ ...seems like this angular momentum is the local part!
+
+ Test  state: 4p
+ KB energy : -17.383796  KB strength:   1.880060  KB cosine:  -0.108150
+ el0       :  -1.834596  el1        :  -0.082938  eig      :  -1.939842
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4p
+ KB energy : -39.248736  KB strength:   1.654024  KB cosine:  -0.042142
+ el0       :  -1.834596  el1        :  -0.082938  eig      :  -1.836080
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4d
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+ !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ KB energy : -23.062861  KB strength:   0.789453  KB cosine:  -0.034230
+ el0       :  -0.085401  el1        :   0.000000  eig      :  -0.090069
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 4d
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   2
+ !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ KB energy : -28.432367  KB strength:   0.768934  KB cosine:  -0.027044
+ el0       :  -0.085401  el1        :   0.000000  eig      :  -0.085519
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 5s
+ ...seems like this angular momentum is the local part!
+
+ Test  state: 5p
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   1
+ !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ KB energy : -17.383796  KB strength:   1.880060  KB cosine:  -0.108150
+ el0       :  -0.082938  el1        :   0.000000  eig      :  -0.089843
+ No ghosts!  Ekb<0  and eig < el0
+
+ Test  state: 5p
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   4   1
+ !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ KB energy : -39.248736  KB strength:   1.654024  KB cosine:  -0.042142
+ el0       :  -0.082938  el1        :   0.000000  eig      :  -1.292479
+ No ghosts!  Ekb<0  and eig < el0
+ ------------------------------
+
+ No ghosts present for designed local pot
+
+
+ ======================================================================== 
+ End NL calculation
+ ======================================================================== 
+<<<do_tc>>>
+
+
+ ===============Configuration 1 AE Calc=============== 
+ ---------Eigenvalue guesses---------
+ 1s         -1521.00000000
+ 2s          -380.25000000
+ 2p          -380.25000000
+ 2p          -380.25000000
+ 3s          -169.00000000
+ 3p          -169.00000000
+ 3p          -169.00000000
+ 3d          -169.00000000
+ 3d          -169.00000000
+ 4s           -95.06250000
+ 4p           -95.06250000
+ 4p           -95.06250000
+ 4d           -95.06250000
+ 4d           -95.06250000
+ 5s           -60.84000000
+ 5p           -60.84000000
+ 5p           -60.84000000
+ orb # 13 did not converge
+ ev = -0.1218780492E+00 nodes =       1 dev =  0.1704752508E-01
+ orb # 14 did not converge
+ ev = -0.1543427682E+00 nodes =       1 dev =  0.1164385321E+00
+
+ iter       Etot             Ebs             Ehxc       de_max   dv_max
+   1    -6948.5408616   -4173.8406826   -2774.7001789 0.10E+01 0.29E+01
+   2    -6862.1438606   -4091.4756023   -2770.6682583 0.22E+01 0.26E+01
+   3    -6752.5707081   -4022.6787364   -2729.8919717 0.36E+00 0.12E+01
+   4    -6763.0437168   -4026.3735799   -2736.6701370 0.49E+00 0.12E+00
+   5    -6770.8230024   -4028.6023859   -2742.2206166 0.26E+00 0.73E-01
+   6    -6770.1050742   -4026.5721126   -2743.5329616 0.69E-01 0.56E-01
+   7    -6766.9140702   -4023.6838059   -2743.2302644 0.37E-01 0.40E-01
+   8    -6765.7862616   -4023.0879971   -2742.6982645 0.75E-01 0.20E-01
+   9    -6765.9111664   -4023.3019229   -2742.6092434 0.24E-01 0.64E-02
+  10    -6766.4503993   -4023.6663025   -2742.7840969 0.79E-02 0.61E-02
+  11    -6766.4335254   -4023.6071064   -2742.8264190 0.63E-02 0.45E-02
+  12    -6766.2782821   -4023.5122660   -2742.7660161 0.12E-01 0.15E-02
+  13    -6766.2897068   -4023.5359781   -2742.7537288 0.19E-02 0.85E-03
+  14    -6766.3365247   -4023.5660108   -2742.7705139 0.24E-02 0.39E-03
+  15    -6766.3357607   -4023.5616502   -2742.7741105 0.45E-03 0.23E-03
+  16    -6766.3301651   -4023.5578571   -2742.7723080 0.30E-03 0.70E-04
+  17    -6766.3264759   -4023.5565503   -2742.7699256 0.10E-03 0.87E-04
+  18    -6766.3260654   -4023.5570881   -2742.7689773 0.60E-04 0.69E-04
+  19    -6766.3269357   -4023.5579028   -2742.7690330 0.75E-04 0.40E-04
+  20    -6766.3276766   -4023.5583397   -2742.7693370 0.40E-04 0.19E-04
+  21    -6766.3279421   -4023.5584243   -2742.7695178 0.11E-04 0.94E-05
+  22    -6766.3279181   -4023.5583718   -2742.7695463 0.27E-05 0.59E-05
+  23    -6766.3278335   -4023.5583233   -2742.7695103 0.26E-05 0.46E-05
+  24    -6766.3277894   -4023.5583130   -2742.7694764 0.13E-05 0.35E-05
+  25    -6766.3277881   -4023.5583245   -2742.7694636 0.14E-05 0.24E-05
+  26    -6766.3278023   -4023.5583376   -2742.7694647 0.13E-05 0.15E-05
+  27    -6766.3278134   -4023.5583445   -2742.7694689 0.76E-06 0.88E-06
+  28    -6766.3278174   -4023.5583461   -2742.7694714 0.31E-06 0.52E-06
+  29    -6766.3278172   -4023.5583455   -2742.7694717 0.13E-06 0.34E-06
+  30    -6766.3278161   -4023.5583450   -2742.7694711 0.70E-07 0.22E-06
+  31    -6766.3278155   -4023.5583450   -2742.7694706 0.50E-07 0.15E-06
+  32    -6766.3278155   -4023.5583452   -2742.7694703 0.38E-07 0.99E-07
+  33    -6766.3278158   -4023.5583455   -2742.7694703 0.27E-07 0.64E-07
+  34    -6766.3278160   -4023.5583456   -2742.7694703 0.16E-07 0.42E-07
+  35    -6766.3278161   -4023.5583457   -2742.7694704 0.89E-08 0.28E-07
+
+   35 iterations: (units are Ry and bohr)
+ Energy:   -6766.32781607  Ebs:   -4023.55834570  Ehxc:   -2742.76947037
+ Eh    :    2802.79314982  Exc:    -214.37083513  Evxc:    -274.39451459
+
+   Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
+    |100 >      2.000       -1235.910069
+    |200 >      2.000        -169.339940
+    |210->      2.000        -154.570042
+    |210+>      4.000        -148.959297
+    |300 >      2.000         -26.934694
+    |310->      2.000         -21.500879
+    |310+>      4.000         -20.623476
+    |320->      4.000         -11.072822
+    |320+>      6.000         -10.915524
+    |400 >      2.000          -3.399596      0.237281      1.132551
+    |410->      2.000          -2.007430      0.267878      1.240448
+    |410+>      4.000          -1.902623      0.289339      1.256679
+    |420->      0.800          -0.123298      0.762112      1.832118
+    |420+>      1.200          -0.117961      0.770136      1.856091
+    |500 >      1.000          -0.266844      0.963991      3.464168
+    |510->      0.000          -0.093161      0.978367      4.611128
+    |510+>      0.000          -0.088265      0.978442      4.732589
+
+
+ ===============Configuration 1 NL: Calc ===============
+ ---------Eigenvalue guesses---------
+ 1s            -3.32680286
+ 2p            -1.93984253
+ 2p            -1.83608034
+ 3d            -0.09006937
+ 3d            -0.08551911
+ 2s            -0.25017916
+ 3p            -0.08869773
+ 3p            -0.08455235
+ Performing non-local pseudopotential calculation
+ Using the s potential as the local potential
+
+ --Augmentation operator info--
+ Number of functions:   1
+ # 1 range(a.u.):   0.009976 ----->  1.567485   size(Ry):  0.000000
+ ------------------------------
+
+ iter       Etot             Ebs             Ehxc       de_max   dv_max
+   1      -74.4926630     -18.3070154     -56.1856476 0.14E+02 0.29E+00
+   2      -78.1139592     -19.1191553     -58.9948039 0.57E+00 0.30E+00
+ !WARNING! : schsl found too many nodes   n,l=   3   2  e= -.8157E+01
+   3     -100.3536404     -28.0253279     -72.3283125 0.60E+02 0.26E+02
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =-.6342938E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =-.2206538E+01
+ !WARNING! : schsl found too many nodes   n,l=   3   2  e= -.1375E+01
+ !WARNING! : schsl found too many nodes   n,l=   3   2  e= -.4920E+03
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   1
+   4  ***************    -604.3818501 *************** 0.59E+02 0.54E+25
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 400     new e =0.2385043E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 410     new e =0.2385769E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 410     new e =0.2385769E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =0.2387220E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =0.2387220E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 500     new e =0.2385043E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =0.2385769E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =0.2385769E+00
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : classical turning point at r=0  100 times in a row. Solve FAILED!
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   2
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   2
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : classical turning point at r=0  100 times in a row. Solve FAILED!
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   1
+   5  ***************      -0.0000088 *************** 0.10E+01 0.62E+48
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 400     new e =0.2385258E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 410     new e =0.2385983E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 410     new e =0.2385983E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =0.2387435E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =0.2387435E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 500     new e =0.2385258E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =0.2385983E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =0.2385983E+00
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : classical turning point at r=0  100 times in a row. Solve FAILED!
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   2
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   2
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : classical turning point at r=0  100 times in a row. Solve FAILED!
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   1
+   6  ***************      -0.0000088 *************** 0.00E+00 0.11E+97
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 400     new e =0.2385279E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 410     new e =0.2386005E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 410     new e =0.2386005E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =0.2387456E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =0.2387456E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 500     new e =0.2385279E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =0.2386005E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =0.2386005E+00
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : classical turning point at r=0  100 times in a row. Solve FAILED!
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   2
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   2
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   2   0 --nm
+ !WARNING! : classical turning point at r=0  100 times in a row. Solve FAILED!
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   3   1
+   7        -Infinity      -0.0000088       -Infinity 0.00E+00 0.60+193
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 400     new e =0.2385281E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 410     new e =0.2386007E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 410     new e =0.2386007E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =0.2387458E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 420     new e =0.2387458E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 500     new e =0.2385281E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =0.2386007E+00
+ !WARNING! positive eigenvalue predicted in scpot  nlm= 510     new e =0.2386007E+00
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : schsl found this state to be unbound: n,l=   1   0 --nm
+ !WARNING! : classical turning point at r=0  100 times in a row. Solve FAILED!
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   1
+ !WARNING! : schsl stopped due since v+l(l+1)/r^2 became positive
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   1
+  !!ERROR!! Could not find self-consistent solution!

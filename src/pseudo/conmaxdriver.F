@@ -31,7 +31,7 @@ c     *************************************************************************
       
 #include "fortdim.h"
 
-      parameter(maxitn=1000)
+      parameter(maxitn=5000)
 
       common /roots/ xroot(numfn0)
       common /angm/ ll

@@ -86,23 +86,7 @@ c -------------------------------------------------------------------------
          imeth=2
       endif
 
-      !do mm=1,norb
-      !  do i = 1,np
-      !    write(29,*) rnl(i,mm)
-      !  enddo
-      !enddo
-
-
-
       call hfmethd(m,ipsp,p,zeff,azz,fail,iprint)
-
-      !do mm=1,norb
-      !  do i = 1,np
-      !    write(30,*) rnl(i,mm)
-      !  enddo
-      !enddo
-
-
 
       if (fail) goto 25
 

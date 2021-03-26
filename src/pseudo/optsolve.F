@@ -29,7 +29,7 @@ c     which was coded by EJW and HK.     10/25/03 EJW
       
 #include "fortdim.h"
 
-      parameter(maxitn=1000)
+      parameter(maxitn=5000)
 
       logical lbes
       common /a/ a(numfn0)

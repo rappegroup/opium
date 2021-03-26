@@ -1,4 +1,5 @@
 c
+c
 c Copyright (c) 1998-2012 The OPIUM Group
 c
 c This program is free software; you can redistribute it and/or modify
@@ -215,9 +216,6 @@ c      enddo
 c      do i = IH,IJ
 c         rvl(i) = rvl(i) + DDEPTH * r(i)
 c      enddo
-c     due to reversing the sign of rvcore, now rvcore is positive
-c     the box added is positive by convention, use minus sign here
-c     to make the local potential shallower
 
       do i = 1,min(numbox,n0)
          do j = iboxstart(i),iboxend(i)

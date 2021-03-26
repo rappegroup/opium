@@ -216,7 +216,9 @@ c      write (iout,9102) iter,iorb,nqn,lang,ei,de,imat
 
       return
       end
-
+c***************************************************
+c     adjust eigenvalue guess
+c***************************************************
       subroutine coarseadj(nqn,lang,ei,rv,wnlf)
       implicit double precision (a-h,o-z)
       

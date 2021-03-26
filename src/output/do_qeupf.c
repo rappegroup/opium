@@ -252,12 +252,18 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
   } else {
 */
   
-  if (param->ixc == 7 || param->ixc == -1){
+  if (param->ixc == -1){
     //For HF or hybrids, we did not perform a NL solve,
     //However, we can still save one of the angular momentum components
     //into the local potential.
     for (i=0;i<param->ngrid;i++){
       fprintf(fp,"%19.16le ",rvcore[param->localind][i]/rr[i]);
+      if( (i+1)%4 == 0 ) fprintf(fp,"\n");
+    }
+  } else if (param->ixc == 7) {
+    for (i=0;i<param->ngrid;i++){
+      fprintf(fp,"%19.16le ",-nlcore[i]*2.0/rr[i]);
+//      fprintf(fp,"%19.16le ",rvcore[param->localind][i]/rr[i]);
       if( (i+1)%4 == 0 ) fprintf(fp,"\n");
     }
   } else {
@@ -291,13 +297,19 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
       
       for (i=0;i<param->ngrid;i++){  
         //nlcore not initialized for HY or HF here
-        if (param->ixc == 7 || param->ixc == -1){
+//        if (param->ixc == 7 || param->ixc == -1){
+        if (param->ixc == -1){
             beta[i]=rnl[j][i]*(rvcore[j][i]-rvcore[param->localind][i])/rr[i];
         //    printf("%19.16le %19.16le \n",rr[i],beta[i]);
+        } else if (param->ixc == 7) {
+            //looks wierd but rvcore has changed sign when it's written in rvps file
+            //nlcore is positive here needs to change back to negative
+            beta[i]=rnl[j][i]*(rvcore[j][i]+nlcore[i]*2.0)/rr[i];
+//            beta[i]=rnl[j][i]*(rvcore[j][i]-rvcore[param->localind][i])/rr[i];
         } else {
 	beta[i]=rnl[j][i]*(rvcore[j][i]-nlcore[i])/rr[i];
         }
-	ddd[i]=beta[i]*rnl[j][i];    
+	ddd[i]=beta[i]*rnl[j][i]; 
       }
       
       fprintf(fp,"  %d  %d      Beta    L\n",nnl,ll);
@@ -308,7 +320,7 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
 	if( (i+1)%4 == 0 ) fprintf(fp,"\n");
       }
       if(i%4 !=0 ) fprintf(fp,"\n");
-      
+
       fprintf(fp,"  </PP_BETA>\n");
       ng=param->ngrid;
       if (ng%2 !=0) ng-=1;

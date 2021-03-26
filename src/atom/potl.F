@@ -67,8 +67,8 @@ c     *************************************************************************
 
       dimension yk(npdm),yr(npdm)
 
-      do in=1,np
-         yr(in)=0.d0
+      do ngrid=1,np
+         yr(ngrid)=0.d0
       enddo
 
       do j=1,norb
@@ -76,16 +76,16 @@ c     *************************************************************************
             if (dabs(aaa(i,j,k)) .ge. 1.d-8) then
                call ykf(yk,j,j,k)
 c               write(7,*) 'hart', i,j,k,aaa(i,j,k)
-               do in=1,np                  
-                  yr(in) = yr(in) + aaa(i,j,k)*yk(in)
+               do ngrid=1,np                  
+                  yr(ngrid) = yr(ngrid) + aaa(i,j,k)*yk(ngrid)
                enddo
             endif
          enddo
       enddo
 
       !add in dft excorr potential for hybrid functionals
-      do in=1,np
-         yr(in)= yr(in)*exxw +0.5*rvdft(in)
+      do ngrid=1,np
+         yr(ngrid)= yr(ngrid)*exxw +0.5*rvdft(ngrid)
       enddo
 
 

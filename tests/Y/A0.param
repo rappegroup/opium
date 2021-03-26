@@ -1,0 +1,68 @@
+[Atom]
+Y                # element
+11                 # norb: number of orbitals
+# reference configuration
+100  2.00  -135.0
+200  2.00   -19.4
+210  6.00   -19.4
+300  2.00   -13.0
+310  6.00    -6.0
+320  10.00   -6.0
+400  2.00    -6.0
+410  6.00   -0.1   # reference configuration
+420  3.00   -1.4   # reference configuration
+500  0.00   -0.1   # reference configuration
+510  0.00   -
+
+[Pseudo]
+5 1.58 1.73 1.78 1.58 1.73
+opt
+  
+[XC]
+gga
+
+[Optinfo]
+7.070 10       # rc[a.u.] Qc[sqrt(Ry)] Nb
+7.070 10
+7.070 10
+7.070 10
+7.070 10
+
+[Grid]
+1201 0.0001 0.013
+
+[Relativity]
+frl
+
+[Configs]
+2                 # number of valence configurations
+#
+400 2.00   -1.4   # test configuration
+410 6.00   -0.4   # test configuration
+420 2.00   -0.4   # test configuration
+500 1.00   -   # test configuration
+510 0.00   -
+#
+400 2.00   -1.4   # test configuration
+410 6.00   -0.4   # test configuration
+420 1.50   -0.4   # test configuration
+500 1.50   -0.4   # test configuration
+510 0.00   -
+#
+#400 2.00   -1.4   # test configuration
+#410 6.00   -0.4   # test configuration
+#420 1.00   -0.4   # test configuration
+#500 1.00   -0.4   # test configuration
+#
+#400 2.00   -1.4   # test configuration
+#410 6.00   -0.4   # test configuration
+#420 1.00   -0.4   # test configuration
+#500 2.00   -0.4   # test configuration
+     
+
+[KBdesign]
+s                 # local orbital
+1                 # number of aug. operators
+au 0.01 1.57 0.00 # unit(gp or au)  left  right  height(Ry)
+
+

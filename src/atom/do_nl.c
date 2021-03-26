@@ -104,7 +104,7 @@ int do_nl(param_t *param, char *logfile, int insl ){
   irel=0;
   irelxc=0;
   iprint=1;
-  if (param->ixc < 0 || param->ixc == 7) {
+  if (param->ixc < 0) {
     nlpot2_.inl = 0;  
     if (insl != 0 ){
       printf("!!NOTE!!: All Hartree-Fock and hybrid functional tests are done with the semi-local form of the potential \n");
@@ -121,7 +121,17 @@ int do_nl(param_t *param, char *logfile, int insl ){
     insl=0;
     //printf("zeff=%lf ixc=%i exccut_temp=%lf ipsp=%i ifc=%i iexit=%i irel=%i iprint=%i",zeff,param->ixc,exccut_temp,ipsp,ifc,iexit,irel,iprint);
     hfsolve_(&zeff,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
-  }else {
+  } else if (param->ixc == 7) {
+      printf("!!NOTE!!: Hybrid functional tests are now implemented with the non-local form of the potential \n");
+
+      fp_log = fopen(logfile, "a");
+
+      fprintf(fp_log,"!!NOTE!!: Hybrid functional tests are now implemented with the non-local form of the potential \n");
+
+      fclose(fp_log);
+
+      hfsolve_(&zeff,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
+  } else {
     //printf("do nonlocal \n");
     //printf("zeff=%lf ixc=%i exccut_temp=%lf ipsp=%i ifc=%i iexit=%i irel=%i irelxc=%i iprint=%i",zeff,param->ixc,exccut_temp,ipsp,ifc,iexit,irel,irelxc,iprint);
     dftsolve_(&zeff,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);

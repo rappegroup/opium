@@ -59,7 +59,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc, int donl){
   int irelxc=0;
   int iminne=0;
   double e,dele,minne;
-  int ifc=0;
+  int ifc=doifc;
   int iexit=0;
   int iprint=1;
   int config,con1,con2;
@@ -121,7 +121,7 @@ int do_tc(param_t *param, char *logfile, int job, int doifc, int donl){
 
     ilogder_.ilogder = 0;
     if (job != -67) {
-      if (param->ixc<0) {
+      if (param->ixc<0 && param->ixc == 7) {
 	fprintf(stderr," No Log derivs for HF/DF yet :( \n");
 	exit(1);
       }
@@ -141,6 +141,8 @@ int do_tc(param_t *param, char *logfile, int job, int doifc, int donl){
       iprint=1;
       irelxc=0;
       if (param->ixc < 0){ 
+	hfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
+      } else if(param->ixc == 7){
 	hfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
       } else {
 
@@ -304,12 +306,14 @@ int do_tc(param_t *param, char *logfile, int job, int doifc, int donl){
     }
 
     irelxc=0;
-    ifc=0;
+    //ifc=0;
     ipsp=1;
     irel=0;
     if (param->ixc < 0) {
       hfsolve_(&zeff,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
-    }else {
+    } else if (param->ixc == 7) {
+        hfsolve_(&zeff,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
+    } else {
       /*
         for (i=0; i<param->ngrid+1; i++)
           for (j=0; j<aorb_.norb; j++)

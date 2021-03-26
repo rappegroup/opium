@@ -79,7 +79,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   /* default */
   consts_.etol = 1.e-8;   
   consts_.vtol = 1.e-6;   
-  consts_.maxit = 500;      
+  consts_.maxit = 5000; //remember to change maxitn to keep the value the same in psp solver      
 
   /* [Pseudo] */
   flexi_request_key("Pseudo",1,"%d", &param->nval);

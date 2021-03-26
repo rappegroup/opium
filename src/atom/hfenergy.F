@@ -90,7 +90,7 @@ c
         enddo
         maxim = max(maxim,nmax(m))
       enddo
-
+    
       !dft parts
 
       call hrtree(maxim,h,r,rsatom,rvh)

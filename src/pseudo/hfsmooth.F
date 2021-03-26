@@ -49,7 +49,6 @@ c     *************************************************************************
       dimension rlocalr(n0),qq(n0),pp(n0)
 
       open(unit=7,file=file_log,form='formatted',access='append')
-
       iprint=0
 
       tolpp=1e-3

@@ -150,7 +150,7 @@ c      endif
          enddo
       endif
             
-      if (ifc.eq.0) then
+      if (ifc.le.12) then
          do j = 1,norb
             eold(j) = en(j)
             nmax(j) = 0
@@ -281,7 +281,7 @@ c     ***********************************************************************
                ibound=ibd(m-ncore)               
             endif
 
-            if (ifc.eq.0.or.m.gt.ncore) then
+            if (ifc.le.12.or.m.gt.ncore) then
 
 c     if not a frozen core calc or if valence
                if (irel.eq.0) then
@@ -468,6 +468,7 @@ c     ***********************************************************************
      $              + (1.0 - xmix) * rvps(i,iorb)
             enddo
          enddo
+
          if (niter.eq.maxit) then
              goto 911
           endif
@@ -508,7 +509,7 @@ c     ***********************************************************************
             else
                ibound=ibd(m-ncore)
             endif
-            if (ifc.eq.0.and.ibound.eq.1) then
+            if (ifc.le.12.and.ibound.eq.1) then
                if (irel.eq.0) then
                   do i = 1,nmax(m)
                      f(i) = p(i) * rnl(i,m)**2
@@ -548,10 +549,6 @@ c     911 = terminal error - exit scpot
 
       enddo
 
-c      close(77)
-c      close(78)
-c      close(79)
-c      close(80)
 
  505  format(1x,'!WARNING! positive eigenvalue predicted',
      $     ' in scpot  nlm=',i4,5x,'new e =',e13.7)

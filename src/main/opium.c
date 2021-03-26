@@ -24,7 +24,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#define VERSION "4.0"
+#define VERSION "4.1"
 #ifndef CHOST
 #define CHOST "unknown"
 #endif
@@ -374,12 +374,12 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
       do_fc(param, logfile);
       if (verbosity) do_fc_report(stdout);*/
   } else if (streq(command, "tc")||streq(command, "tcn")){
-    doifc=0;
+    doifc=11;
     donl=1;
     do_tc(param, logfile, job, doifc,donl);
     if (verbosity) do_tc_report(stdout);
   } else if (streq(command, "tcs")){
-    doifc=0;
+    doifc=11;
     donl=0;
     do_tc(param, logfile, job, doifc,donl);
     if (verbosity) do_tc_report(stdout);
@@ -519,6 +519,7 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     } else {
       do_nl(param, logfile,1); if (verbosity) do_nl_report(stdout);
     }
+    doifc=11;
     do_tc(param, logfile, job, doifc,donl); if (verbosity) do_tc_report(stdout);
   }else{
     fp = fopen(logfile, "a");

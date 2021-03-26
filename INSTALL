@@ -1,6 +1,14 @@
 Installation & Usage:
 ---------------------
+---------------------
+MacOS Users
+---------------------
+If you don't want to compile the package, simply run
+"gopium" as regular "opium" excutable.
+An example would be as following:
+./gopium tests/O/HY/o tests/O/HY/o.log all ke rpt upf
 
+----------------------------------------------------------------
 Please visit the the OPIUM project web site at
 http://opium.sourceforge.net for information on installation and
 usage.
