@@ -86,7 +86,23 @@ c -------------------------------------------------------------------------
          imeth=2
       endif
 
+      !do mm=1,norb
+      !  do i = 1,np
+      !    write(29,*) rnl(i,mm)
+      !  enddo
+      !enddo
+
+
+
       call hfmethd(m,ipsp,p,zeff,azz,fail,iprint)
+
+      !do mm=1,norb
+      !  do i = 1,np
+      !    write(30,*) rnl(i,mm)
+      !  enddo
+      !enddo
+
+
 
       if (fail) goto 25
 
@@ -123,9 +139,20 @@ c      write(7,*) 'azz 1',azz,pnn
       c=acc(m)
       cd=1.d0-c
 
+      !using a fixed acc parameter
+      !c = 0.5
+      !cd = 1.0-c
+
 c      write(7,*) 'ACC', m,acc(m),c,ipr
 
       if (acc(m).gt.0.99999) acc(m)=0.50
+
+      !do mm=1,norb
+      !  do i = 1,np
+      !    write(31,*) rnl(i,mm)
+      !  enddo
+      !enddo
+
 
       dp=0.d0
       do j=1,nmax(m)
@@ -138,16 +165,42 @@ c      do j=1,np
          rnl(i,m)=0.d0
       enddo
 
+      !different in 4th decimal
+      !do mm=1,norb
+      !  do i = 1,np
+      !    write(32,*) rnl(i,mm)
+      !  enddo
+      !enddo
+
+
 c      write(7,*) 'before de adj', m,az(m),azz
 
       az(m)=cd*azz+c*az(m)
       azz=az(m)
+
+      !same
+      !do mm=1,norb
+      !   do i = 1,np
+      !      write(30,*) rnl(i,mm)
+      !   enddo
+      !enddo
+
+
 
       if (wnl(m).lt.1e-6) then
          dpw=dp/0.001
       else
          dpw=dp/sqrt(wnl(m))
       endif
+
+      !same
+      !do mm=1,norb
+      !  do i = 1,np
+      !    write(30,*) rnl(i,mm)
+      !  enddo
+      !enddo
+
+
 
       do j=1,norb
          if (abs(e(m,j)).ne.0.d0.and.m.ne.j) then
@@ -166,6 +219,15 @@ c               write(7,*) 'orth', j,azz,az(j),rx
 
  63   format(6x,'<',i3,'|',i3,'>=',1pd8.1)      
 
+      !same
+      !do mm=1,norb
+      !  do i = 1,np
+      !    write(30,*) rnl(i,mm)
+      !  enddo
+      !enddo
+
+
+
       if (abs(rx).gt.0) then
          rx=dsqrt(quadr(m,m,0))
          
@@ -174,6 +236,15 @@ c               write(7,*) 'orth', j,azz,az(j),rx
          enddo
          azz=azz/rx
       endif
+
+      !same
+      !do mm=1,norb
+      !  do i = 1,np
+      !    write(30,*) rnl(i,mm)
+      !  enddo
+      !enddo
+
+
 
       jjset=np
  687  if (dabs(rnl(jjset,m)).lt.1e-15) then
@@ -205,13 +276,22 @@ c      write(7,*) 'after de adj', m,az(m),azz
          rsatom(i)=rsatom(i)+wnl(m)*rnl(i,m)**2
       enddo
 
+      !same
+      !do mm=1,norb
+      !  do i = 1,np
+      !    write(30,*) rnl(i,mm)
+      !  enddo
+      !enddo
+
+
+
       return
 
  25   continue
       write(7,*) "Solve for HF wfn failed, orthogonalizing..."
       if (norb.eq.1) goto 27
       call orthog(ilast)
-      call grange
+      call grange1
       
  27   continue
       call hfmethd(m,ipsp,p,zeff,azz,fail,iprint)

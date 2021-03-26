@@ -1,4 +1,4 @@
-c--------------------------------------------------------------------
+c-------------------------------------------------------------------
 c The following code is adapted from:
 c
 c A GENERAL HARTREE-FOCK PROGRAM
@@ -85,12 +85,14 @@ c     -------------------------------------------------------------------------
       common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
       common /edi/ e(n0,n0)
       common /ahf/ s(n0),az(n0),acc(n0),dpm(n0)
+      common /hybrid/ exxw,ecw
 
 c     -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks                
 c     -------------------------------------------------------------------------
       common /nlpot1/ Flstar(npdm),phipsref(npdm,n0),phiguess(npdm,n0)
-      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm)
+      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm),
+     $     rvx(npdm),rex(npdm),rvc(npdm),rec(npdm),rvdft(npdm)
       common /nlcore/ rvloc(npdm)
       common /ipos/ ipos(n0),itermcount
       common /vdir/ vdir(npdm),pold(npdm)
@@ -105,15 +107,22 @@ c     *************************************************************************
 c     local variables
 c     *************************************************************************
       dimension eold(n0)
+      dimension f(npdm),f1(npdm),f2(npdm),f3(npdm),f4(npdm)
       dimension rsatom(npdm),rsold(npdm)
       
       dimension wavea(npdm),icarray(30)
       dimension x(npdm),yr(npdm),fr(npdm),fr2(npdm)
       dimension lcount(10)
+      dimension rvn(npdm),rvf(npdm),p(npdm)
 c     *************************************************************************
 c     *************************************************************************
       character*80 file_log
       logical ilast,first
+      logical fexist
+
+
+
+      !HFs setup
 
       vtl=vtol
       etl=etol*10.d0
@@ -130,11 +139,10 @@ c     *************************************************************************
       icorb = norb/4+2
       ighost=0
       ighost2=0
-c      iprint=5
 
       open(unit=7,file=file_log,form='formatted',access='append')
 
-      iflag=0
+      iflag=0  ! comment by JY: this is a dummy variable 
       nfails=0
 
       call hfcoef(iflag,ipsp)
@@ -237,22 +245,157 @@ c     starting guess for channels which don't have a psp-wfn guess
  33      continue
       enddo
 
+      !DFT setup
+      
+      !Do dft steps only when we are doing AE calculation.
+      !If we are doing psp calculation (Trail&Needs procedure),
+      !  skip directly to HF steps
+      if(ipsp.ne.0) goto 55
+
+      do j=1,norb
+         do i = 1,np
+          rnl(i,j)=rnl(i,j)*sqrt(r(i))
+         enddo
+      enddo
+
+      do i=1,norb
+         do j=1,np
+            rvcore(j,i)=-rvcore(j,i)*2.d0
+         enddo
+      enddo
+
+      do i=1,norb        
+         en(i)=-en(i)
+      enddo
+
+
+      !initialize charge density
+      maxim = 0 
+      do m=1,norb
+        do i = 1,nmax(m)
+          rsatom(i) = rsatom(i) + wnl(m) * rnl(i,m)**2 
+        enddo
+        maxim = max(maxim,nmax(m))
+      enddo
+
+      !initialize dft potential
+
+      call hrtree(maxim,h,r,rsatom,rvh)
+      call excorr(maxim,ixc,exccut,rsatom,
+     $           rvxc,rexc,rvx,rex,rvc,rec,irelxc)
+
+      do i = 1,np
+         do iorb = 1,norb
+            !rvps(i,iorb)=rvcore(i,iorb)+rvh(i)+rvxc(i)
+            rvps(i,iorb)=rvcore(i,iorb)+rvh(i)+rvx(i)+rvc(i)
+         enddo
+      enddo
+
+      ! do a few iterations of dftsolve first
+
+      igh=0
+      ipratt=6
+      npratt = ipratt
+      do niter=1,10
+
+         if(niter.eq.1) then
+            do i=1,norb
+               ipos(i)=0
+               nmax(i)=np
+            enddo
+         endif
+         
+         npratt = npratt + 1
+         if (npratt.gt.ipratt) npratt = 0
+
+         do i = 1,np
+            rsold(i)=rsatom(i)
+            rsatom(i) = 0
+         enddo
+ 
+         do m = 1,norb
+            if (m.le.ncore) then
+               ibound=1
+            else
+               ibound=ibd(m-ncore)               
+            endif
+
+
+            call schsl(m,no(m),lo(m),en(m),nmax(m),
+     $                    rvps(:,m),p,igh,ibound)
+            do i = 1,nmax(m)
+               rnl(i,m) = p(i) !this is "dft-style rnl"
+               rsatom(i) = rsatom(i) + wnl(m) * rnl(i,m)**2
+            enddo
+
+         enddo
+
+         alpha = 0.5
+         if (niter.gt.3) then
+            do i = 1,np
+               rsatom(i) = alpha * rsatom(i) + (1.0-alpha) * rsold(i)
+            enddo
+         endif
+ 
+         call hrtree(maxim,h,r,rsatom,rvh)
+
+
+         call excorr(maxim,ixc,exccut,rsatom,
+     $           rvxc,rexc,rvx,rex,rvc,rec,irelxc)
+
+
+         dvmax = 0
+         xn2 = (zeff - xion) * 2
+         do i = 1,maxim
+            coul = rvh(i) + rvxc(i)  
+            dv = abs(coul - rvcoul(i))
+            if (dv.gt.dvmax) igdd=i
+            dvmax = max(dv,dvmax)
+            pr = 0.5
+            if (npratt.gt.0) pr = pratt(rvn(i),rvf(i),rvcoul(i),coul)
+            rvn(i) = rvcoul(i)
+            rvf(i) = coul
+            rvcoul(i)= pr * rvcoul(i) + (1.d0 - pr) * coul
+         enddo
+         
+         do i = maxim + 1,np
+            rvcoul(i) = xn2
+            rvn(i) = xn2
+            rvf(i) = xn2
+         enddo
+         xmix = 0.9
+         do i = 1,np
+            do iorb = 1,norb
+               rvps(i,iorb) = (rvcore(i,iorb) + rvcoul(i)) * xmix
+     $              + (1.0 - xmix) * rvps(i,iorb)
+            enddo
+         enddo
+      enddo
+
+      !done with DFT iterations, now transform the variables back.
+
+      do j=1,norb
+         do i = 1,np
+          rnl(i,j)=rnl(i,j)/sqrt(r(i))
+         enddo
+      enddo
+
+      do i=1,norb
+         do j=1,np
+            rvcore(j,i)=-rvcore(j,i)/2.d0
+         enddo
+      enddo
+
+      do i=1,norb        
+         en(i)=-en(i)
+      enddo
+      !done with DFT
+55    continue
+
+
+
       do niter = 1,maxit
-
-C          if (ipsp.ne.0) then
-C             do i=1,norb
-C                do j=1,np
-C                   if (r(j).lt.15) write(850+i,*) r(j),rvps(j,i)
-C                   if (r(j).lt.15) write(860+i,*) r(j),
-C      $                 x(j)/rnl(j,i),rnl(j,i)
-C                   if (r(j).lt.15) write(870+i,*) r(j),yr(j)
-C                   if (r(j).lt.15) write(370+i,*) r(j),rnl(j,i)
-C                enddo
-C             enddo
-C             stop
-C          endif
-
-         call grange
+      
 
 c     ***********************************************************************
 c     ***********************************************************************
@@ -266,13 +409,91 @@ c     ***********************************************************************
             rsatom(i) = 0
          enddo
 
+         !mix charge density
+         maxim = 0 
+         do m=1,norb
+           do i = 1,nmax(m)
+             rsatom(i) = rsatom(i) + wnl(m) * rnl(i,m)**2 * r(i)
+           enddo
+           maxim = max(maxim,nmax(m))
+         enddo
+
+         alpha = 0.5
+         if (niter.gt.3) then
+            do i = 1,np
+               rsatom(i) = alpha * rsatom(i) + (1.0-alpha) * rsold(i)
+            enddo
+         endif
+ 
+         !set up dft potentials for hybrid calculations
+         do i=1,np
+           rvxc(i) = 0
+           rvx(i) = 0
+           rvc(i) = 0
+           rvdft(i) = 0
+         enddo
+
+         call hrtree(maxim,h,r,rsatom,rvh)
+
+         call excorr(maxim,ixc,exccut,rsatom,
+     $        rvxc,rexc,rvx,rex,rvc,rec,irel)
+
+
+
+         !some code for printing out energies
+c         do i = 1,np
+c            f(i) = (0.5d0 * rvh(i) + rexc(i) - (rvxc(i)+rvh(i)) ) 
+c     $              * rsatom(i)/r(i)
+c            f2(i) = 0.5d0 * rvh(i)* rsatom(i)/r(i)
+c            f3(i) = rexc(i)* rsatom(i)/r(i)
+c            f4(i) = rvxc(i)* rsatom(i)/r(i)
+c         enddo
+c         ehxc = 2
+c         call radin(r,f,0,np,h,ehxc)
+c         ehar = 2
+c         call radin(r,f2,0,np,h,ehar)
+c         exc = 2
+c         call radin(r,f3,0,np,h,exc)
+c         evxc = 2
+c         call radin(r,f4,0,np,h,evxc)
+
+
+
+         do i=1,np
+           rvdft(i) = (1.0-exxw)*(rvh(i)+rvx(i)) + rvc(i)*ecw
+c           write(80,*) rsatom(i)
+         enddo
+
+
+         do m=1,norb
+            do i=1,np
+c               write(77,*) rvdft(i) -2*rvcore(i,m)
+            enddo
+         enddo
+
+         !do m=1,norb
+         !  do i = 1,np
+         !    write(27,*) rnl(i,m)
+         !  enddo
+         !enddo
+
+         !construct off-diag energy params
+         call grange1
+
+         !do m=1,norb
+         !  do i = 1,np
+         !    write(28,*) rnl(i,m)
+         !  enddo
+         !enddo
+
+
+
          dp1=0.d0
 c         nfails=0
          do m=1,norb
             ed1=0
             eold(m)=en(m)
             ed2=e(m,m)
-
             call hfde(m,ipsp,zeff,dpm,iprint)
 c            write(7,*) 'NFAILS', nfails
             if (nfails.gt.25) goto 911
@@ -286,12 +507,20 @@ c            write(7,*) 'NFAILS', nfails
             eold(m) = en(m)
             edmax = max(edif,edmax)
          enddo
+            
+
+         !do m=1,norb
+         !  do i = 1,np
+         !    write(30,*) rnl(i,m)
+         !  enddo
+         !enddo
 
 c     ***********************************************************************
 c      m loop
 c     ***********************************************************************
          
-         if (dp1.lt.vtl) goto 66
+         !if (dp1.lt.vtl) goto 66
+         goto 66
 
          dp1=0.d0
          do mm=1,6
@@ -321,7 +550,15 @@ c     ***********************************************************************
          enddo
  66      continue
 
+         !do m=1,norb
+         !  do i = 1,np
+         !    write(30,*) rnl(i,m)
+         !  enddo
+         !enddo
+
          call orthog(ilast)
+
+
 
          ebs=0.d0
          do m = 1,norb
@@ -334,16 +571,17 @@ c     ***********************************************************************
  8       format(6x,'least self-consistent function is ',i3,
      $        ' weighted maximum change =',1pd10.2,1pd10.2)
 
-         call hfenergy(ipsp,etot,ehart,exx,ekn)      
+         call hfenergy(ipsp,ixc,exccut,etot,ehart,exx,ekn,irel)      
 
          evir=(etot-ekn)/ekn
          ekn=ekn*2.d0
          etot=etot*2.d0
          ehart=ehart*2.d0
          exx=exx*2.d0
+
          
          etot2=etot
-         etot=-ebs-ehart-exx
+         !etot=-ebs-ehart-exx
 
 c         etot2=-ebs-ehart-exx
          edf=etot-etot2
@@ -372,8 +610,6 @@ c     ***********************************************************************
  490        format(1x,i3,2x,f15.7,1x,f15.7,1x,f15.7)
  491        format(1x,i3,2x,f15.7,1x,f15.7,1x,f15.7,1x,e8.2,1x,e8.2)
          endif
-c         write(7,*) 'CONVV', dvmax,vtl
-c         write(7,*) 'CONVE', edmax,etl
          if (dvmax.lt.vtl.and.edmax.lt.etl) goto 1000
          
 c     ***********************************************************************
@@ -384,9 +620,29 @@ c     ***********************************************************************
 
  1000 continue
 
+c     files for debugging purposes
+c      close(unit=27)
+c      close(unit=28)
+c      close(unit=29)
+c      close(unit=30)
+c      close(unit=31)
+c      close(unit=32)
+c      close(unit=77)
+c      close(unit=78)
+c      close(unit=79)
+c      close(unit=80)
+c      close(unit=81)
+c      close(unit=82)
+c      close(unit=83)
+c      close(unit=84)
+
       if (iprint.gt.0)  then
          write(7,*) 
-         write(7,*) 'Hartree-Fock converged!'
+         if (ixc.eq.-1) then
+           write(7,*) 'Hartree-Fock converged!'
+         elseif (ixc.eq.7) then
+           write(7,*) 'Hybrid functional converged!'
+         endif
       endif
 
       if (iprint.gt.1)  write(7,192)
@@ -516,6 +772,7 @@ c     if (r(j).lt.15) write(370+i,*) r(j),rnl(j,i)
             rvcore(j,i)=-2.d0*rvcore(j,i)
          enddo
          en(i)=-en(i)
+c         write(*,*) 'en1=',en(i)
       enddo
 
       do i=1,np
@@ -527,14 +784,6 @@ c     if (r(j).lt.15) write(370+i,*) r(j),rnl(j,i)
          enddo
       enddo
       call hrtree(np,h,r,rsatom,rvh)
-      if (ipsp.eq.0) then
-         open(unit=33,file="vcore",form="formatted")
-         do i=1,np
-            write(33,*) r(i),rvh(i)
-         enddo
-         close(33)
-      endif
-
 
 c     ***********************************************************************
 c     ***********************************************************************
@@ -543,7 +792,7 @@ c     Flip wfn s.t. it is >0 as r->oo
 
       do i = ncore+1,norb
          do j=np,1,-1
-            if (abs(rnl(j,i)).gt.1e-6) then
+            if (abs(rnl(j,i)).gt.1e-5) then
                nmax(i)=j
                goto 939
             endif
@@ -605,8 +854,8 @@ c     radius of outermost peak
       do i=ncore+1,norb
          rvapmax=0.0
          do j=maxim-1,1,-1
-            if ((rnl(j,i).lt.rnl(j+1,i)).
-     $           and.(abs(rnl(j,i)).gt.1e-6)) then
+            if ((rnl(j,i).lt.rnl(j+1,i))
+     $           .and.(abs(rnl(j,i)).gt.1e-5)) then
                rvap(i)=r(j+1)
                if (rvapmax.lt.rvap(i)) rvapmax=rvap(i)
                goto 944

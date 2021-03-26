@@ -191,7 +191,7 @@ c     *************************************************************************
         rnl(i,nnn) = fr(i) * r(i)
         rsval(i) = rsval(i) + wnl(nnn) * rnl(i,nnn)**2
 
-        if (ixc.ge.0) then
+        if (ixc.ge.0.and.ixc.ne.7) then
            if (i.gt.indrc+50) rvps(i,nnn) = -z-z+rvcoul(i)
            if (i.gt.maxim) rvps(i,nnn) = -xion-xion
         endif

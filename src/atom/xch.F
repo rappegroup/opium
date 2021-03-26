@@ -61,6 +61,7 @@ c     *************************************************************************
       common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
       common /edi/ e(n0,n0)
       common /wfn/ rnl(npdm,n0)
+      common /hybrid/ exxw, ecw
 
       dimension yk(npdm),yr(npdm),x(npdm)
 
@@ -77,13 +78,14 @@ c     *************************************************************************
                   call ykf(yk,i,j,k)
 c                  write(7,*) 'xc', i,j,k,bbb(i,j,k)
                   do in=1,np
-                     x(in) = x(in)+ 2.d0*bbb(i,j,k)*yk(in)*rnl(in,j)
+                     x(in)=x(in)+2.d0*bbb(i,j,k)*yk(in)*rnl(in,j)*exxw
                   enddo
                endif
             enddo
             
          endif
       enddo
+
 
       if (iopt.eq.2) then
          do in=1,np

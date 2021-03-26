@@ -45,6 +45,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
+*    1/n*sqrt(Z*(n-l-1)!*(n+l)!) the loop is amazing!!
       double precision function hnorm(n,l,zs)
       implicit double precision(a-h,o-z)
 #include "fortdim.h"
@@ -72,7 +73,10 @@ c
 *
 *       Returns the value of an unnormalized (nl) hydrogenic function
 *   with nuclear charge ZZ and radius r.
-*
+*   hwf stands for hydrogenic wavefunction, equations are in page 4 of 
+*   Fisher's book.
+*   the sum part of the Laguerre polynomials P(nl;r) computed by the
+*   loop  
 *
       double precision function hwf(n,l,zs,r)
       implicit double precision(a-h,o-z)
@@ -351,6 +355,69 @@ c               write(7,35) nlm(i),nlm(j),e(i,j),nlm(j),nlm(i),e(j,i)
  35   format(7x,2(3x,'e(',i3,'|',i3') =',f12.5))
       return
       end
+
+      !this includes excorr terms in off-diag energy params
+      subroutine grange1
+      implicit double precision(a-h,o-z)
+#include "fortdim.h"
+
+      common /aorb/ ncore,nval,norb,nlm(n0),
+     $     no(n0),lo(n0),nmax(n0),maxim
+      common /adat/ wnl(n0),en(n0),so(n0),xion
+      common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
+      common /edi/ e(n0,n0)
+      common /ahf/ s(n0),az(n0),acc(n0),dpm(n0)
+      common /wfn/ rnl(npdm,n0)
+      common /consts/ etol,vtol,maxit,isoft
+      common /grid/ h,r1,z,r(npdm),np
+      common /coeff/coef(100),ijptr(n0,n0)
+
+*  *****  rotate pairs connected by orthogonality but not when one of
+*         the orbitals is simultaneously orthogonal to a non-orthogonal
+*         pair
+*
+      do i = 1,norb-1
+         do j = i+1,norb
+            if (dabs(e(i,j)) .gt. 1.d-10) then
+               write(7,*) 'Rotation needed ', i,j,e(i,j)
+               !if (dabs(e(i,j)) .gt. 1.d-10) call rotate(i,j)
+            endif
+         enddo
+      enddo
+
+*  *****   compute off-diagonal energy parameters
+
+      do i = 2,norb
+         do j = 1,i-1
+            if (dabs(e(i,j)) .gt. 1.d-10) then
+               if ( j .lt. 1) then
+                  e(i,j) = hl(i,j) - ekin(i,j)
+                  e(j,i) = 0.d0
+               else if (wnl(i) .eq. wnl(j)) then
+                  c=hl(i,j)-(ekin(i,j)+ekin(j,i))/2.d0
+                  e(i,j) = c
+                  e(j,i) = c
+               else
+                  res = ekin(i,j)-ekin(j,i)
+                  
+                  e(i,j) = 1.d0*wnl(j)*res/(wnl(i)-wnl(j))
+                  e(j,i) = wnl(i)*e(i,j)/wnl(j)
+               end if
+            end if
+         enddo
+      enddo
+
+      !testing: zeroing off-diags
+      !do i = 2,norb
+      !   do j = 1,i-1
+      !      e(i,j) = 0.0
+      !      e(j,i) = 0.0
+      !   enddo
+      !enddo
+
+      return
+      end
+
 
 
       subroutine orthog(ilast)

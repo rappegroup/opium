@@ -31,7 +31,7 @@
 #include "energy.h"           /* this is for saving the energies */
 
 /* report feature */
-
+//comment by JY hfsolve_ defined here
 static char report[8000];
 void nrelorbnl(param_t *param, int, char *); 
 char * write_reportnl(param_t *param, char *rp,int,double temp_eigen[], double temp_norm[], int, int);
@@ -104,23 +104,26 @@ int do_nl(param_t *param, char *logfile, int insl ){
   irel=0;
   irelxc=0;
   iprint=1;
-  if (param->ixc < 0) {
+  if (param->ixc < 0 || param->ixc == 7) {
     nlpot2_.inl = 0;  
     if (insl != 0 ){
-      printf("!!NOTE!!: All Hartree-Fock tests are done with the semi-local form of the potential \n");
+      printf("!!NOTE!!: All Hartree-Fock and hybrid functional tests are done with the semi-local form of the potential \n");
       printf("!!NOTE!!: Use the 'sl' command instead of the 'nl' command to remove this warning...\n");
 
       fp_log = fopen(logfile, "a");
 
-      fprintf(fp_log,"!!NOTE!!: All Hartree-Fock tests are done with the semi-local form of the potential \n");
+      fprintf(fp_log,"!!NOTE!!: All Hartree-Fock and hybrid functional tests are done with the semi-local form of the potential \n");
       fprintf(fp_log,"!!NOTE!!: Use the 'sl' command instead of the 'nl' command to remove this warning...\n");
 
       fclose(fp_log);
 
     }
     insl=0;
+    //printf("zeff=%lf ixc=%i exccut_temp=%lf ipsp=%i ifc=%i iexit=%i irel=%i iprint=%i",zeff,param->ixc,exccut_temp,ipsp,ifc,iexit,irel,iprint);
     hfsolve_(&zeff,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
   }else {
+    //printf("do nonlocal \n");
+    //printf("zeff=%lf ixc=%i exccut_temp=%lf ipsp=%i ifc=%i iexit=%i irel=%i irelxc=%i iprint=%i",zeff,param->ixc,exccut_temp,ipsp,ifc,iexit,irel,irelxc,iprint);
     dftsolve_(&zeff,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
   }
 
@@ -436,7 +439,7 @@ void writeNL(param_t *param) {
   }
   fclose(fp);
 
-  if (param->ixc >= 0) {
+  if (param->ixc >= 0 && param->ixc != 7) {
     sprintf(filename, "%s.vi_plt", param->name);
     fp = fopen(filename, "a");
     for (j=0;j<param->ngrid;j++){
@@ -509,7 +512,7 @@ void writeSL(param_t *param) {
   }
   fclose(fp);
 
-  if (param->ixc >= 0) {
+  if (param->ixc >= 0 && param->ixc != 7) {
     sprintf(filename, "%s.vi_plt", param->name);
     fp = fopen(filename, "a");
     for (j=0;j<param->ngrid;j++){

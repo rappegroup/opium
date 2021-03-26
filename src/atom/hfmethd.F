@@ -86,6 +86,7 @@ c -------------------------------------------------------------------------
 
       fu=eu
       mk=0
+
       
  17   call hfint(m,ipsp,p,pp,zeff,ed,ntp,azd,deltae,first,eu,em,iprint)
 
@@ -121,7 +122,7 @@ c     count the number of nodes
      :     d10.2,' ed =',d10.2,' eu =',d10.2,' em =',d10.2,
      :     ' deltae =',d10.2)
 
-      
+
       if (iabs(ncc-node).eq.1.and.dabs(deltae/ed).gt.0.02d0) goto 46
 
       if ((ncc-node).gt.0) then
@@ -156,6 +157,7 @@ c     count the number of nodes
             p(j)=-p(j)
          enddo
          pp=-2.d0-pp
+
  51      continue
       endif
       goto 111
@@ -199,7 +201,7 @@ c     count the number of nodes
      $     2i2/10x,5hnc = ,i3,3x,5hnj = ,i3,3x,5hed = ,f10.6,3x,5hel = ,
      $     f10.6,3x,5heu = ,f10.6)
       call orthog(ilast)
-      call grange
+      call grange1
 
       fail=.true.
       nfails=nfails+1

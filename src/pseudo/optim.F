@@ -121,8 +121,7 @@ c -------------------------------------------------------------------------
          endif
 
       enddo
-
-      if (ixc.ge.0) then
+      if (ixc.ge.0.and.ixc.ne.7) then
          call descreen(ixc,exccut)
          call ghost
       else          

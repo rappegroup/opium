@@ -112,6 +112,11 @@ typedef struct param_t{
     emin,         /* ? */
     emax;         /* ? */
 
+  /*[EXXWEIGHT] */
+
+  double 
+    exxw,
+    ecw;
   /* [KBdesign] */
   int  
     local,localind,        /* local orbital [0...< nval[ */

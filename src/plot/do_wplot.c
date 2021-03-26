@@ -97,6 +97,8 @@ int do_wplot(param_t *param, char *logfile, char *pltyp){
       snprintf(xc,xc_size,"XC=PBESol GGA");
     }else if (param->ixc == 6) {    
       snprintf(xc,xc_size,"XC=VWN5 LDA");
+    }else if (param->ixc == 7) {    
+      snprintf(xc,xc_size,"XC=PBE0");
     }else if (param->ixc == -1) {
       snprintf(xc,xc_size,"Hartree-Fock Exchange");
     }

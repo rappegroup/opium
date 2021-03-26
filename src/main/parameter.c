@@ -79,7 +79,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   /* default */
   consts_.etol = 1.e-8;   
   consts_.vtol = 1.e-6;   
-  consts_.maxit = 100;      
+  consts_.maxit = 500;      
 
   /* [Pseudo] */
   flexi_request_key("Pseudo",1,"%d", &param->nval);
@@ -163,6 +163,29 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   /*  if (streq(param->xcparam, "vwn5lda")) param->ixc = 6;
       if (streq(param->xcparam, "vwn5")) param->ixc = 6;*/
   if (streq(param->xcparam, "hf")) param->ixc = -1;
+  if (streq(param->xcparam, "pbe0")) param->ixc = 7;
+
+  if (param->ixc == 7) {
+    hybrid_.exxw = 0.25;
+//    hybrid_.exxw = 0.0;
+    hybrid_.ecw = 1.0;
+
+    //hybrid_.exxw = 1.0;
+    //hybrid_.ecw = 0.0;
+    
+    //hybrid_.exxw = 0.0;
+    //hybrid_.exxw = 0.25;
+    //hybrid_.ecw = 1.0;
+  }
+  else if(param->ixc == -1){
+    hybrid_.exxw = 1.0;
+    hybrid_.ecw = 0.0;
+  }
+  else{
+    hybrid_.exxw = 0.0;
+    hybrid_.ecw = 1.0;
+  }
+
 
   if (param->ixc == -100) {
     printf(" \nXC functional not understood \n ");
@@ -364,6 +387,12 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   flexi_request_key("Average",0,"%c",&avgtype);
   /* default */
   avgtype='b';
+
+  if ((param->ixc==7) && streq(param->reltype,"srl")){
+          printf("Relativity has not been implented for hybrid functionals yet. Non-relativistic calculation is performed instead.\n");
+          strcpy(param->reltype,"nrl");
+//          param->relxc=0;
+  } else {
   if (streq(param->reltype,"srl")) {
     if ((param->ixc >= 2)&&(param->ixc < 6)) {   /* if GGA */
       avgtype='m';
@@ -386,6 +415,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
       fprintf(fp_log,"WARNING: Can not determine rel. average type ; must be either \"byrc\" or \"minrc\" \n");
       exit(1);
     }
+   }
   }
 
   /* Reorder ATOM, PSEUDO, and CONFIGS blocks to be in s p d f s p d f order */

@@ -16,6 +16,7 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
+c change some of the 911 case to be less than 50 instead of less than 10
       subroutine dftsolve(zeff,ixc,exccut,ipsp,ifc,iexit,irel,
      $     irelxc,iprint)
      
@@ -58,26 +59,31 @@ c     -------------------------------------------------------------------------
       common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
 
       common /niter/ niter
+      common /ahf/ s(n0),az(n0),acc(n0),dpm(n0)
 c     -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks                
 c     -------------------------------------------------------------------------
       common /nlpot1/ Flstar(npdm),phipsref(npdm,n0),phiguess(npdm,n0)
-      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm)
+      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm),
+     $     rvx(npdm),rex(npdm),rvc(npdm),rec(npdm),rvdft(npdm)
       common /nlcore/ rvloc(npdm)
       common /ipos/ ipos(n0),itermcount
       common /vdir/ vdir(npdm),pold(npdm)
       common /rold/ rnlold(npdm,n0),rpold(npdm,n0)
+      common /ameth/ meth(n0),imeth,nfails
 c     -------------------------------------------------------------------------
 
 c     *************************************************************************
 c     local variables
 c     *************************************************************************
       dimension rvn(npdm),rvf(npdm),eold(n0),p(npdm)
-      dimension rsatom(npdm),f(npdm),f2(npdm),f3(npdm)
+      dimension rsatom(npdm),f(npdm),f2(npdm),f3(npdm),f4(npdm)
       dimension pder(npdm),ader(npdm)
       dimension dl(n0), rsatom2(npdm)
       dimension rsold(npdm),wnlfract(npdm)
       dimension wavea(npdm),icarray(n0)
+      dimension emattest(n0,n0)
+      dimension lcount(10)
 c     rvpostloc(npdm),rvpreloc(npdm)
 c     *************************************************************************
 c     Section 1:  set up tolerance params and zero out arrays.
@@ -176,6 +182,7 @@ c      endif
         rvcoul(i) = rvps(i,1) - rvcore(i,1)
       enddo
 
+
       if (inl.ne.0) then
         write(7,*)"Performing non-local pseudopotential calculation"
       else
@@ -248,6 +255,11 @@ c     unbound info
          npratt = npratt + 1
          if (npratt.gt.ipratt) npratt = 0
 
+c         do i = 1,np
+c            write(80,*) rsatom(i)
+c         enddo
+
+
          edmax = 0
          difmax = 0
          maxim = 0
@@ -262,6 +274,7 @@ c     Section 3:  call schsl for each orbital & compile charge density.
 c     ***********************************************************************
 
          do m = 1,norb
+
             if (m.le.ncore) then
                ibound=1
             else
@@ -276,7 +289,7 @@ c     if non-rel
                   
                   if (inl.ne.0) then
 c     if non-local
-                     call applyaug(rvloc,rvps(1,iloc))                        
+                     call applyaug(rvloc,rvps(1,iloc))
                      do i=1,np
                         Flstar(i) = (rvps(i,m) - rvloc(i))
      $                       *phipsref(i,m)/r(i)
@@ -285,7 +298,9 @@ c     if non-local
                      call schsl (m,no(m),lo(m),en(m),nmax(m),
      $                    rvloc,p,igh,ibound)
 
-                     if (itermcount.gt.10) goto 911
+                     if (itermcount.gt.50) then
+                         goto 911
+                     endif 
 c     911 = terminal error - exit scpot
                      
                      call applyaug(rvloc,rvcore(1,iloc))
@@ -296,11 +311,13 @@ c     911 = terminal error - exit scpot
                      
                   else
 c     if AE or local 
-
                      call schsl(m,no(m),lo(m),en(m),nmax(m),
      $                    rvps(1,m),p,igh,ibound)
 
-                     if (itermcount.gt.10) goto 911
+                     if (itermcount.gt.50) then
+                         write(7,*) "line 445"
+                         goto 911
+                     endif
 c     911 = terminal error - exit scpot
                      
                   endif
@@ -327,7 +344,9 @@ c     if relativistic
                   call schslrel(m,rvps(1,m),rnla(1,m),
      $                 rnlb(1,m),z,rvcoul,en,nmax(m),ibound)
                   
-                  if (itermcount.gt.10) goto 911
+                  if (itermcount.gt.50) then
+                      goto 911
+                  endif
 c     911 = terminal error - exit scpot
                   
                   do i=1,np
@@ -383,7 +402,8 @@ c     ***********************************************************************
             do i=1,maxim
                rsatom2(i)=rsatom(i)+rscore(i)
             enddo
-            call excorr(maxim,ixc,exccut,rsatom2,rvxc,rexc,irelxc)
+            call excorr(maxim,ixc,exccut,rsatom2,
+     $           rvxc,rexc,rvx,rex,rvc,rec,irelxc)
             
             do i = 1,maxim
                f(i) = 0.5d0 * rvh(i)*rsatom(i)/r(i)
@@ -391,13 +411,15 @@ c     ***********************************************************************
      $              - (rvxc(i)*rsatom(i)+rvh(i)*rsatom(i))/r(i)
             enddo
          else
-            call excorr(maxim,ixc,exccut,rsatom,rvxc,rexc,irelxc)
+            call excorr(maxim,ixc,exccut,rsatom,
+     $           rvxc,rexc,rvx,rex,rvc,rec,irelxc)
             
             do i = 1,maxim
                f(i) = (0.5d0 * rvh(i) + rexc(i) - (rvxc(i)+rvh(i)) ) 
      $              * rsatom(i)/r(i)
                f2(i) = 0.5d0 * rvh(i)* rsatom(i)/r(i)
                f3(i) = rexc(i)* rsatom(i)/r(i)
+               f4(i) = rvxc(i)* rsatom(i)/r(i)
             enddo
          endif
          ehxc = 2
@@ -406,11 +428,14 @@ c     ***********************************************************************
          call radin(r,f2,0,maxim,h,ehar)
          exc = 2
          call radin(r,f3,0,maxim,h,exc)
+         evxc = 2
+         call radin(r,f4,0,maxim,h,evxc)
          ebs = 0
          do m = 1,norb
             ebs = ebs + wnl(m) * en(m)
          enddo
          etot = ebs + ehxc
+         etot = ebs - ehar + exc - evxc
 
 c     ***********************************************************************
 c     Section 6:  Mix potentials
@@ -419,7 +444,7 @@ c     ***********************************************************************
          dvmax = 0
          xn2 = (zeff - xion) * 2
          do i = 1,maxim
-            coul = rvh(i) + rvxc(i)
+            coul = rvh(i) + rvxc(i)  
             dv = abs(coul - rvcoul(i))
             if (dv.gt.dvmax) igdd=i
             dvmax = max(dv,dvmax)
@@ -443,7 +468,9 @@ c     ***********************************************************************
      $              + (1.0 - xmix) * rvps(i,iorb)
             enddo
          enddo
-         if (niter.eq.maxit) goto 911
+         if (niter.eq.maxit) then
+             goto 911
+          endif
             
 c     911 = terminal error - exit scpot
             
@@ -512,7 +539,7 @@ c     911 = terminal error - exit scpot
                   write (7,505) nlm(m),en(m)               
                   
                   if (en(m).ne.en(m)) then
-                     goto 911
+                     goto 911 
 c     911 = terminal error - exit scpot
                   endif
                endif
@@ -520,6 +547,11 @@ c     911 = terminal error - exit scpot
          enddo
 
       enddo
+
+c      close(77)
+c      close(78)
+c      close(79)
+c      close(80)
 
  505  format(1x,'!WARNING! positive eigenvalue predicted',
      $     ' in scpot  nlm=',i4,5x,'new e =',e13.7)
@@ -814,7 +846,7 @@ c     ***********************************************************************
       endif
 
       write(7,701) etot,ebs,ehxc
-      write(7,702) ehar,exc
+      write(7,702) ehar,exc,evxc
 
       write (7,*)
       write (7,9222)
@@ -876,7 +908,7 @@ c     ***********************************************************************
  500  format(1x,i4,1x,'iterations: (units are Ry and bohr)')
  700  format(1x,'Converged in 1 iteration (probably reference state)')
  701  format(1x,'Energy: ',f16.8,2x,'Ebs: ',f16.8,2x,'Ehxc: ',f16.8)
- 702  format(1x,'Eh    : ',f16.8,2x,'Exc: ',f16.8)
+ 702  format(1x,'Eh    : ',f16.8,2x,'Exc: ',f16.8,2x,'Evxc: ',f16.8)
 
  9222 format(3x,'Orbital',4x,'Filling',7x,'Eigenvalues',4x,
      $     'Norm(rc->oo)',6x,'Peak')
@@ -903,7 +935,6 @@ c     ***********************************************************************
          call ghostnl (rvloc)
          call applyaug(rvloc,rvcore(1,iloc))
       endif
-
       call flush(7)
       close(unit=7)
 

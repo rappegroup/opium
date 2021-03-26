@@ -24,7 +24,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#define VERSION "3.8"
+#define VERSION "4.0"
 #ifndef CHOST
 #define CHOST "unknown"
 #endif
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]){
 	} else {
 	  do_phelp();
 	}
-	i++;
+	i++; // might remove later
       } else { 
 	do_command(&param, paramfile, argv[2], argv[i]);
       }

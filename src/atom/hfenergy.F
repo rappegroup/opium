@@ -52,7 +52,7 @@ c
 *     
 *     determines the position of the electron in the electron list
 *     
-      subroutine hfenergy(ipsp,etotal,ehart,exx,ekn)
+      subroutine hfenergy(ipsp,ixc,exccut,etotal,ehart,exx,ekn,irelxc)
       implicit double precision(a-h,o-z)
 #include "fortdim.h"
       common /wfn/ rnl(npdm,n0)
@@ -63,14 +63,57 @@ c
       common /adat/ wnl(n0),en(n0),so(n0),xion
       common /edi/ e(n0,n0)
       common /ahf/ s(n0),az(n0),acc(n0),dpm(n0)
+      common /hybrid/ exxw,ecw
+
+      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm),
+     $     rvx(npdm),rex(npdm),rvc(npdm),rec(npdm),rvdft(npdm)
 
       dimension rm1(n0),ek(n0),yk(npdm)
+      dimension fx(npdm),fc(npdm),fh(npdm),rsatom(npdm)
 
       ekn=0.0
       etotal = 0.d0
       exx = 0.d0
       ehart = 0.d0
       eloc = 0.d0
+
+      !set up charge density
+
+      do i = 1,np
+         rsatom(i) = 0
+      enddo
+
+      maxim = 0 
+      do m=1,norb
+        do i = 1,nmax(m)
+          rsatom(i) = rsatom(i) + wnl(m) * rnl(i,m)**2 * r(i)
+        enddo
+        maxim = max(maxim,nmax(m))
+      enddo
+
+      !dft parts
+
+      call hrtree(maxim,h,r,rsatom,rvh)
+      call excorr(maxim,ixc,exccut,rsatom,
+     $           rvxc,rexc,rvx,rex,rvc,rec,irelxc)
+
+      do i=1,maxim
+        fx(i) = rex(i) * rsatom(i)/r(i)
+        fc(i) = rec(i) * rsatom(i)/r(i)
+        fh(i) = 0.5 * rvh(i) * rsatom(i)/r(i) !rvh = mu_H 
+      enddo
+
+      exdft = 2
+      call radin(r,fx,0,maxim,h,exdft)
+      ecdft = 2
+      call radin(r,fc,0,maxim,h,ecdft)
+      ehdft = 2
+      call radin(r,fh,0,maxim,h,ehdft)
+
+      etotal = (1.0-exxw)*(exdft+ehdft) + ecdft*ecw
+      etotal = 0.5*etotal ! units
+
+      !HF parts
 
       do  i = 1,norb
          ek(i) = -0.5*hl(i,i)
@@ -92,16 +135,16 @@ c
             do k = 0,2*min0(lo(i),lo(j)),2
                c = aaa(i,j,k)*wnl(i)
                if (i .eq. j) c = c/2.d0
-               if (abs(c).ne.0.d0) etotal = etotal + c*fk(i,j,k)
-               if (abs(c).ne.0.d0) ehart = ehart + c*fk(i,j,k)               
+               if (abs(c).ne.0.d0) etotal = etotal + c*fk(i,j,k) *exxw
+               if (abs(c).ne.0.d0) ehart = ehart + c*fk(i,j,k) *exxw  
             enddo
          enddo
 
          do j = 1,i-1
             do k = abs(lo(i)-lo(j)),lo(i)+lo(j),2
                c = bbb(i,j,k)*wnl(i)
-               if (abs(c).ne.0.d0) etotal=etotal+c*gk(i,j,k)
-               if (abs(c).ne.0.d0) exx=exx+c*gk(i,j,k)
+               if (abs(c).ne.0.d0) etotal=etotal+c*gk(i,j,k)*exxw
+               if (abs(c).ne.0.d0) exx=exx+c*gk(i,j,k)*exxw
             enddo
          enddo
       enddo

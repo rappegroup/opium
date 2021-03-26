@@ -16,7 +16,9 @@ c along with this program; if not, write to the Free Software
 c Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 c
 c
-      subroutine excorr(maxim,ixc,exccut,rsatom,rvxc,rexc,irelxc)
+      subroutine excorr(maxim,ixc,exccut,rsatom,
+     $                  rvxc,rexc,rvx,rex,rvc,rec,
+     $                  irelxc)
       implicit double precision (a-h,o-z)
       
 #include "fortdim.h"
@@ -30,7 +32,7 @@ c
       dimension rsatom(npdm),rvxc(npdm),rexc(npdm)
       dimension agde(npdm),agdc(npdm),ggagde(npdm),ggagdc(npdm),
      $     rlape(npdm),rlapc(npdm),dens(npdm),
-     $     rex(npdm),rec(npdm),tau(npdm)
+     $     rex(npdm),rec(npdm),rvx(npdm),rvc(npdm),tau(npdm)
       
       dimension bb(3,3),vcc(3)
       dimension ipvt(3)
@@ -46,6 +48,7 @@ c     ixc - 3 : PW GGA 91
 c     ixc - 4 : WC GGA 06
 c     ixc - 5 : PBEsol GGA 08
 c     ixc - 6 : VWN LDA V (the CA formulation)
+c     ixc - 7 : PBE0 hybrid functional 
 
       ictype=0
       if (exccut.lt.0) ictype=1
@@ -53,7 +56,8 @@ c     ixc - 6 : VWN LDA V (the CA formulation)
 c     ictype=0  : smoothing at origin is done by slow crossover to LDA
 c     ictype=1  : smoothing at origin is done by polynomial fit when descreening ONLY
       
-      if ((ixc.gt.6).or.(ixc.lt.0)) then
+c      if ((ixc.gt.7).or.(ixc.lt.0)) then
+      if ((ixc.gt.7)) then
          write(7,*) 'ixc out of range - stop'
          write(6,*) 'ixc out of range - stop'
          stop
@@ -63,6 +67,10 @@ c     ictype=1  : smoothing at origin is done by polynomial fit when descreening
       do 10 i=1,maxim
          rvxc(i)=0.0
          rexc(i)=0.0
+         rvx(i)=0.0
+         rvc(i)=0.0
+         rex(i)=0.0
+         rec(i)=0.0
 
          dens(i) = rsatom(i)/(4.0*pi*r(i)*r(i))
          if (iset.eq.0) then
@@ -74,7 +82,7 @@ c     ictype=1  : smoothing at origin is done by polynomial fit when descreening
  10   continue
       if (iset.eq.0) inxc=maxim-1
 
-      if (ixc.ge.2.and.ixc.lt.6) then
+      if (ixc.ge.2.and.ixc.le.7) then
          call grad(dens,agde,
      $        ggagde,rlape,agdc,ggagdc,rlapc,tau,inxc)
          if (irelxc.eq.1) then
@@ -123,9 +131,9 @@ c     This is PW92 LDA X which is the same LDA X for PZ X LDA and VWN X LDA
             endif
          endif
 
-         if (ixc.ge.2.and.ixc.lt.6) then
+         if (ixc.ge.2.and.ixc.le.7) then
 
-            if (ixc.eq.2) then
+            if (ixc.eq.2.or.ixc.eq.7) then
 c     This is PBEGGA X
                call exchpbe(rho,agde(i),ggagde(i),rlape(i),1,1,
      $              ex,vx,fx,fs,fss)
@@ -179,7 +187,7 @@ c     This is PW92LDA X - just for terms needed in rel correction
                
                dhighl=2*a1l*beta+4*a2l*beta**3
                dlowl=2*b1l*beta+4*b2l*beta**3
-               sqlowl=(1+b1l*beta*beta+b2l*beta**4)**2		
+               sqlowl=(1+b1l*beta*beta+b2l*beta**4)**2
                dphil=(clowl*dhighl-chighl*dlowl)/sqlowl
                
                chight=(a1t*beta*beta+a2t*beta**4)
@@ -207,17 +215,17 @@ c     This is PW92LDA X - just for terms needed in rel correction
                d2g=fss/(4.d0*s)
                
                exlsdr = exlda*phi0
-               ex = exlsdr+(ex-exlda)*phi2		
+               ex = exlsdr+(ex-exlda)*phi2
                
                vxpr = vxlda*(-0.5D0 + 1.5D0 * alb / (beta*sb))
                vx=vxpr+vxlda*(0.25*beta*dphilt*(g-2*s**2*dg) 
      $              +phi2*(g-1.5*v*dg-1.5*d2g*u))
             endif
          endif
-
          rexc(i)=2.d0*r(i)*(ex*rwgt+(1.d0-rwgt)*exlda)
          rvxc(i)=2.d0*r(i)*(vx*rwgt+(1.d0-rwgt)*vxlda)
-         rex(i)=rexc(i)
+         rex(i)=rexc(i) 
+         rvx(i)=rvxc(i) 
 
          if (ixc.eq.0) then
 c     This is PZ LDA C
@@ -231,7 +239,7 @@ c     This is VWN3 LDA C
 c     This is PW92 LDA C
             call corlsd(rs,zero,ec,vc,vc,ecrs,eczet,alfc)
          endif
-         if (ixc.eq.2.or.ixc.eq.4) then
+         if (ixc.eq.2.or.ixc.eq.4.or.ixc.eq.7) then
 c     This is PBE GGA C - used for WCGGA also
             call corpbe(rs,zero,agdc(i),ggagdc(i),rlapc(i),zero,1,1,
      $           ec,vc,vc,hc,dvc,dvc)
@@ -255,12 +263,12 @@ c     This is PBEsol GGA C
             vc=vc+dvc*rwgt
          endif
 
-         rec(i)=r(i)*ec*2.d0
+         rec(i)=r(i)*ec*2.d0 
+         rvc(i)=r(i)*vc*2.d0 
 
-         rexc(i)=rexc(i)+r(i)*ec*2.d0
-         rvxc(i)=rvxc(i)+r(i)*vc*2.d0
+         rexc(i)=rexc(i)+r(i)*ec*2.d0 
+         rvxc(i)=rvxc(i)+r(i)*vc*2.d0 
       enddo
-
       if (ictype.eq.1) then
          do i=1,maxim
             if (r(i).gt.-exccut) then 
@@ -270,70 +278,13 @@ c     This is PBEsol GGA C
          enddo
  922     continue
 
-         rvx1=rvxc(icut-1)/r(icut-1)
-         rvx2=rvxc(icut)/r(icut)
-         rvx3=rvxc(icut+1)/r(icut+1)
-         rr1=r(icut-1)
-         rr2=r(icut)
-         rr3=r(icut+1)
-
-         bb(1,1)=rr1**2
-         bb(1,2)=rr1
-         bb(1,3)=1.d0
-
-         bb(2,1)=rr2**2
-         bb(2,2)=rr2
-         bb(2,3)=1.d0
-
-         bb(3,1)=rr3**2
-         bb(3,2)=rr3
-         bb(3,3)=1.d0
-
-         vcc(1)=rvx1
-         vcc(2)=rvx2
-         vcc(3)=rvx3
-
-         call dgesv(3,1,bb,3,ipvt,vcc,3,ierr)
-         if (ierr.ne.0) stop
-
-         a=vcc(1)
-         b=vcc(2)
-         c=vcc(3)
-
-         rvx1=rexc(icut-1)/r(icut-1)
-         rvx2=rexc(icut)/r(icut)
-         rvx3=rexc(icut+1)/r(icut+1)
-         rr1=r(icut-1)
-         rr2=r(icut)
-         rr3=r(icut+1)
-
-         bb(1,1)=rr1**2
-         bb(1,2)=rr1
-         bb(1,3)=1.d0
-
-         bb(2,1)=rr2**2
-         bb(2,2)=rr2
-         bb(2,3)=1.d0
-
-         bb(3,1)=rr3**2
-         bb(3,2)=rr3
-         bb(3,3)=1.d0
-
-         vcc(1)=rex1
-         vcc(2)=rex2
-         vcc(3)=rex3
-
-         call dgesv(3,1,bb,3,ipvt,vcc,3,ierr)
-         if (ierr.ne.0) stop
-
-         a2=vcc(1)
-         b2=vcc(2)
-         c2=vcc(3)
-         
-         do i=1,icut
-            rvxc(i)=r(i)*(a*r(i)**2+b*r(i)+c)
-            rexc(i)=r(i)*(a2*r(i)**2+b2*r(i)+c2)
-         enddo
+         !smoothen 
+         call smoothen(rvxc,icut,r)
+         call smoothen(rexc,icut,r)
+         call smoothen(rvx,icut,r)
+         call smoothen(rex,icut,r)
+         call smoothen(rvc,icut,r)
+         call smoothen(rec,icut,r)
 
       endif
 
@@ -445,3 +396,51 @@ c     prepare the various gradient terms
 
       return
       end
+
+      subroutine smoothen(rv,icut,r)
+        implicit double precision(a-h,o-z)
+#include "fortdim.h"
+        !common /grid/ h,r1,z,r(npdm),np
+
+        dimension bb(3,3),vcc(3)
+        dimension ipvt(3)
+        dimension rv(npdm),r(npdm)
+
+        rvx1=rv(icut-1)/r(icut-1)
+        rvx2=rv(icut)/r(icut)
+        rvx3=rv(icut+1)/r(icut+1)
+        rr1=r(icut-1)
+        rr2=r(icut)
+        rr3=r(icut+1)
+
+        bb(1,1)=rr1**2
+        bb(1,2)=rr1
+        bb(1,3)=1.d0
+
+        bb(2,1)=rr2**2
+        bb(2,2)=rr2
+        bb(2,3)=1.d0
+
+        bb(3,1)=rr3**2
+        bb(3,2)=rr3
+        bb(3,3)=1.d0
+
+        vcc(1)=rvx1
+        vcc(2)=rvx2
+        vcc(3)=rvx3
+
+        call dgesv(3,1,bb,3,ipvt,vcc,3,ierr)
+        if (ierr.ne.0) stop
+
+        a=vcc(1)
+        b=vcc(2)
+        c=vcc(3)
+
+        do i=1,icut
+          rv(i)=r(i)*(a*r(i)**2+b*r(i)+c)
+        enddo
+
+
+        return
+        end
+

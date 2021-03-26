@@ -180,7 +180,6 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
     fp_log = fopen(logfile, "a");
     fprintf(fp_log," Making l+1 the local potential %d\n",kk);
     fclose(fp_log);
-
     for (i=0; i<param->ngrid; i++){
       unipp.v_ps[kk][0][i] = rvloc[i]/(2.*unipp.r_m[i]);
       unipp.u_ps[kk][0][i] = 0.0;

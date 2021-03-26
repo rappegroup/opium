@@ -89,7 +89,10 @@ int do_ae(param_t *param, char *logfile){
     irelxc=0;    
     if (param->ixc < 0) {
       hfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
-    }else {
+    } else if (param->ixc==7){
+//         printf("z=%d ixc=%d exccut_temp=%lf ipsp=%d ifc=%d iexit=%d irel=%d iprint=%d \n",param->z, param->ixc,exccut_temp,ipsp,iexit, irel,iprint);
+      hfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
+    } else {
       dftsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
     }
     if (iexit) {
@@ -98,9 +101,13 @@ int do_ae(param_t *param, char *logfile){
     }
 
   } else {
-
+/*   
+ *   Relativity is not implemented for hybrid functionals
+ *   Generating the non-relativistic potentials
+*/      
     fprintf(fp_log," Performing relativistic AE calculation...  \n" );
     fclose(fp_log);
+    
 
     /* turn the l-orbitals into j-orbitals */
     relorbae(param,config,logfile);
@@ -117,6 +124,14 @@ int do_ae(param_t *param, char *logfile){
 
     if (param->ixc < 0) {
       dfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
+    }else if (param->ixc == 7){
+//  non-relativistic calculation for hybrid functionals
+      irel=0;
+      irelxc=0;
+ //     printf("z=%d ixc=%d exccut_temp=%lf ipsp=%d ifc=%d iexit=%d irel=%d iprint=%d \n",param->z, param->ixc,exccut_temp,ipsp,iexit, irel,iprint);
+      nrelorbae(param,config,logfile);
+      startae(param, aorb_.norb);
+      hfsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&iprint);
     }else {
       dftsolve_(&param->z,&param->ixc,&exccut_temp,&ipsp,&ifc,&iexit,&irel,&irelxc,&iprint);
     }

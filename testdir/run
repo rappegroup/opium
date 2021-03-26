@@ -1,6 +1,0 @@
-#!/bin/csh -f
-cp params/*.param .
-foreach i (`cat LIST|egrep -v \#`)
-        echo $i
-	../opium $i $i.log ae ps nl ke tc pwf recpot fhi cpmd ncpp champ psf recpot tet upf qso rpt
-end

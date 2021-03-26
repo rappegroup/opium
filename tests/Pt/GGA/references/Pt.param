@@ -1,0 +1,79 @@
+[Atom]
+Pt              #chemical symbol (max. 2 characters)
+15              # norb: number of orbitals
+# reference configuration
+100 2.00 -643.0 # nlm occ eigen(- means auto-generate)
+200 2.00 -77.4
+210 6.00 -68.4
+300 2.00 -10.0
+310 6.00  -6.0
+320 10.0  -6.4
+400 2.00  -6.4
+410 6.00  -6.0
+500 2.00  -2.4
+510 6.00  -2.0
+420 10.0  -6.0
+430 14.0  -6.4
+600 1.50  -1.0
+610 0.00  -1.0
+520 8.00  -1.0
+
+[Pseudo]
+3 2.06 2.20 2.09
+opt
+
+[Optinfo]
+7.07 10    # rc[a.u.] qc[sqrt(Ry)] Nb
+7.07 10
+7.07 10
+
+[XC]
+gga
+
+[Configs]
+9
+#
+600 1.00 -1.0
+610 0.00 -1.0
+520 8.00 -1.0               # number of valence configurations
+#
+600 2.00 -1.0
+610 0.00 -1.0
+520 8.00 -1.0
+#
+600 0.10 -1.0
+610 0.00 -1.0
+520 8.00 -1.0 
+#
+600 1.50 -1.0
+610 0.00 -1.0
+520 8.00 -1.0               # number of valence configurations
+#
+600 2.00 -1.0
+610 0.00 -1.0
+520 6.00 -1.0
+#
+600 0.10 -1.0
+610 0.00 -1.0
+520 8.00 -1.0 
+#
+600 0.00 -1.0
+610 0.00 -1.0
+520 10.0 -1.0              
+#
+600 0.10 -1.0
+610 0.10 -1.0
+520 7.00 -1.0
+#
+600 0.10 -1.0
+610 0.00 -1.0
+520 6.00 -1.0               # number of valence configurations
+
+[Relativity]
+srl              # nrl / srl / frl
+
+
+[KBdesign]
+s    # local orbital
+1    # number of boxes
+au 0.0 1.90  -1.45

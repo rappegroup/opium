@@ -48,6 +48,8 @@ c     *************************************************************************
       common /iavgtype/ iavgtype
 
       dimension rvxct(npdm),rexct(npdm),v(npdm)
+      dimension rvxt(npdm),rext(npdm)
+      dimension rvct(npdm),rect(npdm)
       dimension ibp(n0),indall(n0),rsatom(npdm),rv(npdm)
       dimension fe_old(n0),fe(n0), rnlt(npdm,n0)
       dimension rvscr(npdm),rvh(npdm),phom(npdm)
@@ -322,7 +324,8 @@ c     is the same as it is for the initial j-averaged wavefunctions
          enddo
 
 c     3a: Find new xc and hartree potentials since rho has changed
-         call excorr (np,ixc,exccut,rsatom,rvxct,rexct,irelxc)
+         call excorr (np,ixc,exccut,rsatom,rvxct,rexct,
+     $        rvxt,rext,rvct,rect,irelxc)
          call hrtree (np,h,r,rsatom,rvh)
 
 c     rvscr is the screening potential
@@ -556,7 +559,8 @@ c     compute new v_xc and v_h
       call radin(r,rsatom,0,maxim,h,pow)
       pow = 2.0
       call radin(r,rscore,0,maxim,h,pow)
-      call excorr (maxim,ixc,exccut,rsatom,rvxct,rexct,irelxc)
+      call excorr (maxim,ixc,exccut,rsatom,rvxct,rexct,
+     $     rvxt,rext,rvct,rect,irelxc)
       call hrtree (maxim,h,r,rsatom,rvh)
       do  i = maxim+1,np
         rvh(i)  = z + z - xion - xion

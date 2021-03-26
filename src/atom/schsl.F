@@ -88,7 +88,6 @@ c         endif
       do iter = 1,itmax
 
          iskip=0
-
          if (bound.and.iclose.eq.0) then
             call newmatch(nqn,lang,ei,imax,imat,rv,wnlfract,iskip)
             if (iskip.eq.1) then 
@@ -104,10 +103,8 @@ c         endif
             imat=np-200
             imax=np-200
          endif            
-
          call outward(ei,lang,rv,p,phom,pinhom,
      $        flstar,phipsref(1,iorb),imat,xt,wt)
-
 
          if (bound) call cntnodes(nqn,lang,ei,p,imat,node,iskip,iclose)
          if (iterm.eq.1) goto 912
@@ -156,6 +153,10 @@ c      write (iout,9101) iter,iorb,nqn,lang,ei,de,imat
       do i = imax+1,np
         p(i) = 0
       enddo
+
+c      do i=1,np
+c         write(79,*) p(i)/sqrt(r(i))
+c      enddo
 
       return
  912  continue
@@ -345,6 +346,7 @@ c     if (ei.ge.-etol.or.ncross.gt.node) then
          do i=1,np
             g(i)=-fs(i)*sqrt(r(i))*r(i)
          enddo
+
          call logder(ei,z,lang,isoft,rv,g,r,np,h,r(imat),dl,npl0,nr,
      $        pinhom,wfld,ider,de,qp,dld)
       endif

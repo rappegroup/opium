@@ -179,6 +179,12 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
     fprintf(fp,"SLA  PZ   NOGX NOGC    PZ   Exchange-Correlation functional\n");
   } else if (param->ixc == 2) {
     fprintf(fp,"SLA  PW   PBE  PBE     PBE  Exchange-Correlation functional\n");
+  } else if (param->ixc == 5) {
+    fprintf(fp,"SLA  PW   PSX  PSC     PBESOL  Exchange-Correlation functional\n");
+  } else if (param->ixc == -1) {
+    fprintf(fp,"HF  NOC   NOGX  NOGC     HF  Exchange-Correlation functional\n"); //will change later
+  } else if (param->ixc == 7) {
+    fprintf(fp,"PB0X  PW   PB0X  PBC     PBE0  Exchange-Correlation functional\n"); //will change later
   } else {
     printf("!!WARNING!!: Your choice of XC functional is not currently supported for this type of output (UPF), will print LDA Perdew-Zunger\n");
     fprintf(fp,"SLA  PZ   NOGX NOGC    PZ   Exchange-Correlation functional\n");
@@ -232,12 +238,36 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
     if(i%4 !=0 ) fprintf(fp,"\n");
     fprintf(fp,"</PP_NLCC>\n");
   }
-
+  int counter = 0;
   fprintf(fp,"\n\n<PP_LOCAL>\n");
-  for (i=0;i<param->ngrid;i++){
-    fprintf(fp,"%19.16le ",nlcore[i]/rr[i]);
-    if( (i+1)%4 == 0 ) fprintf(fp,"\n");
+/*  
+  if (param->ixc == 7 || param->ixc == -1){
+      for (k=0;k<param->nll;k++){
+          for (i=0;i<param->ngrid;i++){
+          fprintf(fp,"%19.16le ",rvcore[k][i]/rr[i]);
+          if( (counter+1)%4 == 0 ) fprintf(fp,"\n");
+          counter ++;
+          }
+      }
+  } else {
+*/
+  
+  if (param->ixc == 7 || param->ixc == -1){
+    //For HF or hybrids, we did not perform a NL solve,
+    //However, we can still save one of the angular momentum components
+    //into the local potential.
+    for (i=0;i<param->ngrid;i++){
+      fprintf(fp,"%19.16le ",rvcore[param->localind][i]/rr[i]);
+      if( (i+1)%4 == 0 ) fprintf(fp,"\n");
+    }
+  } else {
+
+    for (i=0;i<param->ngrid;i++){
+      fprintf(fp,"%19.16le ",nlcore[i]/rr[i]);
+      if( (i+1)%4 == 0 ) fprintf(fp,"\n");
+    }
   }
+
   if(i%4 !=0 ) fprintf(fp,"\n");
   fprintf(fp,"</PP_LOCAL>\n");
 
@@ -260,7 +290,13 @@ int do_qeupf(param_t *param, FILE *fp_param, char *logfile){
       fprintf(fp,"  <PP_BETA>\n");
       
       for (i=0;i<param->ngrid;i++){  
+        //nlcore not initialized for HY or HF here
+        if (param->ixc == 7 || param->ixc == -1){
+            beta[i]=rnl[j][i]*(rvcore[j][i]-rvcore[param->localind][i])/rr[i];
+        //    printf("%19.16le %19.16le \n",rr[i],beta[i]);
+        } else {
 	beta[i]=rnl[j][i]*(rvcore[j][i]-nlcore[i])/rr[i];
+        }
 	ddd[i]=beta[i]*rnl[j][i];    
       }
       

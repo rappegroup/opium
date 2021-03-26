@@ -1,7 +1,0 @@
-#!/bin/csh -f
-
-rm OUT
-foreach i (`cat LIST`)
-	echo $i >>OUT	
-	diff -ub gfortran/"$i"."$1" ifort/"$i"."$1">>OUT
-end

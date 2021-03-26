@@ -1,0 +1,120 @@
+##########################################################
+#    Opium Report File                                   #
+##########################################################
+     Opium version:        3.8
+
+### copy of the parameter file #######################
+
+[Atom]
+H  
+1
+100   1.00   -
+
+[Pseudo]
+1  0.77
+opt
+
+[Optinfo]
+7.07  10
+conmax
+
+[Configs]
+1
+#
+100  1.00  -
+
+[XC]
+hf
+
+#[HFsmooth]
+#1
+#1e-6
+#0.0 0.0
+
+### AE report ########################################
+
+ AE:Orbital    Filling       Eigenvalues[Ry]          Norm
+    ----------------------------------------------------------
+	100	 1.000	      -0.9999999594	  0.8006442331
+
+      E_tot =       -0.9999816746 Ry
+
+### PS report ########################################
+
+
+
+ NOTICE!! :Ghost testing not done for HF psps yet, sorry :( 
+    ====================Optimized pseudopotential method====================
+
+                       Pseudopotential convergence error                      
+    Orbital      [mRy/e]       [meV/e]         [mRy]        [meV]        Ghost
+    --------------------------------------------------------------------------
+	100       0.986903     13.427504      0.986903     13.427504	   ???
+
+                  Tot. error =               0.986903     13.427504
+
+
+### NL/SL report #####################################
+
+
+
+ NOTICE!! :Ghost testing not done for HF psps yet, sorry :( 
+
+ SL:Orbital    Filling       Eigenvalues[Ry]          Norm       Ghost
+    ------------------------------------------------------------------
+	100 	 1.000	      -1.0000336336	  0.8006558440	   ???
+
+      E_tot =       -0.9999366011 Ry
+
+### KE report ########################################
+
+	 ===   Ecut necessary for ~1    eV convergence error / electron === 
+	 --------------------------------------------------------------- 
+		 	 Ecut[Ry] 	 error [meV/e] 
+	100  		   10 	          967.628 
+	 ===   Ecut necessary for ~100 meV convergence error / electron === 
+	 --------------------------------------------------------------- 
+		 	 Ecut[Ry] 	 error [meV/e] 
+	100  		   29 	           96.287 
+        :q
+
+	 ===   Ecut necessary for  ~10 meV convergence error / electron === 
+	 --------------------------------------------------------------- 
+		 	 Ecut[Ry] 	 error [meV/e] 
+	100  		   52 	            9.768 
+
+	 ===   Ecut necessary for   ~1 meV convergence error / electron === 
+	 --------------------------------------------------------------- 
+		 	 Ecut[Ry] 	 error [meV/e] 
+	100  		   216 	            0.990 
+
+### TC report ########################################
+
+ AE:Orbital    Filling       Eigenvalues[Ry]          Norm
+    ----------------------------------------------------------
+	100	 1.000	      -0.9999998140	  0.8009014720
+
+      E_tot =       -0.9995068791 Ry
+
+
+ NOTICE!! :Ghost testing not done for HF psps yet, sorry :( 
+
+ SL:Orbital    Filling       Eigenvalues[Ry]          Norm       Ghost
+    ------------------------------------------------------------------
+	100 	 1.000	      -1.0000336336	  0.8006558440	   ???
+
+      E_tot =       -0.9999366011 Ry
+
+ AE-SL:Orbital Filling       Eigenvalues[mRy]         Norm[1e-3] 
+ AE-SL- --------------------------------------------------------------
+ AE-SL- 100 	 1.000	       0.0338196464	  0.2456279796	
+ AE-SL-  total error =	       0.0338196464	  0.2456279796
+
+ =====================================================================
+
+  Comparison of total energy differences.           
+   DD_ij = (E_i - E_j)_AE - (E_i-E_j)_SL     
+
+ AE-SL-   i   j         DD[mRy]        DD[meV] 
+ AE-SL- ------------------------------------------
+ AE-SL-   0   1        -0.474795      -6.459924

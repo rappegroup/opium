@@ -49,6 +49,7 @@ c
      
 c     *************************************************************************
 c     get the hartree potential function
+c     rvdft must be initialized.        
 c     *************************************************************************
      
       implicit double precision (a-h,o-z)
@@ -60,6 +61,9 @@ c     *************************************************************************
       common /adat/ wnl(n0),en(n0),so(n0),xion
       common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
       common /wfn/ rnl(npdm,n0)
+      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm),
+     $     rvx(npdm),rex(npdm),rvc(npdm),rec(npdm),rvdft(npdm)
+      common /hybrid/ exxw, ecw
 
       dimension yk(npdm),yr(npdm)
 
@@ -78,6 +82,13 @@ c               write(7,*) 'hart', i,j,k,aaa(i,j,k)
             endif
          enddo
       enddo
+
+      !add in dft excorr potential for hybrid functionals
+      do in=1,np
+         yr(in)= yr(in)*exxw +0.5*rvdft(in)
+      enddo
+
+
 
       return
       end

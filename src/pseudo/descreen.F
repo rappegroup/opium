@@ -28,6 +28,8 @@ c -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
       common /rpcc/ rpcc,rpccz
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm),
+     $     rvx(npdm),rex(npdm),rvc(npdm),rec(npdm),rvdft(npdm)
       common /rscore/ rscore(npdm),rdd(npdm),rddd(npdm),rscoretot(npdm),
      $     rsval(npdm)
       common /wfn/ rnl(npdm,n0)
@@ -42,8 +44,8 @@ c -------------------------------------------------------------------------
 c -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks
 c -------------------------------------------------------------------------
-      common /atom4/ v(npdm),rv(npdm),p(npdm),rsatom(npdm),
-     $     c1(npdm),rvh(npdm),rvxc(npdm),rexc(npdm)
+      common /atom4/ v(npdm),rv(npdm),p(npdm),rsatom(npdm)
+c     $     c1(npdm),rvh(npdm),rvxc(npdm),rexc(npdm)
       common /iterm/ iterm
 c -------------------------------------------------------------------------
 
@@ -90,15 +92,21 @@ c -------------------------------------------------------------------------
 c     *************************************************************************
 c     section 1:  input/output from hfs files                             
 c     *************************************************************************
-
       do i=1,maxim
         rsatom(i)=rsval(i)+rscore(i)
       enddo
 
       irelxc=0
-      call excorr (maxim,ixc,exccut,rsval,rvxcv,rexcv,irelxc)
+      call excorr (maxim,ixc,exccut,rsval,rvxcv,rexcv,rvx,rex,rvc,
+     $    rec,irelxc)
+c      call excorr (maxim,ixc,exccut,rsval,rvxcv,rexcv,irelxc)
       call hrtree (maxim,h,r,rsval,rvhv)
-      call excorr (maxim,ixc,exccut,rsatom,rvxct,rexct,irelxc)
+      call excorr (maxim,ixc,exccut,rsatom,rvxct,rexct,rvx,rex,rvc,
+     $    rec,irelxc)
+c      call excorr (maxim,ixc,exccut,rsval,rvxcv,rexcv,irelxc)
+c      call hrtree (maxim,h,r,rsval,rvhv)
+c      call excorr (maxim,ixc,exccut,rsatom,rvxct,rexct,irelxc)
+c      call excorr (maxim,ixc,exccut,rsatom,rvxct,rexct,irelxc)
       call hrtree (maxim,h,r,rscore,rvhc)
       
 c     compute ionic pseudopotential by subtracting off screening terms.     

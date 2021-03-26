@@ -63,11 +63,14 @@ c -------------------------------------------------------------------------
       common /grid/ h,r1,z,r(npdm),np
       common /edi/ e(n0,n0)
       common /ahf/ s(n0),az(n0),acc(n0)
+      common /hybrid/ exxw,ecw
 
 c -------------------------------------------------------------------------
 c     Internal (Fortran only) common blocks                
 c -------------------------------------------------------------------------
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm),
+     $     rvx(npdm),rex(npdm),rvc(npdm),rec(npdm),rvdft(npdm)
       common /iterm/ iterm
       common /elim/ emore,eless,elim
       common /ipos/ ipos(n0),itermcount
@@ -77,11 +80,13 @@ c -------------------------------------------------------------------------
       common /ighost/ ighost,ighost2
 
 c -------------------------------------------------------------------------
-      dimension p(npdm), yk(npdm)
+      dimension p(npdm), yk(npdm), yr1(npdm)
       dimension x(npdm)
       dimension xz(npdm),w(npdm),p1(npdm),p2(npdm)
       dimension yr(npdm),hq(npdm),xx(npdm)
       logical v2,first
+
+
 
       if (.not.first) goto 17
 
@@ -92,10 +97,17 @@ c -------------------------------------------------------------------------
 
       cd=(lo(m)+1.d0/2.d0)**2
       mk=0
-      
+
+      ! X is scaled in xch.F
+      ! Y is scaled in potl.F
+            
       do i=1,np
-         yk(i)=-2.d0*(rvcore(i,m)-yr(i))*r(i)+cd
+         yk(i)= -2.d0*r(i)*rvcore(i,m)
+     $          +2.d0*r(i)*yr(i)
+     $          +cd
+         ! Here, rvcore = Z
       enddo
+
 
       zinf=max(0.05d0,rvcore(nmax(m),m)-yr(nmax(m)))
       v=yr(1)/r(1)
@@ -171,6 +183,7 @@ c -------------------------------------------------------------------------
       enddo
       ed=fl/(cden*ch)
 
+
       if (ed.lt.em) then
          ed=em
          if (dabs(fm-e(m,m)).gt.1e-6.or.kk.eq.3) goto 19
@@ -215,6 +228,12 @@ c -------------------------------------------------------------------------
       ntp=il-7
  101  continue
 
+
+c      do j=1,np
+c         write(82,*) yr(j)
+c      enddo
+ 
+
       b3=(v+v+ed-(z/no(m))**2)/c
       b4=z*(lo(m)+4.d0/3.d0)/((lo(m)+1.d0)*(lo(m)+2.d0))
 
@@ -232,11 +251,17 @@ c -------------------------------------------------------------------------
       p1(2)=hq(2)+xp/c
       call nmrvs(ntp,del1,m1,p1,x,yr,m,iprint)
 
+c      do j=1,np
+c         write(81,*) p1(j)
+c      enddo
+ 
+
       nmax(m)=max(m1,mh)
       pnorm=0.d0
       do j=1,nmax(m)
          pnorm=pnorm+r(j)**2*hq(j)*p1(j)
       enddo
+
 
       y1=p1(ntp-1)
       y2=p1(ntp)
@@ -249,6 +274,7 @@ c -------------------------------------------------------------------------
       do j=1,np
          p1(j)=p1(j)+pp*hq(j)
       enddo
+
 
       if (imeth.eq.2) then
 c         write(7,*) 'Hey in var section'
@@ -288,6 +314,7 @@ c         write(7,*) 'Hey in var section'
 
       do j=1,np
          p(j)=p1(j)
+c         write(79,*) p(j)
       enddo
          
 c      write(7,9955) m,pp,del1,delh

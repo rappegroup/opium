@@ -36,10 +36,13 @@ c
       common /aval/ rcall(n0),rvap(n0),rnorm(n0),ibd(n0),etot
       common /wfn/ rnl(npdm,n0)
       common /totpot/ rvcore(npdm,n0),rvps(npdm,n0),rvcoul(npdm)
+      common /partpot/ rvh(npdm),rvxc(npdm),rexc(npdm),
+     $     rvx(npdm),rex(npdm),rvc(npdm),rec(npdm),rvdft(npdm)
       common /nlall/ nlall(n0)
       common /filenames/ file_log      
       common /inelma/ nem                                                         
       common /psout/ wsumt(n0),sumc(n0),npsghost(n0)
+      common /hybrid/ exxw, ecw
 
       character*80 file_log
       
@@ -48,6 +51,7 @@ c
       dimension rnljunk(npdm,n0),esave(n0)
       dimension rvnew(npdm,n0),rvnew2(npdm,n0),rnnew(npdm,n0)
       dimension ennew(n0),wnlnew(n0)
+      dimension rsatom(npdm)
 
       character*1 xc(0:3)
 
@@ -61,6 +65,8 @@ c
       ipsp=1
       norb=nval
       iprint=0
+
+
 
 c     EJW
       nem=0
@@ -100,13 +106,77 @@ c     EJW this is for dirac-fock potrdf2.F
             endif
          enddo
  788     continue
-         if (iprint.gt.1) write(7,*) 'Max radius used for Veff:',
+         if (iprint.gt. -1) write(7,*) 'Max radius used for Veff:',
      $        j,rmmax
 
          if (irel.eq.0) then
 
+            !get charge density
+             do m=1,norb
+               do i = 1,np
+                  rsatom(i) = 0
+               enddo
+            enddo
+
+            maxim = 0 
+            do m=1,norb
+               do i = 1,np
+                  rsatom(i) = rsatom(i) + wnl(m) * rnl(i,m)**2 * r(i)
+               enddo
+               maxim = max(maxim,nmax(m))
+            enddo
+
+            !set up dft potentials
+
+            do i=1,np
+               rvxc(i) = 0
+               rvx(i) = 0
+               rvc(i) = 0
+               rvdft(i) = 0
+            enddo
+
+            call hrtree(np,h,r,rsatom,rvh)
+
+            call excorr(np,ixc,exccut,rsatom,
+     $          rvxc,rexc,rvx,rex,rvc,rec,irel)
+
+
+            do i=1,np
+              rvdft(i) = (1.0-exxw)*(rvh(i)+rvx(i)) + rvc(i)*ecw
+            enddo
+
+            !done setting up dft potentials
+
             call potl(yr,nnn)
             call xch(x,nnn,1)
+
+            !debug: print out potentials
+c            write(*,*) "in psp, maxim=", maxim," nval=",nval," nnn=",nnn
+c            open(unit=91,file="rvps_psp.dat")
+c            open(unit=92,file="yr_psp.dat")
+c            open(unit=93,file="xrnl_psp.dat")
+c            open(unit=94,file="rvdft_psp.dat")
+c            open(unit=95,file="rvh_psp.dat")
+c            open(unit=96,file="rvx_psp.dat")
+c            open(unit=97,file="rvc_psp.dat")
+c            do j=1,np
+c               write(91,*) rvps(j,nnn)
+c               write(92,*) 2.d0*yr(j)
+c               write(93,*) x(j)/rnl(j,nnn)
+c               write(94,*) rvdft(j)
+c               write(95,*) rvh(j)
+c               write(96,*) rvx(j)
+c               write(97,*) rvc(j)
+c            enddo
+c
+c            close(unit=91)
+c            close(unit=92)
+c            close(unit=93)
+c            close(unit=94)
+c            close(unit=95)
+c            close(unit=96)
+c            close(unit=97)
+
             
             do j=1,np
                rps=rnl(j,nnn)*sqrt(r(j))
@@ -252,7 +322,7 @@ c      endif
       iexit=0
       ifc=0
       exccut=0.d0
-      iprint=0
+      iprint=1
 
       close(7)
 

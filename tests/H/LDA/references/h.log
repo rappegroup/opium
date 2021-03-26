@@ -1,0 +1,280 @@
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+           OPIUM  Version:        3.8                             
+           =====================================            
+ See http://opium.sourceforge.net for help and information                 
+ Copyright 2009 : The OPIUM project                         
+
+ Compile host     : esa047.wireless-pennnet.upenn.edu
+ Compile OS       : Darwin 14.5.0 i386
+ Compile date     : Fri Apr 15 15:44:01 EDT 2016
+
+ Execution host   : vagvlan567.034.wlan.design.upenn.edu
+ time of execution: Thu May  5 18:53:18 2016
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Reading parameter file:  <h.param> ... 
+ File prefix             : h 
+ Element                 : Hydrogen   (H) 
+ Z                       : 1 
+ 
+ Number of all-electron orbitals   : 1 
+ Number of pseudo       orbitals   : 1 
+ 
+ Pseudopotential is non-relativistic 
+ Exchage-correlation functional is : Perdew-Zunger LDA 
+ The s potential is used for the KB construction 
+ Optimized (RRKJ) pseudopotential method will be used 
+
+ nl    cutoff radii    q-max      # bessel functions
+ 1s       0.770        7.070              10 
+
+ Reference Configuration: core  <-/-> valence 
+ <-/-> 1s1 
+
+ Grid definitions: 
+ a_grid=1.00e-04    b_grid=1.30e-02    # points=1076 
+ r(1)=1.00e-04      r(np)=1.17e+02    
+
+ dEmax tolerance:  1.00e-08      dVmax tolerance:  1.00e-06     
+
+ Starting calculation...
+
+ ======================================================================== 
+ Begin AE calculation
+ ======================================================================== 
+ Performing non-relativistic AE calculation...  
+ ---------Eigenvalue guesses---------
+ 1s            -1.00000000
+ 
+ iter       Etot             Ebs             Ehxc       de_max   dv_max
+   1       -1.4705021      -1.0000000      -0.4705021 0.00E+00 0.20E+01
+   2       -1.1859782      -0.7376962      -0.4482821 0.26E+00 0.10E+01
+   3       -0.9153984      -0.4894136      -0.4259848 0.34E+00 0.13E-01
+   4       -0.8929751      -0.4678481      -0.4251270 0.44E-01 0.36E-02
+   5       -0.8915145      -0.4667789      -0.4247356 0.23E-02 0.14E-02
+   6       -0.8915984      -0.4670241      -0.4245743 0.53E-03 0.66E-03
+   7       -0.8917010      -0.4671925      -0.4245085 0.36E-03 0.31E-03
+   8       -0.8917422      -0.4672624      -0.4244798 0.15E-03 0.15E-03
+   9       -0.8917539      -0.4672860      -0.4244679 0.51E-04 0.15E-03
+  10       -0.8917656      -0.4673021      -0.4244635 0.34E-04 0.11E-03
+  11       -0.8917747      -0.4673125      -0.4244622 0.22E-04 0.70E-04
+  12       -0.8917806      -0.4673185      -0.4244621 0.13E-04 0.43E-04
+  13       -0.8917839      -0.4673217      -0.4244622 0.68E-05 0.26E-04
+  14       -0.8917855      -0.4673232      -0.4244623 0.33E-05 0.15E-04
+  15       -0.8917863      -0.4673239      -0.4244624 0.15E-05 0.87E-05
+  16       -0.8917867      -0.4673242      -0.4244624 0.66E-06 0.51E-05
+  17       -0.8917868      -0.4673244      -0.4244625 0.29E-06 0.30E-05
+  18       -0.8917869      -0.4673244      -0.4244625 0.13E-06 0.18E-05
+  19       -0.8917869      -0.4673245      -0.4244624 0.57E-07 0.11E-05
+  20       -0.8917869      -0.4673245      -0.4244624 0.35E-07 0.63E-06
+  21       -0.8917869      -0.4673245      -0.4244624 0.36E-07 0.38E-06
+  22       -0.8917869      -0.4673245      -0.4244624 0.18E-07 0.23E-06
+  23       -0.8917869      -0.4673245      -0.4244624 0.12E-07 0.14E-06
+  24       -0.8917869      -0.4673245      -0.4244624 0.85E-08 0.82E-07
+ 
+   24 iterations: (units are Ry and bohr)
+ Energy:      -0.89178694  Ebs:      -0.46732451  Ehxc:      -0.42446243
+ Eh    :       0.56556215  Exc:      -0.46542379  Evxc:      -0.60652351
+ 
+   Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
+    |100>      1.000          -0.467325      0.828169      1.060414
+
+ ======================================================================== 
+ End AE calculation
+ ======================================================================== 
+
+ ======================================================================== 
+ Begin PS construction
+ ======================================================================== 
+ Optimized Pseudopotential Generation ...
+ 
+ ==================
+ zeff=   1.00000000000000     
+ Pseudizing state : |100>
+ eigenvalue       : -0.467325
+ qc               :  7.070000
+ # bessel fxns    : 10
+ point nearest rc :  689
+ rc               :  0.770000
+ actual rc        :  0.766178
+ 
+ Psi(rc)          :     0.8674563411
+ Slope at rc      :    -0.8387464956
+ Curvature at rc  :     0.8739277401
+ Del^2 Psi at rc  :    -1.3155012698
+ Log Deriv at rc  :    -0.9669034116
+ 
+ Error in constraints
+   1         0.57432E-12
+   2        -0.57432E-12
+   3        -0.11107E-10
+   4         0.11107E-10
+   5        -0.82252E-05
+   6         0.82252E-05
+   7         0.85834E-03
+   8         0.85834E-03
+   9         0.00000E+00
+  10         0.82252E-05
+ Bessel wavevectors and final coefficients
+   1        1.8088780352        1.2971657577
+   2        6.0779456701        0.2208897764
+   3       10.2076164687       -0.0313062322
+   4       14.3203699622        0.0147860244
+   5       18.4275801198       -0.0071752192
+   6       22.5322850309        0.0024220803
+   7       26.6356445755        0.0012332536
+   8       30.7381980929       -0.0041975490
+   9       34.8402305351        0.0068519798
+  10       38.9419066644       -0.0092248671
+ 
+ Total KE           (Ry) :     0.8361072949
+ 0  -> qc contribution   :     0.8352489564
+ qc -> oo contribution   :     0.0008583385   (=Convergence term)
+ Occupancy of this state :     1.0000000000
+ Convergence term (Ry/e) :     0.0008583385
+ Convergence error (mRy) :     0.8583385441
+ Convergence error (meV) :    11.6783825629
+ 
+ ------------------------------
+ Descreening potential
+ valence charge          :   1.000000
+ core    charge          :   0.000000
+ 
+ ----Solving the Schrodinger equation for all states----
+ State: 1s  AE eigenvalue =  -0.467325  PS eigenvalue =  -0.467325
+ 
+ ---Semilocal ghost testing---
+ Local state: 1s
+ 
+ No ghosts for local potential: 1s
+ ------------------------------
+ 
+
+ ======================================================================== 
+ End PS construction
+ ======================================================================== 
+
+ ======================================================================== 
+ Begin NL calculation
+ ======================================================================== 
+ ---------Eigenvalue guesses---------
+ 1s            -0.46732451
+ Performing non-local pseudopotential calculation
+ Using the s potential as the local potential
+ 
+ iter       Etot             Ebs             Ehxc       de_max   dv_max
+   1       -0.8915936      -0.4673245      -0.4242691 0.00E+00 0.42E-08
+ 
+ Converged in 1 iteration (probably reference state)
+ Energy:      -0.89159361  Ebs:      -0.46732451  Ehxc:      -0.42426910
+ Eh    :       0.56522375  Exc:      -0.46496964  Evxc:      -0.60592429
+ 
+   Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
+    |100>      1.000          -0.467325      0.828176      1.060414
+ 
+ ---Non-local ghost testing---
+ Local state: 1s
+ 
+ Test  state: 1s
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   0
+ !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ ...seems like this angular momentum is the local part!
+ ------------------------------
+ 
+ No ghosts present for local potential
+ 
+
+ ======================================================================== 
+ End NL calculation
+ ======================================================================== 
+<<<do_tc>>>
+
+
+ ===============Configuration 1 AE Calc=============== 
+ ---------Eigenvalue guesses---------
+ 1s            -1.00000000
+ 
+ iter       Etot             Ebs             Ehxc       de_max   dv_max
+   1       -1.4705021      -1.0000000      -0.4705021 0.00E+00 0.20E+01
+   2       -1.1859782      -0.7376962      -0.4482821 0.26E+00 0.10E+01
+   3       -0.9153984      -0.4894136      -0.4259848 0.34E+00 0.13E-01
+   4       -0.8929751      -0.4678481      -0.4251270 0.44E-01 0.36E-02
+   5       -0.8915145      -0.4667789      -0.4247356 0.23E-02 0.14E-02
+   6       -0.8915984      -0.4670241      -0.4245743 0.53E-03 0.66E-03
+   7       -0.8917010      -0.4671925      -0.4245085 0.36E-03 0.31E-03
+   8       -0.8917422      -0.4672624      -0.4244798 0.15E-03 0.15E-03
+   9       -0.8917539      -0.4672860      -0.4244679 0.51E-04 0.15E-03
+  10       -0.8917656      -0.4673021      -0.4244635 0.34E-04 0.11E-03
+  11       -0.8917747      -0.4673125      -0.4244622 0.22E-04 0.70E-04
+  12       -0.8917806      -0.4673185      -0.4244621 0.13E-04 0.43E-04
+  13       -0.8917839      -0.4673217      -0.4244622 0.68E-05 0.26E-04
+  14       -0.8917855      -0.4673232      -0.4244623 0.33E-05 0.15E-04
+  15       -0.8917863      -0.4673239      -0.4244624 0.15E-05 0.87E-05
+  16       -0.8917867      -0.4673242      -0.4244624 0.66E-06 0.51E-05
+  17       -0.8917868      -0.4673244      -0.4244625 0.29E-06 0.30E-05
+  18       -0.8917869      -0.4673244      -0.4244625 0.13E-06 0.18E-05
+  19       -0.8917869      -0.4673245      -0.4244624 0.57E-07 0.11E-05
+  20       -0.8917869      -0.4673245      -0.4244624 0.35E-07 0.63E-06
+  21       -0.8917869      -0.4673245      -0.4244624 0.36E-07 0.38E-06
+  22       -0.8917869      -0.4673245      -0.4244624 0.18E-07 0.23E-06
+  23       -0.8917869      -0.4673245      -0.4244624 0.12E-07 0.14E-06
+  24       -0.8917869      -0.4673245      -0.4244624 0.85E-08 0.82E-07
+ 
+   24 iterations: (units are Ry and bohr)
+ Energy:      -0.89178694  Ebs:      -0.46732451  Ehxc:      -0.42446243
+ Eh    :       0.56556215  Exc:      -0.46542379  Evxc:      -0.60652351
+ 
+   Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
+    |100>      1.000          -0.467325      0.828169      1.060414
+
+
+ ===============Configuration 1 NL: Calc ===============
+ ---------Eigenvalue guesses---------
+ 1s            -0.46732451
+ Performing non-local pseudopotential calculation
+ Using the s potential as the local potential
+ 
+ iter       Etot             Ebs             Ehxc       de_max   dv_max
+   1       -0.8915936      -0.4673245      -0.4242691 0.00E+00 0.42E-08
+ 
+ Converged in 1 iteration (probably reference state)
+ Energy:      -0.89159361  Ebs:      -0.46732451  Ehxc:      -0.42426910
+ Eh    :       0.56522375  Exc:      -0.46496964  Evxc:      -0.60592429
+ 
+   Orbital    Filling       Eigenvalues    Norm(rc->oo)      Peak
+    |100>      1.000          -0.467325      0.828176      1.060414
+ 
+ ---Non-local ghost testing---
+ Local state: 1s
+ 
+ Test  state: 1s
+ !WARNING! : schsl found a positive eigenvalue. n,l=:   2   0
+ !WARNING! No solution for 1st excited state of local potential.  Setting e=0.0
+ ...seems like this angular momentum is the local part!
+ ------------------------------
+ 
+ No ghosts present for local potential
+ 
+   ------------------------------------------------
+   ================================================
+
+ ======================================================================== 
+ Begin KE convergence testing
+ ======================================================================== 
+ ----------------------------------------------------------------------
+                     Kinetic energy convergence
+      ==============================|100>==============================
+      Ecut(Ry)  KE/electron(Ry)         KE error/electron (mRy,meV)
+         9       0.762546133                73.470882     999.622782
+        27       0.828680576                 7.336440      99.817399
+        50       0.835285873                 0.731142       9.947697
+       199       0.835943659                 0.073356       0.998058
+
+ ======================================================================== 
+ End KE convergence testing
+ ======================================================================== 
+<<<do_rpt>>>
+<<<do_fhi>>>
+   ================================================
+------------- closing opium session ------------

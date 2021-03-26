@@ -1,0 +1,24 @@
+rvxc[i] : exchange correlation potential at radius i
+rexc[i] : exchange correlation energy density at radius i
+
+rsatom[i] : density at radius i
+
+rnl[i,j] : wavefunction at radius i of orbital j
+
+npdm : size of radial grid ?
+n0 : number of orbitals ?
+
+no(m) : n-quantum number of orbital m ?
+lo(m) : l-quantum number of orbital m ?
+en(m) : energy of orbital m ?
+
+zeff: core charge
+ixc : see atom/excorr.F
+ipsp: 0 if all-electron, 1 if psp
+
+
+schsl(iorb,nqn,lang,ei,imax,rv,p,igh,ibound)
+  iorb : orbital index
+  nqn  : n-quantum number of orbital iorb ?
+  lang : l-quantum number of orbital iorb ?
+  ei : energy of orbital iorb ?

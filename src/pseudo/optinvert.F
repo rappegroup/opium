@@ -30,14 +30,14 @@ c
 
 cEJW Most of the work in this routine is to make the PS and AE 
 cEJW pots exactly the same.  Just inverting the wavefunction analytically
-cEJW leads to a mall (< 1mRy) discontinuity at rc, therefore, the 
+cEJW leads to a small (< 1mRy) discontinuity at rc, therefore, the 
 cEJW reference NL calculation will take more than 1 iteration.
 cEJW this is basically a compromise between making the potential
 cEJW match exactly and making the eigenvalues and norms match close to
 cEJW exactly.
 
 c     good compromise
-      ioff=100
+      ioff=floor(1.3/h)
 
 c     This is for NO analytic section, 0 -> indrc is done numerically
 c      if (ixc.lt.0) ioff=indrc
@@ -124,7 +124,7 @@ c     section II - analytical procedure
 
 c     section III - AE -> oo
 
-      if (ixc.ge.0) then
+      if (ixc.ge.0.and.ixc.ne.7) then
 
          do i=indrc+ioff,np
             v(i)=(rvcore(i,nnn)+rvcoul(i))/r(i)
