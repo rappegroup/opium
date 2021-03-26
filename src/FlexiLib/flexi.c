@@ -165,17 +165,14 @@ int flexi_gather_keys(FILE *fp){
   keycell *keyc;
   
   while (!scan_key(fp, key)){
-    /* printf("scaned key: %s\n", key); */
     if ((keyc=find_key(key))){
       for (i=0; i<keyc->n; i++){
         do{
           /* scanning until found some real stuff */
           while(((c=getc(fp)) != EOF) && ((c =='\n') || (c==' ') || (c=='\t')));
-	  /*          printf("found c=%c\n", c);*/
           if (c=='#'){
             /* skip the rest of this line */
             while(((c=getc(fp)) != EOF) && (c!='\n'));
-	    /*printf("%c\n",c);*/
           }
         }while ((c=='\n') || (c==' ') || (c=='\t') || (c=='#'));
         /* worth scanning for */        
@@ -252,8 +249,9 @@ static int scan_key(FILE *fp, char *key){
     if (c=='#') while(((c=getc(fp)) != EOF) && (c!='\n')); /* skip comments */
   }while(c!='[');
   i=0;
-  while(((c=getc(fp)) != EOF) && (c!=']'))
+  while(((c=getc(fp)) != EOF) && (c!=']') && (c!='[')){
     key[i++]=c;
+  }
   key[i]='\0';
   return 0;  
 }

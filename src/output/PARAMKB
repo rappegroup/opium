@@ -1,4 +1,0 @@
-      parameter (nl0 = 51, npdm = 5733, ngau0 = 540, ngrid = npdm,
-     $	maxflq = 2001, npspt0 = 4002,  nang0 = 3, n0=16)
-        
-      

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 #endif
 
 #include "parameter.h"        /* defines structure: 'param_t' */
-#include "fortparam.h"        /* fortran code parameters */
+#include "cdim.h"        /* fortran code parameters */
 #include "do_ncpp.h"          /* the module's own header */
 #include "nlm.h"
 
@@ -94,10 +94,12 @@ int do_ncpp(param_t *param, FILE *fp_param, char *logfile){
   }	
   fclose(fp);
 
-  sprintf(filename, "%s.rho_core", param->name);
-  fp = fopen(filename, "rb");
-  fread(rscore, sizeof(double), param->ngrid, fp);
-  fclose(fp);
+  if (param->rpcc > 0.){
+    sprintf(filename, "%s.rho_pcore", param->name);
+    fp = fopen(filename, "rb");
+    fread(rscore, sizeof(double), param->ngrid, fp);
+    fclose(fp);
+  }
 
   /* section 1 : header */
 

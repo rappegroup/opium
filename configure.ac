@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(opium, 1.0, mbarnes@compsci.wm.edu)
+AC_INIT(opium, 1.1, mbarnes@compsci.wm.edu,ejwalt@wm.edu)
 
 AC_CONFIG_SRCDIR([src/uniPPlib/xmcomplex.h])
 
@@ -55,7 +55,7 @@ AC_SUBST(NOOPT,[$NOOPT])
 FOO_MONKEY="$PATH:/lib:/usr/lib"
 AC_PATH_PROG([FPP], [cpp], [no], [$FOO_MONKEY])
 
-FPPFLAGS='-P'
+FPPFLAGS="$FPPFLAGS"
 AC_MSG_CHECKING([if $FPP needs -traditional])
 need_traditional=no
 cat <<_ACEOF > conftest.f
@@ -204,23 +204,21 @@ dnl PC running linux and Portland Group's C and Portand compilers
 	 FFLAGS="$FFLAGS -assume bscc"
       fi
 
-      G2Cjunk=`gcc -print-search-dirs | grep '^libraries:' | sed -r 's,libraries: *=? *,,'`
+dnl      G2Cjunk=`gcc -print-search-dirs | grep '^libraries:' | sed -r 's,libraries: *=? *,,'`
+dnl      ac_save_IFS=$IFS; IFS=:
+dnl      for i in $G2Cjunk
+dnl      do
+dnl	test -f $i/libg2c.a && GOTCHA=1 && break
+dnl      done
 
-      ac_save_IFS=$IFS; IFS=:
-      for i in $G2Cjunk
-      do
-	test -f $i/libg2c.a && GOTCHA=1 && break
-      done
+dnl      IFS=$ac_save_IFS
+dnl      if test x$GOTCHA = xvv; then
+dnl	AC_MSG_ERROR([
+dnl*** I could not find libg2c.a, contact the maintainers])
+dnl      fi
 
-      IFS=$ac_save_IFS
-
-      if test x$GOTCHA = x; then
-	AC_MSG_ERROR([
-*** I could not find libg2c.a, contact the maintainers
-])
-      fi
-
-      LDFLAGS="$LDFLAGS -L$i -lg2c -static-libcxa"
+dnl      LDFLAGS="$LDFLAGS -L$i -lg2c -static-libcxa"
+      LDFLAGS="$LDFLAGS -L$i -static-libcxa"
 
       if test $F77 = ifort; then
         LDFLAGS="$LDFLAGS -nofor_main"
@@ -317,17 +315,12 @@ dnl AC_FUNC_STRFTIME
 dnl AC_CHECK_FUNCS([memset pow sqrt strchr])
 
 CFLAGS="-I../include -I../FlexiLib -I../uniPPlib $CFLAGS"
+CDATE=\'`date`\'
+CHOST=`hostname`
+CSYS=\'`uname -srp`\'
+CFLAGS="$CFLAGS -DCSYS=\\\"${CSYS}\\\" -DCHOST=\\\"${CHOST}\\\" -DCDATE=\\\"${CDATE}\\\" "
+AC_CONFIG_FILES([makevars])
 
-AC_CONFIG_FILES([Makefile
-                 src/Makefile
-                 src/FlexiLib/Makefile
-                 src/main/Makefile
-                 src/atom/Makefile
-                 src/output/Makefile
-                 src/pseudo/Makefile
-                 src/plot/Makefile
-                 src/lapack/Makefile
-                 src/uniPPlib/Makefile])
 AC_OUTPUT
 
 echo ""
@@ -337,7 +330,7 @@ echo ""
 echo "Fortran compiler     :       $F77"
 echo "Fortan flags         :       $FFLAGS"
 echo "Fortran preprocessor :       $FPP"
-echo "Fortran preproc flags:       $FPPFLAGS"
+#echo "Fortran preproc flags:       $FPPFLAGS"
 echo "C compiler           :       $CC"
 echo "C flags              :       $CFLAGS"
 echo "Linker               :       $LD"

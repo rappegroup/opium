@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,4 +22,5 @@
 
 double enae[50];
 double ennl[50];
+double enfc[50];
 

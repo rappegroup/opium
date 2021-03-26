@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 
 #include "parameter.h"
-#include "fortparam.h"
+#include "cdim.h"
 #include "common_blocks.h"
 #include "do_vplot.h"
 #include "do_ps.h"
@@ -63,10 +63,10 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
 
   if (streq(pltyp,"s")) {
 
-    parm = fopen("sps.par","w");
+    parm = fopen("vs.par","w");
 
     if (!parm) {
-      printf("Could not open grace param file 'sps.par': %s\n",
+      printf("Could not open grace param file 'vs.par': %s\n",
 	  strerror(errno));
       return 1;
     }
@@ -76,24 +76,32 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm,"with g0\n");
     fprintf(parm,"world xmin 0\n");
     fprintf(parm,"world xmax 5\n");
-    fprintf(parm,"title \"Screened pseudopotential: %s\"\n",param->symbol);
+    fprintf(parm,"title \"Screened pseudopotential for %s\"\n",param->symbol);
     fprintf(parm,"world ymin -50\n");
     fprintf(parm,"world ymax 50\n");
     fprintf(parm,"title font 0\n");
     fprintf(parm,"title size 1.500000\n");
     fprintf(parm,"title color 1\n");
-    fprintf(parm,"subtitle \"atom name: %s\"\n",param->name);
+
+    if (param->psmeth=='o') {
+      fprintf(parm,"subtitle \"Optimized Pseudopotential Method\"\n");
+    }else if (param->psmeth=='k') {
+      fprintf(parm,"subtitle \"Kerker Pseudopotential Method\"\n");
+    }else if (param->psmeth=='t') {
+      fprintf(parm,"subtitle \"Troullier-Martins Pseudopotential Method\"\n");
+    }
+
     fprintf(parm,"subtitle font 0\n");
     fprintf(parm,"subtitle size 1.000000\n");
     fprintf(parm,"subtitle color 1\n");
     fprintf(parm,"xaxis on\n");
     fprintf(parm,"xaxis tick major 1\n");
     fprintf(parm,"xaxis tick minor 0.5\n");
-    fprintf(parm,"xaxis label \"R (Bohr)\"\n");
+    fprintf(parm,"xaxis label \"r (a.u.)\"\n");
     fprintf(parm,"yaxis on\n");
     fprintf(parm,"yaxis tick major 10 \n");
     fprintf(parm,"yaxis tick minor 2 \n");
-    fprintf(parm,"yaxis label \"V_scr (Ry)\"\n");
+    fprintf(parm,"yaxis label \"V\\sscr\\N (Ry)\"\n");
     fprintf(parm,"legend on\n");
     fprintf(parm,"legend loctype view\n");
     fprintf(parm,"legend 0.85, 0.8\n");
@@ -122,37 +130,44 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
 	lc='f';
       }
       fprintf(parm," s%d hidden false \n",i);
-      fprintf(parm," s%d type xy \n",i);
+      fprintf(parm," s%d type xydx \n",i);
       fprintf(parm," s%d symbol 0 \n",i);
       fprintf(parm," s%d line type 1 \n",i);
       fprintf(parm," s%d line linestyle %d \n",i,lsty);
       fprintf(parm," s%d line linewidth 2.0 \n",i);
       fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"%d%c\" \n",i,
+      fprintf(parm," s%d legend \"V\\s%d%c\\N\" \n",i,
 	  nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
+      fprintf(parm," s%d errorbar on\n",i);
+      fprintf(parm," s%d errorbar place both\n",i);
+      fprintf(parm," s%d errorbar color %d\n",i,lcolor);
+      fprintf(parm," s%d errorbar pattern 1\n",i);
+      fprintf(parm," s%d errorbar size 10.000000\n",i);
+      fprintf(parm," s%d errorbar linewidth 2.0\n",i);
+      fprintf(parm," s%d errorbar linestyle 1\n",i);
     }
     i=param->nll;
     fprintf(parm," s%d hidden false \n",i);
-    fprintf(parm," s%d type xy \n",i);
+    fprintf(parm," s%d type xydx \n",i);
     fprintf(parm," s%d symbol 0 \n",i);
     fprintf(parm," s%d line type 1 \n",i);
     fprintf(parm," s%d line linestyle %d \n",i,3);
     fprintf(parm," s%d line linewidth 3.0 \n",i);
     fprintf(parm," s%d line color %d \n",i,14);
-    fprintf(parm," s%d legend \"V_loc\"\n" ,i);
+    fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,i);
 
     fclose(parm);
 
-    sprintf(comm, "xmgrace %s.plt_sps -p sps.par -autoscale y -saveall %s_sps.agr & ",
+    sprintf(comm, "xmgrace -timestamp $XMG_OPTS -settype xydx %s.vs_plt -p vs.par -autoscale y -saveall %s_vs.agr & ",
 	param->name,param->name);
     system(comm);
 
   } else {
 
-    parm = fopen("ips.par","w");
+    parm = fopen("vi.par","w");
 
     if (!parm) {
-      printf("Could not open grace param file 'ips.par': %s\n",
+      printf("Could not open grace param file 'vi.par': %s\n",
 	  strerror(errno));
       return 1;
     }
@@ -160,29 +175,36 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
     fprintf(parm,"# IPS par file for xmgrace\n");
     fprintf(parm,"g0 on\n");
     fprintf(parm,"with g0\n");
-    fprintf(parm,"    world xmin 0\n");
-    fprintf(parm,"    world xmax 5\n");
-    fprintf(parm,"    world ymin -50\n");
-    fprintf(parm,"    world ymax 50\n");
-    fprintf(parm,"    title \"Ionic pseudopotential: %s\"\n",param->symbol);
-    fprintf(parm,"    title font 0\n");
-    fprintf(parm,"    title size 1.500000\n");
-    fprintf(parm,"    title color 1\n");
-    fprintf(parm,"    subtitle \"atom name: %s\"\n",param->name);
-    fprintf(parm,"    subtitle font 0\n");
-    fprintf(parm,"    subtitle size 1.000000\n");
-    fprintf(parm,"    subtitle color 1\n");
-    fprintf(parm,"    xaxis  on\n");
-    fprintf(parm,"    xaxis  tick major 1\n");
-    fprintf(parm,"    xaxis  tick minor 0.5\n");
-    fprintf(parm,"    xaxis  label \"R (Bohr)\"\n");
-    fprintf(parm,"    yaxis  on\n");
-    fprintf(parm,"    yaxis  tick major 10 \n");
-    fprintf(parm,"    yaxis  tick minor 2 \n");
-    fprintf(parm,"    yaxis  label \"V_ion (Ryd)\"\n");
-    fprintf(parm,"    legend on\n");
-    fprintf(parm,"    legend loctype view\n");
-    fprintf(parm,"    legend 0.85, 0.8\n");
+    fprintf(parm,"world xmin 0\n");
+    fprintf(parm,"world xmax 5\n");
+    fprintf(parm,"world ymin -50\n");
+    fprintf(parm,"world ymax 50\n");
+    fprintf(parm,"title \"Ionic pseudopotential for %s\"\n",param->symbol);
+    fprintf(parm,"title font 0\n");
+    fprintf(parm,"title size 1.500000\n");
+    fprintf(parm,"title color 1\n");
+
+    if (param->psmeth=='o') {
+      fprintf(parm,"subtitle \"Optimized Pseudopotential Method\"\n");
+    }else if (param->psmeth=='k') {
+      fprintf(parm,"subtitle \"Kerker Pseudopotential Method\"\n");
+    }else if (param->psmeth=='t') {
+      fprintf(parm,"subtitle \"Troullier-Martins Pseudopotential Method\"\n");
+    }
+    fprintf(parm,"subtitle font 0\n");
+    fprintf(parm,"subtitle size 1.000000\n");
+    fprintf(parm,"subtitle color 1\n");
+    fprintf(parm,"xaxis  on\n");
+    fprintf(parm,"xaxis  tick major 1\n");
+    fprintf(parm,"xaxis  tick minor 0.5\n");
+    fprintf(parm,"xaxis  label \"r (a.u.)\"\n");
+    fprintf(parm,"yaxis  on\n");
+    fprintf(parm,"yaxis  tick major 10 \n");
+    fprintf(parm,"yaxis  tick minor 2 \n");
+    fprintf(parm,"yaxis  label \"V\\sion\\N (Ry)\"\n");
+    fprintf(parm,"legend on\n");
+    fprintf(parm,"legend loctype view\n");
+    fprintf(parm,"legend 0.85, 0.8\n");
 
     for (i=0; i<param->nll;i++){
 
@@ -208,38 +230,45 @@ int do_vplot(param_t *param, char *logfile, char *pltyp){
 	lc='f';
       }
       fprintf(parm," s%d hidden false \n",i);
-      fprintf(parm," s%d type xy \n",i);
+      fprintf(parm," s%d type xydx \n",i);
       fprintf(parm," s%d symbol 0 \n",i);
       fprintf(parm," s%d line type 1 \n",i);
       fprintf(parm," s%d line linestyle %d \n",i,lsty);
       fprintf(parm," s%d line linewidth 2.0 \n",i);
       fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"%d%c\" \n",i,
+      fprintf(parm," s%d legend \"V\\s%d%c\\N\" \n",i,
 	  nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
+      fprintf(parm," s%d errorbar on\n",i);
+      fprintf(parm," s%d errorbar place both\n",i);
+      fprintf(parm," s%d errorbar color %d\n",i,lcolor);
+      fprintf(parm," s%d errorbar pattern 1\n",i);
+      fprintf(parm," s%d errorbar size 10.000000\n",i);
+      fprintf(parm," s%d errorbar linewidth 2.0\n",i);
+      fprintf(parm," s%d errorbar linestyle 1\n",i);
     }
     /* add the AE ionic potential */
     i=param->nll;
     fprintf(parm," s%d hidden false \n",i);
-    fprintf(parm," s%d type xy \n",i);
+    fprintf(parm," s%d type xydx \n",i);
     fprintf(parm," s%d symbol 0 \n",i);
     fprintf(parm," s%d line type 1 \n",i);
     fprintf(parm," s%d line linestyle %d \n",i,3);
     fprintf(parm," s%d line linewidth 2.0 \n",i);
     fprintf(parm," s%d line color %d \n",i,15);
-    fprintf(parm," s%d legend \"2Z_eff/r\"\n" ,i);
+    fprintf(parm," s%d legend \"2Z\\seff\\N /r\"\n" ,i);
 
     fprintf(parm," s%d hidden false \n",i+1);
-    fprintf(parm," s%d type xy \n",i+1);
+    fprintf(parm," s%d type xydx \n",i+1);
     fprintf(parm," s%d symbol 0 \n",i+1);
     fprintf(parm," s%d line type 1 \n",i+1);
     fprintf(parm," s%d line linestyle %d \n",i+1,3);
     fprintf(parm," s%d line linewidth 3.0 \n",i+1);
     fprintf(parm," s%d line color %d \n",i+1,14);
-    fprintf(parm," s%d legend \"V_loc\"\n" ,i+1);
+    fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,i+1);
 
     fclose(parm);
 
-    sprintf(comm, "xmgrace %s.plt_ips -p ips.par -autoscale y -saveall %s_ips.agr & ",
+    sprintf(comm, "xmgrace -timestamp $XMGRACE_OPTS -settype xydx %s.vi_plt -p vi.par -autoscale y -saveall %s_vi.agr & ",
 	param->name,param->name);
 
     system(comm);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #include <stdio.h>
 
 #include "parameter.h"        /* defines structure: 'param_t' */
-#include "fortparam.h"        /* fortran code parameters */
+#include "cdim.h"        /* fortran code parameters */
 #include "do_pwf.h"           /* the module's own header */
 #include "common_blocks.h"    /* fortran common blocks */
 
@@ -69,7 +69,7 @@ int do_pwf(param_t *param, FILE *fp_param, char *logfile){
   else
     pwf_.inl = 0;
 
-  if (param->nval == 1)
+  if (param->nll == 1)
     param->ist1 = 3;
   else
     param->ist1 = 2;
@@ -107,11 +107,13 @@ int do_pwf(param_t *param, FILE *fp_param, char *logfile){
   }	
   fclose(fp);
 
-  sprintf(filename, "%s.rho_core", param->name);
-  fp = fopen(filename, "rb");
-  fread(rscore_.rscore, sizeof(double), param->ngrid, fp);
-  fclose(fp);
-      
+  if (param->rpcc > 0.){
+    sprintf(filename, "%s.rho_pcore", param->name);
+    fp = fopen(filename, "rb");
+    fread(rscore_.rscore, sizeof(double), param->ngrid, fp);
+    fclose(fp);
+  }
+
   fprintf(fp_log,"<<calling: writepwf>>\n");
   fclose(fp_log);
   sprintf(filename, "%s.pwf", param->name);

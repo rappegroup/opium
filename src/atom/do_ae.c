@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 
 #include "parameter.h"
 #include "nlm.h"
-#include "fortparam.h"
+#include "cdim.h"
 #include "do_ae.h"
 #include "common_blocks.h"    /* fortran common blocks */
 #include "energy.h"
@@ -42,10 +42,11 @@ char * write_reportae(param_t *param, char *rp,int,double temp_eigen[], double t
 void writeAE(param_t *param);
 
 /* fortran prototypes Should this be somewher else?????? */
-void scpot_(double  *, int * ,int *);
-void atm_(double *, int *);
-void interp_(int *, int *, int *);
-void getpcc_(void);
+void scpot_(double  *, int * ,int * , int *, int *);
+void atm_(double *, int *, int *);
+void interp_(int *, int *, int *, int *);
+void getpcc_(int *);
+void denkcomp_(char *, double[3], int[3] );
 
 int do_ae(param_t *param, char *logfile){
   
@@ -56,9 +57,13 @@ int do_ae(param_t *param, char *logfile){
   int ifrl;
   int config=-1;
   int ipsp=0;
+  int ifc=0;
+  int iexit=0;
   double temp_eigen[10];
   double temp_norm[10];
-
+  int ikstor[3];
+  double rkstor[3];
+  char filename[80];
 
   /* clear report buffer */
   *rp = 0;
@@ -98,7 +103,11 @@ int do_ae(param_t *param, char *logfile){
     }
 
     /* find the SCF solution */
-    scpot_(&param->z,&param->ixc,&ipsp);
+    scpot_(&param->z,&param->ixc,&ipsp,&ifc,&iexit);
+    if (iexit) {
+      printf("Terminal error in: scpot <-- do_ae\n EXITING OPIUM \n");
+      exit(1);
+    }
 
     for (i=0; i<param->norb; i++) {
       if (param->ibound[i] != ibound_.ibd[i]) {
@@ -124,12 +133,20 @@ int do_ae(param_t *param, char *logfile){
     relorb(param,config);
 
     /* find the SCF solution */
-    atm_(&param->z,&param->ixc);
-
+    atm_(&param->z,&param->ixc, &iexit);
+    if (iexit) {
+      printf("Terminal error in: atm <-- do_ae\n EXITING OPIUM \n");
+      exit(1);
+    }
+    
     ifrl = (!strcmp(param->reltype,"frl"))?1:0;
     param->aereltransf = 0;
     nrelorbae(param,config);
-    interp_(&ifrl, &param->aereltransf,&param->ixc);
+    interp_(&ifrl, &param->aereltransf,&param->ixc, &iexit);
+    if (iexit) {
+      printf("Terminal error in: interp <-- do_ae\n EXITING OPIUM \n");
+      exit(1);
+    }
     
   }
 
@@ -140,7 +157,15 @@ int do_ae(param_t *param, char *logfile){
     fprintf(fp_log, "   ================================================\n");
     fprintf(fp_log,"<<<pseudizing core>>>\n");
     fclose(fp_log);
-    getpcc_();
+    getpcc_(&iexit);
+    sprintf(filename, "%s.denkedat", param->name);
+    /*    denkcomp_(filename,rkstor,ikstor);*/
+
+    if (iexit) {
+      printf("Terminal error in: getpcc <-- do_ae\n EXITING OPIUM \n");
+      exit(1);
+    }
+
     fp_log = fopen(logfile, "a");
     fprintf(fp_log, "   ================================================\n");
     fclose(fp_log);
@@ -295,7 +320,7 @@ char * write_reportae(param_t *param, char *rp,int config, double temp_eigen[], 
 
   if (!strcmp(param->reltype, "nrl")){
     for (i=0; i<param->norb; i++)
-      if (i>ncore-1) {
+      if ((i>ncore-1)&&(ibound_.ibd[i]==1)) {
 	rp += sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\n",
 		      atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],results_.rnorm[i]);
 	temp_eigen[i-ncore]=atomic_.en[i];
@@ -350,7 +375,7 @@ void writeAE(param_t *param) {
 
   /* New plot section */
 
-  sprintf(filename, "%s.plt_pcc", param->name);
+  sprintf(filename, "%s.pcc_plt", param->name);
   fp = fopen(filename, "w");
 
   if (param->rpcc>1e-12){
@@ -367,19 +392,10 @@ void writeAE(param_t *param) {
     for (j=0;j<param->ngrid;j++)
       fprintf(fp,"%lg %lg \n",grid_.r[j],rscore_.rscore[j]);
     fprintf(fp,"@ \n");
-    
-    /*    for (j=0;j<param->ngrid;j++)
-	  fprintf(fp,"%lg %lg \n",grid_.r[j],rscore_.rdd[j]*grid_.r[j]*grid_.r[j]);
-	  fprintf(fp,"@ \n");
-	  
-	  for (j=0;j<param->ngrid;j++)
-	  fprintf(fp,"%lg %lg \n",grid_.r[j],rscore_.rddd[j]*grid_.r[j]*grid_.r[j]);
-	  fprintf(fp,"@ \n"); */
-
   }
   fclose(fp);
 
-  sprintf(filename, "%s.plt_ae", param->name);
+  sprintf(filename, "%s.ae_plt", param->name);
   fp = fopen(filename, "w");
 
   ncore = param->norb-param->nval;  
@@ -413,12 +429,6 @@ void writeAE(param_t *param) {
       }
       fprintf(fp,"@ \n");
     }
-    /*    for (i=0; i<atmwave_.numorb;i++) {
-	  for (j=0;j<atmwave_.nnr;j++) {
-	  fprintf(fp,"%lg %lg \n",atmwave_.rr[j],atmwave_.bbr[i][j]);
-	  }
-	  fprintf(fp,"@ \n");
-	  } */
   }
   fclose(fp);
 
@@ -437,6 +447,23 @@ void writeAE(param_t *param) {
     for (i=0; i<param->nval; i++){
       fwrite(relwf_.wfu[ncore+i], sizeof(double), param->ngrid, fp);
       fwrite(relwf_.wfd[ncore+i], sizeof(double), param->ngrid, fp);
+    }
+  }
+  fclose(fp);
+  
+  sprintf(filename, "%s.psi_ae_core", param->name);
+  fp = fopen(filename, "wb");
+  if (!strcmp(param->reltype, "nrl")){
+    ncore = param->norb-param->nval;
+    for (i=0; i<ncore; i++) 
+      fwrite(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+  }else{
+    ncore = 0;
+    for (i=0; i<ncore; i++)
+      fwrite(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+    for (i=0; i<ncore; i++){
+      fwrite(relwf_.wfu[i], sizeof(double), param->ngrid, fp);
+      fwrite(relwf_.wfd[i], sizeof(double), param->ngrid, fp);
     }
   }
   fclose(fp);
@@ -475,16 +502,43 @@ void writeAE(param_t *param) {
   }
   fclose(fp);
   
-  /* now dump the PCC into a binary file if NLCC requested */
-  
-  sprintf(filename, "%s.rho_core", param->name);
+  sprintf(filename, "%s.eig_ae_core", param->name);
   fp = fopen(filename, "wb");
-  fwrite(rscore_.rscore, sizeof(double), param->ngrid, fp);
-  if (param->rpcc>1e-12){
-    fwrite(rscore_.rdd, sizeof(double), param->ngrid, fp);
-    fwrite(rscore_.rddd, sizeof(double), param->ngrid, fp);
-    fwrite(rscore_.rscoretot, sizeof(double), param->ngrid, fp);
+
+  /*This probably doesn't work for SRL */
+  ncore = param->norb-param->nval;
+  for (i=0; i<ncore; i++) {
+    fwrite(&atomic_.en[i], sizeof(double),1, fp);
+    fwrite(&atomic_.wnl[i], sizeof(double),1, fp);
+    fwrite(&atomic_.nlm[i], sizeof(int),1, fp);
+    fwrite(&nmax_.nmax[i], sizeof(int),1, fp);
+    fwrite(&nmax_.maxim, sizeof(int),1, fp);
+    fwrite(&atomic_.xion, sizeof(double),1, fp);
+    fwrite(&ibound_.ibd[i], sizeof(int),1, fp);
+    fwrite(&ensave_.ensave[i], sizeof(double),1, fp);
   }
   fclose(fp);
+  
+  /* now dump the PCC into a binary file if NLCC requested */
+
+  if (param->rpcc>1e-12){
+    sprintf(filename, "%s.rho_pcore", param->name);
+    fp = fopen(filename, "wb");
+    fwrite(rscore_.rscore, sizeof(double), param->ngrid, fp);
+    fwrite(rscore_.rdd, sizeof(double), param->ngrid, fp);
+    fwrite(rscore_.rddd, sizeof(double), param->ngrid, fp);
+    fclose(fp);
+
+    sprintf(filename, "%s.rho_fcore", param->name);
+    fp = fopen(filename, "wb");
+    fwrite(rscore_.rscoretot, sizeof(double), param->ngrid, fp);
+    fclose(fp);
+  }else{
+    sprintf(filename, "%s.rho_fcore", param->name);
+    fp = fopen(filename, "wb");
+    fwrite(rscore_.rscore, sizeof(double), param->ngrid, fp);
+    fclose(fp);
+  }
 
 }
+

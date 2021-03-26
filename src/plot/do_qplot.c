@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
 
 
 #include "parameter.h"        /* defines structure: 'param_t' */
-#include "fortparam.h"
+#include "cdim.h"
 #include "do_qplot.h"           /* the module's own header */
 #include "common_blocks.h"
 #include "nlm.h"
 
-void btrans_(double *, char *);
+void btrans_(double *, char *, char *);
 void readPS(param_t *param);
 
 int do_qplot(param_t *param, char *logfile){
@@ -50,14 +50,16 @@ int do_qplot(param_t *param, char *logfile){
   int ncore;
   int ic;
 
-  char filename[160];
+  char filename[80];
+  char filename1[80];
+  char filename2[80];
   FILE *parm;
   FILE *fp;
   char *comm;
   char lc = 0;
   double zeff;
 
-  comm= (char *) malloc(120*sizeof(char));
+  comm= (char *) malloc(180*sizeof(char));
 
   readPS(param);
 
@@ -107,29 +109,36 @@ int do_qplot(param_t *param, char *logfile){
   }
   nll_.nll=param->nll;
 
-  btrans_(&zeff,param->name);
+  sprintf(filename1, "%s.wq_plt", param->name);
+  sprintf(filename2, "%s.vq_plt", param->name);
+  btrans_(&zeff,filename1,filename2);
 
   if ((parm = fopen("vq.par","w")) != NULL) {
-    
     fprintf(parm,"# q-potential param file for xmgrace\n");
     fprintf(parm,"g0 on\n");
     fprintf(parm,"with g0\n");
     fprintf(parm,"world xmin 0\n");
-    fprintf(parm,"world xmax 100\n");
-    fprintf(parm,"title \"Bessel transform of V_ionic: %s\"\n",param->symbol);
+    fprintf(parm,"world xmax 20\n");
+    fprintf(parm,"title \"Bessel transform of V\\sion\\N and \\xy\\f{} for %s\"\n",param->symbol);
     fprintf(parm,"title font 0\n");
     fprintf(parm,"title size 1.500000\n");
     fprintf(parm,"title color 1\n");
-    fprintf(parm,"subtitle \"atom name: %s\"\n",param->name);
+    if (param->psmeth=='o') {
+      fprintf(parm,"subtitle \"Optimized Pseudopotential Method\"\n");
+    }else if (param->psmeth=='k') {
+      fprintf(parm,"subtitle \"Kerker Pseudopotential Method\"\n");
+    }else if (param->psmeth=='t') {
+      fprintf(parm,"subtitle \"Troullier-Martins Pseudopotential Method\"\n");
+    } 
     fprintf(parm,"subtitle font 0\n");
-    fprintf(parm,"subtitle size 1.000000\n");
-    fprintf(parm,"subtitle color 1\n");
+    fprintf(parm,"subtitle size 1.000000\n"); 
+    fprintf(parm,"subtitle color 1\n"); 
     fprintf(parm,"xaxis on\n");
     fprintf(parm,"xaxis tick major 10\n");
     fprintf(parm,"xaxis tick minor 5\n");
     fprintf(parm,"xaxis label \"q\"\n");
     fprintf(parm,"yaxis on\n");
-    fprintf(parm,"yaxis label \"V_ion(q)\"\n");
+    fprintf(parm,"yaxis label \"V\\sion\\N(q)\"\n");
     fprintf(parm,"legend on\n");
     fprintf(parm,"legend loctype view\n");
     fprintf(parm,"legend 0.85, 0.8\n");
@@ -164,7 +173,7 @@ int do_qplot(param_t *param, char *logfile){
       fprintf(parm," s%d line linestyle %d \n",i,lsty);
       fprintf(parm," s%d line linewidth 2.0 \n",i);
       fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"V_%d%c\" \n",i,
+      fprintf(parm," s%d legend \"V\\s%d%c\\N\" \n",i,
 	      nlm_label(param->nlm[param->ipot[i]+ncore]).n,lc);
     }
     
@@ -175,7 +184,7 @@ int do_qplot(param_t *param, char *logfile){
     fprintf(parm," s%d line linestyle %d \n",i,3);
     fprintf(parm," s%d line linewidth 3.0 \n",i);
     fprintf(parm," s%d line color %d \n",i,14);
-    fprintf(parm," s%d legend \"V_loc\"\n" ,i);
+    fprintf(parm," s%d legend \"V\\sloc\\N\"\n" ,i);
     
 
     fprintf(parm," s%d hidden false \n",i+1);
@@ -185,15 +194,15 @@ int do_qplot(param_t *param, char *logfile){
     fprintf(parm," s%d line linestyle %d \n",i+1,3);
     fprintf(parm," s%d line linewidth 2.5 \n",i+1);
     fprintf(parm," s%d line color %d \n",i+1,13);
-    fprintf(parm," s%d legend \"Rho_pcc\"\n" ,i+1);
+    fprintf(parm," s%d legend \"\\xr\\f{}\"\n" ,i+1);
     
     
     fclose(parm);
     
   } 
   
-  sprintf(comm, "xmgrace %s.plt_vq -autoscale y -p vq.par  -saveall %s_viq.agr & ", param->name,param->name);
-  system(comm);
+  /*  sprintf(comm, "xmgrace %s.plt_vq -timestamp -autoscale y -p vq.par  -saveall %s_viq.agr & ", param->name,param->name);
+      system(comm);*/
 
   scount=0;
   pcount=0;
@@ -205,27 +214,35 @@ int do_qplot(param_t *param, char *logfile){
   if ((parm = fopen("psiq.par","w")) != NULL) {
     
     fprintf(parm,"# q-wfn param file for xmgrace\n");
-    fprintf(parm,"g0 on\n");
-    fprintf(parm,"with g0\n");
+    fprintf(parm,"g1 on\n");
+    fprintf(parm,"with g1\n");
     fprintf(parm,"world xmin 0\n");
-    fprintf(parm,"world xmax 10\n");
-    fprintf(parm,"title \"Bessel transform of Psi: %s\"\n",param->symbol);
+    fprintf(parm,"world xmax 5\n");
+    /* fprintf(parm,"title \"Bessel transform of \\xy\\f{} and V\\sion\\N for %s\"\n",param->symbol);
     fprintf(parm,"title font 0\n");
     fprintf(parm,"title size 1.500000\n");
     fprintf(parm,"title color 1\n");
-    fprintf(parm,"subtitle \"atom name: %s\"\n",param->name);
+
+    if (param->psmeth=='o') {
+      fprintf(parm,"subtitle \"Optimized Pseudopotential Method\"\n");
+    }else if (param->psmeth=='k') {
+      fprintf(parm,"subtitle \"Kerker Pseudopotential Method\"\n");
+    }else if (param->psmeth=='t') {
+      fprintf(parm,"subtitle \"Troullier-Martins Pseudopotential Method\"\n");
+    }
+
     fprintf(parm,"subtitle font 0\n");
     fprintf(parm,"subtitle size 1.000000\n");
-    fprintf(parm,"subtitle color 1\n");
+    fprintf(parm,"subtitle color 1\n"); */
     fprintf(parm,"xaxis on\n");
     fprintf(parm,"xaxis tick major 1\n");
     fprintf(parm,"xaxis tick minor 0.5\n");
     fprintf(parm,"xaxis label \"q\"\n");
     fprintf(parm,"yaxis on\n");
-    fprintf(parm,"yaxis label \"Psi(q)\"\n");
+    fprintf(parm,"yaxis label \"\\+ \\xy\\f{}(q)\"\n");
     fprintf(parm,"legend on\n");
     fprintf(parm,"legend loctype view\n");
-    fprintf(parm,"legend 0.85, 0.8\n");
+    fprintf(parm,"legend 0.85, 0.4\n");
     
     for (i=0; i<param->nval;i++){
       
@@ -258,7 +275,7 @@ int do_qplot(param_t *param, char *logfile){
       fprintf(parm," s%d line linestyle %d \n",i,lsty);
       fprintf(parm," s%d line linewidth 2.0 \n",i);
       fprintf(parm," s%d line color %d \n",i,lcolor);
-      fprintf(parm," s%d legend \"Psi_%d%c\" \n",i,
+      fprintf(parm," s%d legend \"\\xy\\f{}\\s%d%c\\N\" \n",i,
 	      nlm_label(param->nlm[i+ncore]).n,lc);
     }
     
@@ -266,8 +283,10 @@ int do_qplot(param_t *param, char *logfile){
     
   } 
     
-  sprintf(comm, "xmgrace %s.plt_wq -autoscale y -p psiq.par  -saveall %s_psiq.agr & ",
-		  param->name,param->name);
+  /*  sprintf(comm, "xmgrace $XMG_OPTS %s.plt_wq -timestamp -autoscale y -p psiq.par  -saveall %s_psiq.agr & ",
+      param->name,param->name);*/
+  sprintf(comm, "xmgrace $XMGRACE_OPTS -timestamp -graph 0 -viewport 0.15 0.55 1.15 0.85 -p vq.par %s.vq_plt -graph 1 -viewport 0.15 0.15 1.15 0.45 -p psiq.par %s.wq_plt -saveall %s_qp.agr & ", param->name,param->name,param->name);
+
   system(comm);
   free(comm);
 

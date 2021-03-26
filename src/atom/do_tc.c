@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 #include "parameter.h"        /* defines structure: 'param_t' */
 #include "nlm.h"              /* nlm_label call */
-#include "fortparam.h"        /* fortran code parameters */
+#include "cdim.h"        /* fortran code parameters */
 #include "do_tc.h"            /* the module's own header */
 #include "common_blocks.h"    /* fortran common blocks */
 #include "energy.h"           /* this is for saving the energies */
@@ -40,14 +40,14 @@ void nrelorbnl(param_t *param, int);
 void nrelorbae(param_t *param, int); 
 char * write_reportae(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[]);
 char * write_reportnl(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[]);
+char * write_reportfc(param_t *param, char *rp,int, double temp_eigen[], double temp_norm[]);
 void readPS(param_t *param);
+void readAE(param_t *param);
 void interp_(int *, int *, int *);
-/* fortran prototypes Should this be somewher else?????? */
-void scpot_(double  *, int * ,int *);
-void atm_(double *, int *);
+void scpot_(double  *, int * ,int *, int *, int *);
+void atm_(double *, int *, int *);
 
-
-int do_tc(param_t *param, char *logfile, int job){
+int do_tc(param_t *param, char *logfile, int job, int doifc){
 
   int i, j,k, kk; 
   FILE *fp_log;
@@ -57,6 +57,8 @@ int do_tc(param_t *param, char *logfile, int job){
   int ncore,ifrl; 
   double zeff;
   double e,dele;
+  int ifc=0;
+  int iexit=0;
   int config,con1,con2;
   int ipsp,ncoreAE;
   double temp_eigen[10];
@@ -65,7 +67,7 @@ int do_tc(param_t *param, char *logfile, int job){
   int ntpot;
   int ill[10];
 
-  sprintf(filename, "%s.plt_logd", param->name);
+  sprintf(filename, "%s.logd_plt", param->name);
   fp=fopen(filename,"w");
   fclose(fp);
 
@@ -134,7 +136,11 @@ int do_tc(param_t *param, char *logfile, int job){
 	}
       }
 
-      scpot_(&param->z,&param->ixc,&ipsp);
+      scpot_(&param->z,&param->ixc,&ipsp,&ifc, &iexit);
+      if (iexit) {
+	printf("Terminal error in: scpot <-- config #%d AE <-- do_tc\n EXITING OPIUM \n",config+1);
+	exit(1);
+      }
       ncoreAE=ncore;
       
     }else{
@@ -144,7 +150,13 @@ int do_tc(param_t *param, char *logfile, int job){
 	exit(1);
       }
       relorb(param,config);
-      atm_(&param->z,&param->ixc);
+      atm_(&param->z,&param->ixc,&iexit);
+      if (iexit) {
+	printf("Terminal error in: atm <-- config #%d AE <-- do_tc\n EXITING OPIUM \n",config+1);
+	exit(1);
+      }
+
+
       /*      ifrl = (!strcmp(param->reltype,"frl"))?1:0;
 	      param->aereltransf = 0;
 	      nrelorbae(param,config);
@@ -168,7 +180,7 @@ int do_tc(param_t *param, char *logfile, int job){
 	  }
       fclose(fp);
     
-      sprintf(filename, "%s.plt_logd", param->name);
+      sprintf(filename, "%s.logd_plt", param->name);
       fp = fopen(filename, "a");
 
       for (i=0;i<4;i++)
@@ -203,23 +215,52 @@ int do_tc(param_t *param, char *logfile, int job){
       fclose(fp);
     }
 
-    fp_log = fopen(logfile, "a");
-    fprintf(fp_log,"\n\n ===============Configuration %d NL: Calc ===============\n",config+1);
-    fclose(fp_log);
-
-
     rp=write_reportae(param,rp,config,temp_eigen,temp_norm);
     enae[config+1] = results_.etot;
 
+    /*    fp_log = fopen(logfile, "a");
+    fprintf(fp_log,"\n\n ===============Configuration %d FC: Calc ===============\n",config+1);
+    fclose(fp_log);*/
+
+    /* FC */
+    if (doifc != 0) {
+
+      nlpot2_.inl = 0;  
+      ipsp=0;
+      
+      ncore = param->norb-param->nval;
+      
+      sprintf(filename, "%s.psi_ae_core", param->name);
+      fp = fopen(filename, "rb");
+      for (i=0; i<ncore; i++) 
+	fread(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
+      fclose(fp);
+      
+      sprintf(filename, "%s.eig_ae_core", param->name);
+      fp = fopen(filename, "rb");
+      
+      for (i=0; i<ncore; i++) {
+	fread(&atomic_.en[i], sizeof(double),1, fp);
+	fread(&atomic_.wnl[i], sizeof(double),1, fp);
+	fread(&atomic_.nlm[i], sizeof(int),1, fp);
+	fread(&nmax_.nmax[i], sizeof(int),1, fp);
+	fread(&nmax_.maxim, sizeof(int),1, fp);
+	fread(&atomic_.xion, sizeof(double),1, fp);
+	fread(&ibound_.ibd[i], sizeof(int),1, fp);
+	fread(&ensave_.ensave[i], sizeof(double),1, fp);
+      }
+      fclose(fp);
+
+    scpot_(&zeff,&param->ixc,&ipsp,&ifc, &iexit); 
+    rp = write_reportfc(param,rp,config,temp_eigen,temp_norm);
+    enfc[config+1] = results_.etot;
+    }
+
     /* NL */
 
-    atomic_.norb = param->nval;
-    npm_.ncores = 0; 
-    ipsp = 1;   
-    nlpot2_.inl = 1;  
-
-    readPS(param);
-    nrelorbnl(param,config);
+    fp_log = fopen(logfile, "a");
+    fprintf(fp_log,"\n\n ===============Configuration %d NL: Calc ===============\n",config+1);
+    fclose(fp_log);
 
     zeff=atomic_.xion;
     for (i=0; i<param->nval; i++){
@@ -237,8 +278,20 @@ int do_tc(param_t *param, char *logfile, int job){
     logarith_.rphas = param->rphas;
     logarith_.elogmin = param->emin;
     logarith_.elogmax = param->emax;
-    
-    scpot_(&zeff,&param->ixc,&ipsp); 
+
+    readPS(param);
+    nrelorbnl(param,config);
+
+    atomic_.norb = param->nval;
+    npm_.ncores = 0; 
+    nlpot2_.inl = 1;  
+    ifc=0;
+    ipsp=1;
+    scpot_(&zeff,&param->ixc,&ipsp,&ifc, &iexit); 
+    if (iexit) {
+      printf("Terminal error in: scpot <-- config #%d NL <-- do_tc\n EXITING OPIUM \n",config+1);
+      exit(1);
+    }
 
     rp = write_reportnl(param,rp,config,temp_eigen,temp_norm);
     ennl[config+1] = results_.etot;
@@ -259,7 +312,7 @@ int do_tc(param_t *param, char *logfile, int job){
 	  }
       fclose(fp);
       
-      sprintf(filename, "%s.plt_logd", param->name);
+      sprintf(filename, "%s.logd_plt", param->name);
       fp = fopen(filename, "a");
       
       dele = (param->emax - param->emin)/(NPL0-1);
@@ -296,8 +349,8 @@ int do_tc(param_t *param, char *logfile, int job){
 
   rp+=sprintf(rp,
 	      "\n  Comparison of total energy differences.           \n "
-	      "  DD_ij = (E_i - E_j)_all-electron - (E_i - E_j)_pseudo     \n\n "
-	      "AE-NL-  i   j          DD[mRy]        DD[meV] \n"
+	      "  DD_ij = (E_i - E_j)_AE - (E_i-E_j)_NL     \n\n "
+	      "AE-NL-   i   j         DD[mRy]        DD[meV] \n"
 	      " AE-NL- ------------------------------------------\n");
   
   for(k=0;k<param->nconfigs+1;k++){

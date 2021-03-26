@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 #include "parameter.h"
 #include "uniPPlib.h"
-#include "fortparam.h"        /* fortran code parameters */
+#include "cdim.h"        /* fortran code parameters */
 #include "do_fhi.h"
 #include "nlm.h"
 
@@ -83,7 +83,7 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
 
   /* if NLCC then read in the PCC from a binary file created by do_ae() */
   if (param->rpcc > 0.){
-    sprintf(filename, "%s.rho_core", param->name);
+    sprintf(filename, "%s.rho_pcore", param->name);
     fp = fopen(filename, "rb");
     fread(rscore, sizeof(double), param->ngrid, fp);
     fread(rdd, sizeof(double), param->ngrid, fp);

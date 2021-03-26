@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,14 +26,15 @@
 
 #include "parameter.h"        /* defines structure: 'param_t' */
 #include "nlm.h"              /* nlm_label call */
-#include "fortparam.h"        /* fortran code parameters */
+#include "cdim.h"        /* fortran code parameters */
 #include "do_plot.h"            /* the module's own header */
 #include "common_blocks.h"    /* fortran common blocks */
 #include "energy.h"           /* this is for saving the energies */
 #include "do_wplot.h"
+#include "do_keplot.h"
 #include "do_vplot.h"
-#include "do_pccplt.h"
-#include "do_logplt.h"
+#include "do_pccplot.h"
+#include "do_logplot.h"
 #include "do_qplot.h"
 
 #define streq(a,b) (!strcasecmp(a,b))
@@ -49,9 +50,11 @@ int do_plot(param_t *param, char *logfile, char *plot){
   }else if (streq(plot, "vi")) {
     do_vplot(param, logfile,"i"); 
   }else if ((streq(plot, "pcc"))||(streq(plot, "den"))) {
-    do_pccplt(param, logfile); 
+    do_pccplot(param, logfile); 
   }else if (streq(plot, "logd")) {
-    do_logplt(param, logfile); 
+    do_logplot(param, logfile); 
+  }else if (streq(plot, "ke")) {
+    do_keplot(param, logfile); 
   }else if (streq(plot, "qp")) {
     do_qplot(param, logfile);
   }else{

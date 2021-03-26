@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 
 /* FlexiLib */
 #include "flexi.h"
-#include "fortparam.h"
+#include "cdim.h"
 #include "nlm.h"
 #include "common_blocks.h"
 
@@ -56,12 +56,12 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   char la[]={"spdf"};
   int ncore; 
   char loc='s';
-  int pccmeth='l';
+  char pccmeth='l';
   int loctemp=0;
   int npot[10];
 
   /* Prepare for 1st flexi_gather_keys() */  
-
+  
   /* [Atom] */
   param->symbol = (char *) malloc(160*sizeof(char));
   param->longname = (char *) malloc(160*sizeof(char));
@@ -99,14 +99,14 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   /* default */
   consts_.etol = 1.e-8;   
   consts_.vtol = 1.e-6;   
-  consts_.maxit = 800;      
+  consts_.maxit = 100;      
 
   /* [Pseudo] */
   flexi_request_key("Pseudo",1,"%d", &param->nval);
 
   /* [Pcc] */
   flexi_request_key("Pcc",0,"%lg", &param->rpcc);
-  flexi_request_key("Pcc",0,"%d",&pccmeth);
+  flexi_request_key("Pcc",0,"%c",&pccmeth);
 
   /* default */
   param->rpcc=0.0;
@@ -129,10 +129,10 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   /* [XC] */
   param->xcparam = (char *) malloc(160*sizeof(char));
   flexi_request_key("XC",0,"%s",param->xcparam);
-  flexi_request_key("XC",0,"%lg",&param->rxccut);
+  /*  flexi_request_key("XC",0,"%lg",&param->rxccut);*/
   /* default */
   strcpy(param->xcparam, "lda");
-  param->rxccut=0.01;
+  /*param->rxccut=0.01;*/
   
   /* [Conmax] */
   flexi_request_key("Conmax",0,"%d %lg %d", &param->switch1, &param->encsm,
@@ -157,8 +157,8 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
 
   rpcc_.rpcc = param->rpcc;
   ipccmeth_.ipccmeth=-1;
-  /*  printf("  pccmeth= %c \n",pccmeth);*/
-  if ((pccmeth=='l') || (pccmeth=='L')) {
+  /*  printf("  pccmeth= %c \n",pccmeth); */
+  if ((pccmeth == 'l') || (pccmeth == 'L')) {
     ipccmeth_.ipccmeth=0; 
   }else if ((pccmeth=='f') || (pccmeth=='F')) {
     ipccmeth_.ipccmeth=1;
@@ -166,10 +166,10 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     printf("Can not determine partial core correction method ; must be either lfc or fuchs \n");
     exit(1);
   }
-
+  
   param->z = symtoz(param->symbol,param->longname);
-  rxccut_.rxccut=param->rxccut;
-
+  /*rxccut_.rxccut=param->rxccut;*/
+  
   param->ixc = 0;
   if (streq(param->xcparam, "gga")) param->ixc = 2;
   if (streq(param->xcparam, "pwlda")) param->ixc = 1;
@@ -193,6 +193,8 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   flexi_clear_keys();
   rewind(fp);
 
+  /*EEE*/
+
   /* [Atom] */
   flexi_request_key("Atom",1,"%s %d", param->symbol, &param->norb);
   param->ibound = (int *)malloc(param->norb*sizeof(int));
@@ -206,6 +208,13 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     flexi_request_key("Atom",1,"%d %lg %s", &param->nlm[i],
 		      &param->wnl[i], ens[i]);
   }
+
+  if (flexi_gather_keys(fp)) return 1;
+  
+  /* Prepare for 3rd flexi_gather_keys() */
+  flexi_clear_keys();
+  rewind(fp);
+  
   
   /* [Configs] */
   flexi_request_key("Configs",0,"%d", &param->nconfigs);
@@ -220,10 +229,17 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     ensc[i] = (char **)malloc(param->nval*sizeof(char *));
     for (j=0; j<param->nval; j++){
       ensc[i][j] = (char *)malloc(20*sizeof(char));
-      flexi_request_key("Configs",0,"%d %lg %s", &param->nlm_conf[i][j],
+      k=flexi_request_key("Configs",1,"%d %lg %s", &param->nlm_conf[i][j],
 			&param->wnl_conf[i][j], ensc[i][j]);
     }
   }
+
+  if (flexi_gather_keys(fp)) return 1;
+
+  /* Prepare for 3rd flexi_gather_keys() */
+  flexi_clear_keys();
+  rewind(fp);
+
 
   /* [Pseudo] */
   flexi_request_key("Pseudo",1,"%d ", &param->nval);
@@ -235,7 +251,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   for (i=0; i<param->nval; i++) {
     flexi_request_key("Pseudo",1,"%lg",&param->rc[i]);
   }
-
+  
   /* mth is a character for method type (k or o) */
   flexi_request_key("Pseudo",1,"%c",&param->psmeth);
 
@@ -243,9 +259,16 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     param->qc[i]=0.0;
     param->nb[i]=0;
   }
+
+  if (flexi_gather_keys(fp)) return 1;
+
+  /* Prepare for 3rd flexi_gather_keys() */
+  flexi_clear_keys();
+  rewind(fp);
+
   
   /* [KBdesign] */
-  flexi_request_key("KBdesign",0,"%s %d", &param->local, &param->nboxes);
+  flexi_request_key("KBdesign",0,"%c %d", &loc, &param->nboxes);
   param->box_start = (int *)malloc(param->nboxes*sizeof(int));
   param->box_end = (int *)malloc(param->nboxes*sizeof(int));
   param->box_height = (double *)malloc(param->nboxes*sizeof(double));
@@ -253,7 +276,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   b_start = (double *)malloc(param->nboxes*sizeof(double));
   b_end = (double *)malloc(param->nboxes*sizeof(double));
   for (i=0; i<param->nboxes; i++){
-    b_unit[i] = (char *)malloc(20*sizeof(char));
+    b_unit[i] = (char *)malloc(2*sizeof(char));
     flexi_request_key("KBdesign",0,"%s %lg %lg %lg", 
 		      b_unit[i], &b_start[i], &b_end[i], &param->box_height[i]);
   }
@@ -286,7 +309,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     lparam_.qcl[i] = param->qc[i];
     lparam_.nbl[i] = param->nb[i];
   }
-
+  
   /* Cleanup */
   flexi_clear_keys();
   rewind(fp);
@@ -296,7 +319,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   /* Post processing section */
 
   /* set up semicore info */
-
+  
   param->ipot = (int *)malloc(20*sizeof(int));
 
   for (i=0; i<4; i++){
@@ -351,10 +374,10 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   }
   for (i=ncore;i<param->norb;i++) {
     if (loctemp == nlm_label(param->nlm[i]).l) {
-
+      
       /*EJW  param->local is the l value of the local pot
 	param->localind is the valence index (index-ncore) of the local pot */
-
+      
       param->local=loctemp;
       param->localind=i-ncore;
       break;
@@ -459,7 +482,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   rgrid_.a=param->a2 / (param->b2*param->z);
   
   nrgrid_.nr=0;
-  for (i=0; i<NRMAX; i++){
+  for (i=0; i<NPDM; i++){
     rgrid_.r[i]=rgrid_.a * (exp(rgrid_.b*(i))-1.0);
     rgrid_.rab[i] =(rgrid_.r[i]+rgrid_.a)*rgrid_.b;
     if (rgrid_.r[i]>80.0) break;
@@ -479,10 +502,11 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   for (i=0; i<param->nboxes; i++){
     if (streq(b_unit[i], "au") || streq(b_unit[i], "a.u.") 
 	|| streq(b_unit[i], "AU") || streq(b_unit[i], "A.U.")){
+      
       /* need to convert box limits to grid units */
       r_l = param->a * pow(param->z, -1./3.);
       r_r = r_l * exp(param->b * (param->ngrid-1));
-
+      
       /* outside grid test */
       if(b_start[i]<r_l)
         param->box_start[i] = 1;            /* Fortran array index conv. */
@@ -522,14 +546,14 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   free(b_unit);
   free(b_start);
   free(b_end);  
-
-
+  
+  
   /* set up DNL stuff */
-
+  
   local_.iloc = param->localind+1;
   box_.numbox = param->nboxes;
 
-  for (i=0; i<4; i++){
+  for (i=0 ; i<4; i++) {
     if (i < param->nboxes){
       box_.iboxstart[i] = param->box_start[i];
       box_.iboxend[i]   = param->box_end[i];
@@ -541,8 +565,8 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     }
   }
 
-  /* Finally! Write the log file header */
-
+/* Finally! Write the log file header */
+  
   fprintf(fp_log, " File prefix             : %s \n",param->name);
   fprintf(fp_log, " Element                 : %s(%s) \n",param->longname,param->symbol);
   fprintf(fp_log, " Z                       : %lg \n",param->z);
@@ -550,7 +574,7 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
   fprintf(fp_log, " Number of all-electron orbitals   : %d \n",param->norb);
   fprintf(fp_log, " Number of pseudo       orbitals   : %d \n",param->nval);
   fprintf(fp_log, " \n");
-
+  
   if (streq(param->reltype,"nrl")) {
     fprintf(fp_log, " Pseudopotential is non-relativistic \n");
   }else if (streq(param->reltype,"srl")){
@@ -641,15 +665,21 @@ int read_param(param_t *param, FILE *fp, FILE *fp_log){
     fprintf(fp_log," Relativistic grid   :  a_grid=%-11.2e b_grid=%-11.2e # points=%d \n  r(1)=%-11.2e r(np)=%-11.2e \n",
 	    param->a2,param->b2,nrgrid_.nr,rgrid_.r[0],rgrid_.r[nrgrid_.nr-1]);
   }
-
+  
   fprintf(fp_log, "\n");
-
+  
   fprintf(fp_log, " dEmax tolerance:  %-11.2e   dVmax tolerance:  %-11.2e  \n",consts_.etol,consts_.vtol);
-
+  
   fprintf(fp_log, "\n");
-
+  
+  if (param->nboxes > 0) {
+    for (i=0; i<param->nboxes; i++){
+      fprintf(fp_log, " Box %d  %lg --> %lg  height: %lg \n",i+1,grid_.r[param->box_start[i]],grid_.r[param->box_end[i]],param->box_height[i]);
+    }
+  }
+  
   return 0;
-
+  
 }  
 
 double symtoz(char *sym, char *longname) {
@@ -872,7 +902,7 @@ double symtoz(char *sym, char *longname) {
     strcpy(longname,"Xenon      ");
     val = 54;
     
-  }else if (streq(sym,"Ce")){
+  }else if (streq(sym,"Cs")){
     strcpy(longname,"Cesium     ");
     val = 55;
     
@@ -976,7 +1006,7 @@ double symtoz(char *sym, char *longname) {
     strcpy(longname,"Mercury    ");
     val = 80;
     
-  }else if (streq(sym,"Ti")){
+  }else if (streq(sym,"Tm")){
     strcpy(longname,"Thallium   ");
     val = 81;
     

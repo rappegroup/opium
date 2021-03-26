@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 
 #include "parameter.h"        /* defines structure: 'param_t' */
 #include "nlm.h"              /* nlm_label call */
-#include "fortparam.h"        /* fortran code parameters */
+#include "cdim.h"        /* fortran code parameters */
 #include "do_nl.h"            /* the module's own header */
 #include "common_blocks.h"    /* fortran common blocks */
 #include "energy.h"           /* this is for saving the energies */
@@ -37,7 +37,7 @@
 static char report[800];
 void nrelorbnl(param_t *param, int); 
 char * write_reportnl(param_t *param, char *rp,int,double temp_eigen[], double temp_norm[]);
-void scpot_(double  *, int * ,int *);
+void scpot_(double  *, int * ,int *, int *, int *);
 void readPS(param_t *param);
 void writeNL(param_t *param);
 
@@ -48,6 +48,8 @@ int do_nl(param_t *param, char *logfile){
   double zeff;
   int config=-1;
   int ipsp=1;
+  int ifc=0;
+  int iexit=0;
   char *rp=report;
   double temp_eigen[10];
   double temp_norm[10];
@@ -82,7 +84,12 @@ int do_nl(param_t *param, char *logfile){
     zeff +=atomic_.wnl[i];
   }
 
-  scpot_(&zeff,&param->ixc,&ipsp); 
+  scpot_(&zeff,&param->ixc,&ipsp,&ifc, &iexit); 
+  if (iexit) {
+    printf("Terminal error in: scpot <-- do_nl\n EXITING OPIUM \n");
+    exit(1);
+  }
+
 
   writeNL(param);
 
@@ -143,25 +150,49 @@ char * write_reportnl(param_t *param, char *rp, int config, double temp_eigen[],
   
   int i;
   double temp_eigen_tot, temp_norm_tot;
+  int igh=0;
 
   if (config<0) {
     rp+=sprintf(rp, 
 		"\n NL:Orbital    Filling       Eigenvalues[Ry]          Norm       Ghost\n"
 		"    ------------------------------------------------------------------\n");
-    for (i=0; i<param->nval; i++)
-      rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\t%6s\n",
-		  atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
-		  results_.rnorm[i],(results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
-    
+    for (i=0; i<param->nval; i++){
+      if (ibound_.ibd[i]==1) {
+	rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\t%6s\n",
+		    atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
+		    results_.rnorm[i],(results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
+      }else{
+	rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t\t\t%6s\n",
+		    atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
+		    (results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
+	
+      }
+      igh+=results_.lghost[i];
+      
+    }
+    if (igh > 0) {
+      rp+=sprintf(rp, "\n");
+      rp+=sprintf(rp, "  !!ERROR!! Ghosts are present in pseudopotential \n");
+      rp+=sprintf(rp, "  !!ERROR!! See log file for more information \n");
+    }else{
+      rp+=sprintf(rp, "\n\t ========== No ghosts in potential!!========== \n");
+    }
+
   }else{
     rp+=sprintf(rp, 
 		"\n NL:Orbital    Filling       Eigenvalues[Ry]          Norm       Ghost\n"
 		"    ------------------------------------------------------------------\n");
     for (i=0; i<param->nval; i++)
-      rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\t%6s\n",
-		  atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
-		  results_.rnorm[i],(results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
-    
+      if (ibound_.ibd[i]==1) {
+	rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t%14.10f\t%6s\n",
+		    atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
+		    results_.rnorm[i],(results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
+      }else{
+	rp+=sprintf(rp, "\t%3d\t%6.3f\t%19.10f\t\t\t%6s\n",
+		    atomic_.nlm[i], atomic_.wnl[i], atomic_.en[i],
+		    (results_.lghost[i]>0)?"yes":((results_.lghost[i]<0)?"?":"no"));
+	
+      }
   }
   rp+=sprintf(rp, "\n      E_tot = %19.10f Ry\n",
 	      results_.etot);
@@ -173,19 +204,23 @@ char * write_reportnl(param_t *param, char *rp, int config, double temp_eigen[],
     temp_eigen_tot = temp_norm_tot = 0.;
 
     for (i=0; i<param->nval; i++) {
-      rp+=sprintf(rp, " AE-NL- %3d\t%6.3f\t%19.10f\t%14.10f\t\n",
-		  atomic_.nlm[i], atomic_.wnl[i], 1000.0*(temp_eigen[i]-atomic_.en[i]),
-		  1000.0*(temp_norm[i]-results_.rnorm[i]));
-      
-      temp_eigen_tot += fabs(temp_eigen[i]-atomic_.en[i]);
-      temp_norm_tot += fabs(temp_norm[i]-results_.rnorm[i]);
+      if (ibound_.ibd[i]==1) {
+	
+	rp+=sprintf(rp, " AE-NL- %3d\t%6.3f\t%19.10f\t%14.10f\t\n",
+		    atomic_.nlm[i], atomic_.wnl[i], 1000.0*(temp_eigen[i]-atomic_.en[i]),
+		    1000.0*(temp_norm[i]-results_.rnorm[i]));
+
+	temp_eigen_tot += fabs(temp_eigen[i]-atomic_.en[i]);
+	temp_norm_tot += fabs(temp_norm[i]-results_.rnorm[i]);
+      }
     }
+    
     rp+=sprintf(rp, " AE-NL-  total error =\t%19.10f\t%14.10f\n\n",
 		1000*temp_eigen_tot, 1000*temp_norm_tot);
-
+    
     rp+=sprintf(rp," =====================================================================\n");
   }    
-
+  
   return rp;
 }
 
@@ -228,18 +263,30 @@ void readPS(param_t *param) {
   }
   fclose(fp);
 
-  sprintf(filename, "%s.rho_core", param->name);
-  fp = fopen(filename, "rb");
-  fread(rscore_.rscore, sizeof(double), param->ngrid, fp);
   if (param->rpcc>1e-12){
+    sprintf(filename, "%s.rho_pcore", param->name);
+    fp = fopen(filename, "rb");
+    fread(rscore_.rscore, sizeof(double), param->ngrid, fp);
+    fread(rscore_.rdd, sizeof(double), param->ngrid, fp);
+    fread(rscore_.rddd, sizeof(double), param->ngrid, fp);
+    fclose(fp);
+
+    sprintf(filename, "%s.rho_fcore", param->name);
+    fp = fopen(filename, "wb");
     fread(rscore_.rscoretot, sizeof(double), param->ngrid, fp);
+    fclose(fp);
+  }else{
+    sprintf(filename, "%s.rho_fcore", param->name);
+    fp = fopen(filename, "wb");
+    fread(rscore_.rscore, sizeof(double), param->ngrid, fp);
+    fclose(fp);
   }
-  fclose(fp);
 }
 
 void writeNL(param_t *param) {
 
   int i,j;
+  int iset=0;
   FILE *fp;
   char filename[160];
 
@@ -255,43 +302,48 @@ void writeNL(param_t *param) {
     fwrite(atomic_.rnl[i], sizeof(double), param->ngrid, fp);
   fclose(fp);
 
-  sprintf(filename, "%s.plt_pcc", param->name);
+  sprintf(filename, "%s.pcc_plt", param->name);
   fp = fopen(filename, "a");
   for (j=0;j<param->ngrid;j++)
     fprintf(fp,"%lg %lg \n",grid_.r[j],valden_.rsval[j]);
   fprintf(fp,"@ \n");
   fclose(fp);
 
-  sprintf(filename, "%s.plt_nl", param->name);
+  sprintf(filename, "%s.nl_plt", param->name);
   fp = fopen(filename, "w");
   for (i=0; i<param->nval;i++) {
     if (ibound_.ibd[i]==1) {
       for (j=0;j<param->ngrid;j++)
-	fprintf(fp,"%lg %lg \n",grid_.r[j],atomic_.rnl[i][j]);
+	if ((grid_.r[j]<param->rc[i])||(iset)) {
+	  fprintf(fp,"%lg %lg 0.0\n",grid_.r[j],atomic_.rnl[i][j]);
+	}else{
+	  fprintf(fp,"%lg %lg 1e-8\n",grid_.r[j],atomic_.rnl[i][j]);
+	  iset=1;
+	}
     } else {
       j=0;
       while(grid_.r[j] < param->rc[i]) {
-	fprintf(fp,"%lg %lg \n",grid_.r[j],atomic_.rnl[i][j]);
+	fprintf(fp,"%lg %lg 0.0\n",grid_.r[j],atomic_.rnl[i][j]);
 	j++;
-	
       }
     }
     fprintf(fp,"@ \n");
+    iset=0;
   }
   fclose(fp);
 
-  sprintf(filename, "%s.plt_ips", param->name);
+  sprintf(filename, "%s.vi_plt", param->name);
   fp = fopen(filename, "a");
   for (j=0;j<param->ngrid;j++){
-    fprintf(fp,"%lg %lg \n",grid_.r[j],nlcore_.rvloc[j]/grid_.r[j]);
+    fprintf(fp,"%lg %lg 0.0\n",grid_.r[j],nlcore_.rvloc[j]/grid_.r[j]);
   }
   fprintf(fp,"@ \n");
   fclose(fp);
   
-  sprintf(filename, "%s.plt_sps", param->name);
+  sprintf(filename, "%s.vs_plt", param->name);
   fp = fopen(filename, "a");
   for (j=0;j<param->ngrid;j++){
-    fprintf(fp,"%lg %lg \n",grid_.r[j],(nlcore_.rvloc[j]+totpot_.rvcoul[j])/grid_.r[j]);
+    fprintf(fp,"%lg %lg 0.0\n",grid_.r[j],(nlcore_.rvloc[j]+totpot_.rvcoul[j])/grid_.r[j]);
   }
   fprintf(fp,"@ \n");
   fclose(fp);

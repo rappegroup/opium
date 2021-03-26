@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 The OPIUM Group
+ * Copyright (c) 1998-2005 The OPIUM Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,16 @@
 *                                                                           *
 ****************************************************************************/
 
-#define VERSION "1.0.3"
+#define VERSION "2.0.1"
+#ifndef CHOST
+#define CHOST "unknown"
+#endif
+#ifndef CSYS
+#define CSYS "unknown"
+#endif
+#ifndef CDATE
+#define CDATE "unknown"
+#endif
 
 /* standard libraries */
 #include <stdio.h>
@@ -36,6 +45,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 /*const unsigned short int *ctype_b; */
 
 #include "parameter.h"        /* defines structure: 'param_t'   */
@@ -44,6 +54,7 @@
 /* other program modules */
 #include "do_ae.h"
 #include "do_ps.h"
+#include "do_ke.h"
 #include "do_nl.h"
 #include "do_tc.h"
 #include "do_pwf.h"
@@ -53,6 +64,7 @@
 #include "do_plot.h"
 #include "do_ncpp.h"
 #include "do_logplt.h"
+#include "do_fc.h"
 
 #define streq(a,b) (!strcasecmp(a,b))
 
@@ -88,7 +100,7 @@ int main(int argc, char *argv[]){
   char command[40];
   FILE *fp_log;           /* log file */
   char *paramfile;
-
+  char hname[120];
   
   /**************************************************************************
   * check command line options given                                        *
@@ -139,6 +151,7 @@ int main(int argc, char *argv[]){
   
   fprintf(fp_log,
       "\n ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+
   fprintf(fp_log,
       "           OPIUM  Version: %10s                             \n", VERSION);
   fprintf(fp_log,
@@ -146,9 +159,15 @@ int main(int argc, char *argv[]){
   fprintf(fp_log,
       " See http://opium.sourceforge.net for help and information                 \n");  
   fprintf(fp_log,
-      " Copyright 2004 : The OPIUM project                         \n");
+      " Copyright 2005 : The OPIUM project                         \n");
 
+  fprintf(fp_log,"\n Compile host     : %s\n",CHOST);
+  fprintf(fp_log," Compile OS       : %s\n",CSYS);
+  fprintf(fp_log," Compile date     : %s\n\n",CDATE);
+  
+  if (!(gethostname(hname,120))) fprintf(fp_log," Execution host   : %s\n",hname);
   fprintf(fp_log," time of execution: %s\n", ctime(&t0));  
+
   fprintf(fp_log,
       " ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
   fclose(fp_log);
@@ -293,6 +312,7 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
   FILE *fp_param;
   char filename[160];
   int c;
+  int doifc=0;
   int job=-67;
 
   if (streq(command, "v")) {
@@ -303,20 +323,31 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
   } else if (streq(command, "ps")){
     do_ps(param, logfile);
     if (verbosity) do_ps_report(stdout);
+  } else if (streq(command, "ke")){
+    do_ke(param, logfile);
+    if (verbosity) do_ke_report(stdout);
   } else if (streq(command, "nl")){
     do_nl(param, logfile);
     if (verbosity) do_nl_report(stdout);
+    /*  } else if (streq(command, "fc")){
+    do_fc(param, logfile);
+    if (verbosity) do_fc_report(stdout);*/
   } else if (streq(command, "tc")){
-    do_tc(param, logfile, job);
+    doifc=0;
+    do_tc(param, logfile, job, doifc);
     if (verbosity) do_tc_report(stdout);
+    /*} else if (streq(command, "tcf")){
+    doifc=1;
+    do_tc(param, logfile, job, doifc);
+    if (verbosity) do_tc_report(stdout);*/
   } else if (streq(command, "pwf")){
     fp = fopen(paramfile, "r"); 
     do_pwf(param, fp, logfile); 
     fclose(fp);
   } else if (streq(command, "recpot")){
-    fp = fopen(paramfile, "r"); 
+    /*fp = fopen(paramfile, "r"); */
     do_recpot(param, fp, logfile); 
-    fclose(fp);
+    /*fclose(fp);*/
   } else if (streq(command, "upf")) {
     do_upf(param, logfile);
   } else if (streq(command, "fhi")) {
@@ -341,13 +372,21 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
     fp_param = fopen(paramfile, "r");
     while((c=fgetc(fp_param)) != EOF) fputc(c, fp);
     fclose(fp_param);
-    fprintf(fp, "\n### AE report ########################################\n\n");
+    fprintf(fp, "\n### AE report ########################################\n\n");    
     do_ae_report(fp);
-    fprintf(fp, "\n### PS report ########################################\n\n");
+
+    /*    fprintf(fp, "\n### FC report ########################################\n\n");    do_fc_report(fp);*/
+
+    fprintf(fp, "\n### PS report ########################################\n\n");    
     do_ps_report(fp);
-    fprintf(fp, "\n### NL report ########################################\n\n");
+
+    fprintf(fp, "\n### NL report ########################################\n\n");    
     do_nl_report(fp);
-    fprintf(fp, "\n### TC report ########################################\n\n");
+
+    fprintf(fp, "\n### KE report ########################################\n\n");   
+    do_ke_report(fp);
+
+    fprintf(fp, "\n### TC report ########################################\n\n");   
     do_tc_report(fp);
     fclose(fp);
   }else if (streq(command, "help"))
@@ -361,9 +400,10 @@ static void do_command(param_t *param, char *paramfile, char *logfile,
 
   else if (streq(command, "all")){
     do_ae(param, logfile); if (verbosity) do_ae_report(stdout);
+    do_fc(param, logfile); if (verbosity) do_fc_report(stdout);
     do_ps(param, logfile); if (verbosity) do_ps_report(stdout);
     do_nl(param, logfile); if (verbosity) do_nl_report(stdout);
-    do_tc(param, logfile, job); if (verbosity) do_tc_report(stdout);
+    do_tc(param, logfile, job, doifc); if (verbosity) do_tc_report(stdout);
   }else{
     fp = fopen(logfile, "a");
     fprintf(fp,"option [%s] not supported!\n", command);
@@ -406,6 +446,7 @@ static void do_chelp(){
   printf("\tps                  - generate optimized pseudopotential\n");
   printf("\tnl                  - pseudopotential solve of the \n"
          "\t                        atomic ref. configuration\n");
+  printf("\tke                  - compute kinetic energy error information \n");
   printf("\ttc                  - test additional configurations\n");
   printf("\tall                 - run through the complete cycle (ae ps nl tc)\n");
   printf("\n\tpseudo file output style \n");
@@ -438,6 +479,7 @@ static void do_phelp(){
   printf("\t vs   - screened pseudopotentials \n");
   printf("\t vi   - ionic psuedopotentials (descreened) \n");
   printf("\t qp   - q-space pseudowavefunctions and potentials \n");
+  printf("\t ke   - kinetic energy error vs. Ecut \n");
   printf("\t logd - log. deriv. for state indentified in [Loginfo] keyblock \n");
   printf("\t=================================================================\n\n\n");
 }
@@ -462,7 +504,7 @@ static void do_khelp(){
   printf("\t  cut-off radius for pseudo orbital 1 (float) \n");
   printf("\t  .                   .             .         \n");
   printf("\t  cut-off radius for pseudo orbital n (float) \n");
-  printf("\t  (o)ptimized or (k)erker--pseud. method (only 1st letter needed) \n\n\n");
+  printf("\t  (o)ptimized, (tm)-Troullier-Martins, or (k)erker--pseud. method \n\n\n");
   printf("\t[Optinfo]                                                        \n");
   printf("\t  cut-off wavevector(float), # bessel fxns(int) for pseudo orb 1 \n");  
   printf("\t  .                            .                                . \n");
@@ -471,8 +513,8 @@ static void do_khelp(){
   printf("\t  pzlda or pwlda or gga  --xc funct. (default is pzlda, lda=pzlda) \n\n\n");
   printf("\t[Pcc]                                               \n");
   printf("\t partial core radius(float) (default = no pcc)  \n");
-  printf("\t partial core method (character) lfc or fuchs  \n");
-  printf("\t lfc=Louie, Froyen & Cohen / fuchs=Fuchs & Scheffler  (default=lfc)\n\n\n");
+  printf("\t partial core method (character) lfc or fs  \n");
+  printf("\t lfc=Louie, Froyen & Cohen / fs=Fuchs & Scheffler  (default=lfc)\n\n\n");
   printf("\t[Relativity] \n");
   printf("\t  nrl or srl -- non-rel or scalar-rel solve (default = nrl) \n\n\n");
   printf("\t[Grid]                                                 \n");
