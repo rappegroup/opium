@@ -38,6 +38,8 @@
 void interp2_(int *, double *,double *, double *);
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 void nrelsproj(param_t *param, char *);
+void nrelorbnl(param_t *param, int, char *);
+void relorbnl(param_t *param, int, char *);
 int do_casino(param_t *param, FILE *fp_param, char *logfile){
 
   int i,j,k,ic,icount,ncore;
@@ -63,7 +65,13 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
   /* section 0 : check if this potential format is supported */
   /* casino doesn't support DNL potentials */
 
-  nrelsproj(param,logfile);
+  int config=-1;
+  if ((!strcmp(param->reltype, "nrl")) || (!strcmp(param->reltype, "srl"))) {
+    nrelorbnl(param,config,logfile);
+    nrelsproj(param,logfile);
+  } else {
+    relorbnl(param,config,logfile);
+  }
   /* new routine to set the arrays for semicore states */
 
   if (param->nboxes > 0) {
@@ -81,7 +89,12 @@ int do_casino(param_t *param, FILE *fp_param, char *logfile){
   }
 
   for (i=0; i<param->nll; i++) {
-    sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    if (!strcmp(param->reltype, "frl")) {
+      sprintf(filename, "%s.pot.ps.l=%d%c", param->name, aorb_.lo[i],
+              (adat_.so[i] > 0) ? '+' : '-');
+    } else {
+      sprintf(filename, "%s.pot.ps.l=%d", param->name, aorb_.lo[i]);
+    }
 
     fp = fopen(filename, "rb");
     fread(dumm, sizeof(double), param->ngrid, fp);    

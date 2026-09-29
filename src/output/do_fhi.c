@@ -26,11 +26,14 @@
 #include "parameter.h"
 #include "uniPPlib.h"
 #include "cdim.h"        /* fortran code parameters */
+#include "common_blocks.h"
 #include "do_fhi.h"
 #include "nlm.h"
 
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 void nrelsproj(param_t *param, char *);
+void nrelorbnl(param_t *param, int, char *);
+void relorbnl(param_t *param, int, char *);
 
 int do_fhi(param_t *param, FILE *fp_param, char *logfile){
 
@@ -59,11 +62,22 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   
   /* read in the local potential from a binary file created by do_nl() */
 
-  nrelsproj(param,logfile);
+  int config=-1;
+  if ((!strcmp(param->reltype, "nrl")) || (!strcmp(param->reltype, "srl"))) {
+    nrelorbnl(param,config,logfile);
+    nrelsproj(param,logfile);
+  } else {
+    relorbnl(param,config,logfile);
+  }
 
 
   for (i=0; i<param->nll; i++) {
-    sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    if (!strcmp(param->reltype, "frl")) {
+      sprintf(filename, "%s.pot.ps.l=%d%c", param->name, aorb_.lo[i],
+              (adat_.so[i] > 0) ? '+' : '-');
+    } else {
+      sprintf(filename, "%s.pot.ps.l=%d", param->name, aorb_.lo[i]);
+    }
     fp = fopen(filename, "rb");
     fread(rvcore[i], sizeof(double), param->ngrid, fp);
     fseek(fp,sizeof(double) ,param->ngrid);
@@ -71,7 +85,12 @@ int do_fhi(param_t *param, FILE *fp_param, char *logfile){
   }
 
   for (i=0; i<param->nll; i++) {
-    sprintf(filename, "%s.psi.ps.l=%d", param->name,i);
+    if (!strcmp(param->reltype, "frl")) {
+      sprintf(filename, "%s.psi.ps.l=%d%c", param->name, aorb_.lo[i],
+              (adat_.so[i] > 0) ? '+' : '-');
+    } else {
+      sprintf(filename, "%s.psi.ps.l=%d", param->name, aorb_.lo[i]);
+    }
     fp = fopen(filename, "rb");
     fread(rnl[i], sizeof(double), param->ngrid, fp);
     fclose(fp);
