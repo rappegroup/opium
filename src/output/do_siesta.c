@@ -44,6 +44,8 @@
 void interp2_(int *, double *,double *, double *);
 void writeparam(param_t *param, FILE *fp, FILE *fp_param);
 void nrelsproj(param_t *param, char *);
+void nrelorbnl(param_t *param, int, char *);
+void relorbnl(param_t *param, int, char *);
 int do_siesta(param_t *param, FILE *fp_param, char *logfile){
 
   int i,j,k,ic,icount,ncore,ii;
@@ -88,7 +90,13 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
 
   ncore=param->norb-param->nval;
 
-  nrelsproj(param,logfile);
+  int config=-1;
+  if ((!strcmp(param->reltype, "nrl")) || (!strcmp(param->reltype, "srl"))) {
+    nrelorbnl(param,config,logfile);
+    nrelsproj(param,logfile);
+  } else {
+    relorbnl(param,config,logfile);
+  }
 
   fp_log = fopen(logfile, "a");
   fprintf(fp_log,"<<<do_siesta -- psf>>>\n");  
@@ -118,7 +126,12 @@ int do_siesta(param_t *param, FILE *fp_param, char *logfile){
   interp2_(rvloc,rvloc2);*/
     
   for (i=0; i<param->nll; i++) {
-    sprintf(filename, "%s.pot.ps.l=%d", param->name,i);
+    if (!strcmp(param->reltype, "frl")) {
+      sprintf(filename, "%s.pot.ps.l=%d%c", param->name, aorb_.lo[i],
+              (adat_.so[i] > 0) ? '+' : '-');
+    } else {
+      sprintf(filename, "%s.pot.ps.l=%d", param->name, aorb_.lo[i]);
+    }
     
     fp_file = fopen(filename, "rb");
     fread(dumm, sizeof(double), param->ngrid, fp_file);    
